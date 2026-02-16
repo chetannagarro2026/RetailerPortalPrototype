@@ -1,7 +1,8 @@
-import { Input, Badge } from "antd";
+import { Input, Badge, Avatar } from "antd";
 import {
   SearchOutlined,
   BellOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -70,12 +71,19 @@ export default function Header() {
             <SearchOutlined className="text-lg" />
           </button>
 
-          <span
-            className="hidden lg:block text-sm font-medium"
-            style={{ color: config.secondaryColor }}
-          >
-            {config.partnerName}
-          </span>
+          <div className="hidden lg:flex items-center gap-2">
+            <Avatar
+              size={28}
+              icon={<UserOutlined />}
+              style={{ backgroundColor: config.primaryColor, fontSize: 12 }}
+            />
+            <span
+              className="text-sm font-medium"
+              style={{ color: config.secondaryColor }}
+            >
+              {config.partnerName}
+            </span>
+          </div>
 
           <Badge dot size="small" offset={[-2, 2]}>
             <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50">
