@@ -1,12 +1,12 @@
 import { Row, Col, Card } from "antd";
 import {
-  RocketOutlined,
-  DollarOutlined,
   AppstoreOutlined,
   GiftOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
 import HeroBanner from "../components/home/HeroBanner";
+import UpdatesSection from "../components/home/UpdatesSection";
+import AvailableCreditSection from "../components/home/AvailableCreditSection";
 import { activeBrandConfig } from "../config/brandConfig";
 
 interface SectionPlaceholderProps {
@@ -64,22 +64,14 @@ export default function Index() {
           <HeroBanner />
         </Col>
 
-        {/* Quick Actions — 8 cols (2/3 width) */}
+        {/* Updates — 8 cols */}
         <Col xs={24} lg={16}>
-          <SectionPlaceholder
-            label="Quick Actions"
-            icon={<RocketOutlined />}
-            minHeight={200}
-          />
+          <UpdatesSection />
         </Col>
 
-        {/* Financial Snapshot — 4 cols (1/3 width) */}
+        {/* Available Credit — 4 cols */}
         <Col xs={24} lg={8}>
-          <SectionPlaceholder
-            label="Financial Snapshot"
-            icon={<DollarOutlined />}
-            minHeight={200}
-          />
+          <AvailableCreditSection />
         </Col>
 
         {/* Active Collections — Full Width */}
