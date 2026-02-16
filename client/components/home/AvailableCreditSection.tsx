@@ -33,7 +33,7 @@ export default function AvailableCreditSection() {
 
   return (
     <div
-      className="rounded-xl px-2 py-1 flex flex-col"
+      className="rounded-xl p-3 flex flex-col h-[236px]"
       style={{
         border: `1px solid ${config.borderColor}`,
         backgroundColor: "#fff",
@@ -46,14 +46,14 @@ export default function AvailableCreditSection() {
 
       {/* Available Credit — Large */}
       <div className="mb-5">
-        <p className="text-2xl font-semibold h-8" style={{ color: config.primaryColor }}>
+        <p className="text-2xl font-semibold pt-1" style={{ color: config.primaryColor }}>
           {formatCurrency(available)}
         </p>
       </div>
 
       {/* Utilization Bar */}
-      <div className="mb-2">
-        <div className="flex items-center justify-between mb-0.5">
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-1">
           <span className="text-[11px] font-medium" style={{ color: config.secondaryColor }}>
             Utilization – {creditData.period}
           </span>
@@ -119,7 +119,7 @@ export default function AvailableCreditSection() {
       )}
 
       {/* CTA */}
-      <div className="mt-2">
+      <div className="mt-4">
         <button
           className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
           style={{ color: config.primaryColor }}

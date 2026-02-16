@@ -108,7 +108,10 @@ export default function UpdatesSection() {
   };
 
   return (
-    <div>
+    <div
+      className="rounded-xl overflow-hidden p-2"
+      style={{ border: `1px solid ${config.borderColor}` }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-semibold" style={{ color: config.primaryColor }}>
