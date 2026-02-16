@@ -1,4 +1,4 @@
-import { RightOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { RightOutlined, InfoCircleOutlined, DollarOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 
 // Mock data — would come from API
@@ -40,8 +40,16 @@ export default function AvailableCreditSection() {
       }}
     >
       {/* Header */}
-      <div className="text-xs" style={{ color: config.primaryColor }}>
-        Available Credit
+      <div className="flex items-center justify-between">
+        <div className="text-xs" style={{ color: config.primaryColor }}>
+          Available Credit
+        </div>
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: config.borderColor, color: config.primaryColor }}
+        >
+          <DollarOutlined className="text-sm" />
+        </div>
       </div>
 
       {/* Available Credit — Large */}
