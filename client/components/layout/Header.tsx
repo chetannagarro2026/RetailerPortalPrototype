@@ -1,20 +1,10 @@
-import { Input, Badge, Dropdown, Avatar } from "antd";
+import { Input, Badge } from "antd";
 import {
   SearchOutlined,
   BellOutlined,
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
-
-const profileMenuItems: MenuProps["items"] = [
-  { key: "profile", label: "My Profile", icon: <UserOutlined /> },
-  { key: "settings", label: "Settings", icon: <SettingOutlined /> },
-  { type: "divider" },
-  { key: "logout", label: "Sign Out", icon: <LogoutOutlined /> },
-];
 
 export default function Header() {
   const config = activeBrandConfig;
@@ -28,8 +18,8 @@ export default function Header() {
       }}
     >
       <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-6 lg:px-8">
-        {/* Left — Brand Identity */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Left — Brand Identity (links to home) */}
+        <Link to="/" className="flex items-center gap-3 shrink-0 no-underline">
           {config.logoUrl ? (
             <img
               src={config.logoUrl}
@@ -57,7 +47,7 @@ export default function Header() {
               </div>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Center — Global Search */}
         <div className="hidden md:flex flex-1 max-w-md mx-8">
@@ -73,7 +63,7 @@ export default function Header() {
           />
         </div>
 
-        {/* Right — User Actions */}
+        {/* Right — Utility Actions */}
         <div className="flex items-center gap-4 shrink-0">
           {/* Mobile search icon */}
           <button className="md:hidden p-2 text-gray-500 hover:text-gray-700 transition-colors">
@@ -92,23 +82,6 @@ export default function Header() {
               <BellOutlined className="text-lg" />
             </button>
           </Badge>
-
-          <Dropdown
-            menu={{ items: profileMenuItems }}
-            placement="bottomRight"
-            trigger={["click"]}
-          >
-            <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-              <Avatar
-                size={32}
-                style={{
-                  backgroundColor: config.primaryColor,
-                  fontSize: 13,
-                }}
-                icon={<UserOutlined />}
-              />
-            </button>
-          </Dropdown>
         </div>
       </div>
     </header>

@@ -1,70 +1,60 @@
-import { useState, useCallback, useRef } from "react";
-import { Menu } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
+import { useState, useEffect, useCallback } from "react";
+import { MenuOutlined, DownOutlined } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import MegaMenu from "./MegaMenu";
+import AccountDropdown from "./AccountDropdown";
 import MobileNav from "./MobileNav";
+
+type OpenPanel = "collections" | "my-account" | null;
 
 export default function Navigation() {
   const config = activeBrandConfig;
   const location = useLocation();
-  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const clearCloseTimer = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-    }
+  // Close panels on route change
+  useEffect(() => {
+    setOpenPanel(null);
+  }, [location.pathname]);
+
+  // ESC key closes open panels
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenPanel(null);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleMenuItemEnter = useCallback(
-    (key: string, hasMegaMenu?: boolean) => {
-      clearCloseTimer();
-      if (hasMegaMenu) {
-        setActiveMegaMenu(key);
-      } else {
-        setActiveMegaMenu(null);
-      }
-    },
-    [clearCloseTimer]
-  );
-
-  const handleMenuItemLeave = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => {
-      setActiveMegaMenu(null);
-    }, 200);
+  const togglePanel = useCallback((panel: OpenPanel) => {
+    setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
 
-  const handleMegaMenuEnter = useCallback(() => {
-    clearCloseTimer();
-  }, [clearCloseTimer]);
+  // Active state: no highlight on homepage
+  const getActiveKey = (): string | null => {
+    const path = location.pathname;
+    if (path === "/") return null;
+    if (path.startsWith("/collections")) return "collections";
+    if (path.startsWith("/brands")) return "brands";
+    if (path.startsWith("/bulk-order")) return "bulk-order";
+    if (path.startsWith("/purchase-orders")) return "purchase-orders";
+    if (path.startsWith("/account")) return "my-account";
+    return null;
+  };
 
-  const handleMegaMenuLeave = useCallback(() => {
-    setActiveMegaMenu(null);
-  }, []);
+  const activeKey = getActiveKey();
 
-  const activeKey =
-    config.navItems.find((item) => item.path === location.pathname)?.key ||
-    "home";
-
-  const menuItems = config.navItems.map((item) => ({
-    key: item.key,
-    label: (
-      <Link
-        to={item.path}
-        onMouseEnter={() => handleMenuItemEnter(item.key, item.hasMegaMenu)}
-        onMouseLeave={handleMenuItemLeave}
-      >
-        {item.label}
-      </Link>
-    ),
-  }));
+  const navItemStyle = (key: string) => ({
+    color: activeKey === key ? config.primaryColor : "#4B5563",
+    fontWeight: activeKey === key ? 600 : 500,
+    borderBottom: activeKey === key ? `2px solid ${config.navActiveBorder}` : "2px solid transparent",
+  });
 
   return (
     <>
+      {/* Desktop Nav */}
       <nav
         className="sticky z-40 bg-white hidden lg:block"
         style={{
@@ -73,28 +63,74 @@ export default function Navigation() {
         }}
       >
         <div className="max-w-[1440px] mx-auto px-6 lg:px-8">
-          <Menu
-            mode="horizontal"
-            selectedKeys={[activeKey]}
-            items={menuItems}
-            style={{
-              lineHeight: "54px",
-              border: "none",
-              fontWeight: 500,
-              fontSize: 14,
-            }}
-          />
+          <div className="flex items-center h-[56px] gap-1">
+            {config.navItems.map((item) => {
+              // Collections — triggers mega menu
+              if (item.hasMegaMenu) {
+                return (
+                  <div key={item.key} className="relative">
+                    <button
+                      onClick={() => togglePanel("collections")}
+                      className="flex items-center gap-1.5 h-[56px] px-4 text-sm transition-colors cursor-pointer bg-transparent"
+                      style={navItemStyle(item.key)}
+                    >
+                      {item.label}
+                      <DownOutlined
+                        className="text-[10px] transition-transform"
+                        style={{
+                          transform: openPanel === "collections" ? "rotate(180deg)" : "rotate(0deg)",
+                        }}
+                      />
+                    </button>
+                  </div>
+                );
+              }
+
+              // My Account — triggers dropdown
+              if (item.hasDropdown) {
+                return (
+                  <div key={item.key} className="relative ml-auto">
+                    <button
+                      onClick={() => togglePanel("my-account")}
+                      className="flex items-center gap-1.5 h-[56px] px-4 text-sm transition-colors cursor-pointer bg-transparent"
+                      style={navItemStyle(item.key)}
+                    >
+                      {item.label}
+                      <DownOutlined
+                        className="text-[10px] transition-transform"
+                        style={{
+                          transform: openPanel === "my-account" ? "rotate(180deg)" : "rotate(0deg)",
+                        }}
+                      />
+                    </button>
+                    <AccountDropdown
+                      visible={openPanel === "my-account"}
+                      onClose={() => setOpenPanel(null)}
+                    />
+                  </div>
+                );
+              }
+
+              // Standard nav link
+              return (
+                <Link
+                  key={item.key}
+                  to={item.path}
+                  className="flex items-center h-[56px] px-4 text-sm transition-colors no-underline"
+                  style={navItemStyle(item.key)}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Mega Menu */}
-        {activeMegaMenu && (
-          <MegaMenu
-            menuKey={activeMegaMenu}
-            visible={!!activeMegaMenu}
-            onMouseEnter={handleMegaMenuEnter}
-            onMouseLeave={handleMegaMenuLeave}
-          />
-        )}
+        {/* Collections Mega Menu */}
+        <MegaMenu
+          visible={openPanel === "collections"}
+          onClose={() => setOpenPanel(null)}
+        />
       </nav>
 
       {/* Mobile hamburger — visible below lg */}
@@ -112,8 +148,10 @@ export default function Navigation() {
         >
           <MenuOutlined className="text-lg" />
         </button>
-        <span className="ml-3 text-sm font-medium text-gray-700 capitalize">
-          {activeKey === "home" ? "Home" : activeKey.replace("-", " ")}
+        <span className="ml-3 text-sm font-medium text-gray-700">
+          {activeKey
+            ? config.navItems.find((i) => i.key === activeKey)?.label || "Menu"
+            : "Menu"}
         </span>
       </div>
 

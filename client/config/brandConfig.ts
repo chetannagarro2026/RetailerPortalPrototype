@@ -1,3 +1,11 @@
+export interface NavItem {
+  key: string;
+  label: string;
+  path: string;
+  hasMegaMenu?: boolean;
+  hasDropdown?: boolean;
+}
+
 export interface BrandConfig {
   // Identity
   brandName: string;
@@ -22,12 +30,7 @@ export interface BrandConfig {
   searchPlaceholder: string;
 
   // Navigation items (configurable per tenant)
-  navItems: Array<{
-    key: string;
-    label: string;
-    path: string;
-    hasMegaMenu?: boolean;
-  }>;
+  navItems: NavItem[];
 }
 
 export const centricBrandsConfig: BrandConfig = {
@@ -48,13 +51,11 @@ export const centricBrandsConfig: BrandConfig = {
   searchPlaceholder: "Search by Style Code, Collection, Brand...",
 
   navItems: [
-    { key: "home", label: "Home", path: "/" },
     { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },
-    { key: "brands", label: "Brands", path: "/brands", hasMegaMenu: true },
+    { key: "brands", label: "Brands", path: "/brands" },
+    { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "purchase-orders", label: "Purchase Orders", path: "/purchase-orders" },
-    { key: "financials", label: "Financials", path: "/financials" },
-    { key: "statements", label: "Statements", path: "/statements" },
-    { key: "support", label: "Support", path: "/support" },
+    { key: "my-account", label: "My Account", path: "/account", hasDropdown: true },
   ],
 };
 

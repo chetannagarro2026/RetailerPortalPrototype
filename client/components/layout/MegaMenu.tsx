@@ -1,73 +1,103 @@
-import { Row, Col } from "antd";
+import { useState } from "react";
 import { activeBrandConfig } from "../../config/brandConfig";
 
 interface MegaMenuProps {
-  menuKey: string;
   visible: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
+  onClose: () => void;
 }
 
-interface MegaMenuSection {
-  title: string;
+interface TabContent {
+  key: string;
+  label: string;
   items: string[];
 }
 
-// Structural placeholder data — will be replaced with real data per tenant
-const megaMenuData: Record<string, MegaMenuSection[]> = {
-  collections: [
-    { title: "By Season", items: ["Spring/Summer 2025", "Fall/Winter 2025", "Pre-Fall 2025", "Resort 2025"] },
-    { title: "By Category", items: ["Apparel", "Accessories", "Footwear", "Intimates"] },
-    { title: "By Status", items: ["Now Shipping", "Open for Order", "Coming Soon", "Archive"] },
-    { title: "Featured", items: ["New Arrivals", "Best Sellers", "Exclusive Lines", "Capsule Collections"] },
-  ],
-  brands: [
-    { title: "Fashion", items: ["Brand A", "Brand B", "Brand C", "Brand D"] },
-    { title: "Lifestyle", items: ["Brand E", "Brand F", "Brand G", "Brand H"] },
-    { title: "Premium", items: ["Brand I", "Brand J", "Brand K", "Brand L"] },
-    { title: "Emerging", items: ["Brand M", "Brand N", "Brand O", "Brand P"] },
-  ],
-};
+const collectionsTabs: TabContent[] = [
+  { key: "all", label: "All Products", items: ["View Full Catalog", "Search All Styles", "Filter by Availability"] },
+  { key: "category", label: "By Category", items: ["Apparel", "Outerwear", "Kidswear", "Accessories", "Performance"] },
+  { key: "brand", label: "By Brand", items: ["Calvin Klein", "Tommy Hilfiger", "IZOD", "Buffalo", "Arrow"] },
+  { key: "gender", label: "By Gender", items: ["Men's", "Women's", "Unisex", "Kids"] },
+  { key: "new", label: "New Arrivals", items: ["This Week", "This Month", "Pre-Order", "Coming Soon"] },
+  { key: "best", label: "Best Sellers", items: ["Top 50 Styles", "Trending Now", "Reorder Favorites", "Seasonal Picks"] },
+];
 
-export default function MegaMenu({ menuKey, visible, onMouseEnter, onMouseLeave }: MegaMenuProps) {
+export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
   const config = activeBrandConfig;
-  const sections = megaMenuData[menuKey];
+  const [activeTab, setActiveTab] = useState("all");
 
-  if (!visible || !sections) return null;
+  if (!visible) return null;
+
+  const activeContent = collectionsTabs.find((t) => t.key === activeTab);
 
   return (
-    <div
-      className="absolute left-0 right-0 bg-white z-30"
-      style={{
-        borderBottom: `1px solid ${config.borderColor}`,
-        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)",
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <div className="max-w-[1280px] mx-auto px-6 py-8">
-        <Row gutter={[32, 24]}>
-          {sections.map((section) => (
-            <Col key={section.title} xs={24} sm={12} md={6}>
-              <h4
-                className="text-xs font-semibold uppercase tracking-wider mb-3"
-                style={{ color: config.secondaryColor }}
-              >
-                {section.title}
-              </h4>
-              <ul className="space-y-2">
-                {section.items.map((item) => (
-                  <li key={item}>
-                    <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </Col>
-          ))}
-        </Row>
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-30"
+        onClick={onClose}
+      />
+
+      {/* Panel */}
+      <div
+        className="absolute left-0 right-0 z-40 bg-white"
+        style={{
+          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.08)",
+          borderBottom: `1px solid ${config.borderColor}`,
+        }}
+      >
+        <div className="max-w-[1280px] mx-auto flex" style={{ padding: "24px 32px" }}>
+          {/* Left — Vertical Tabs */}
+          <div
+            className="shrink-0 pr-8"
+            style={{
+              width: 200,
+              borderRight: `1px solid ${config.borderColor}`,
+            }}
+          >
+            <ul className="space-y-1">
+              {collectionsTabs.map((tab) => (
+                <li key={tab.key}>
+                  <button
+                    onClick={() => setActiveTab(tab.key)}
+                    className="w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer"
+                    style={{
+                      fontWeight: activeTab === tab.key ? 600 : 400,
+                      color: activeTab === tab.key ? config.primaryColor : "#6B7280",
+                      backgroundColor: activeTab === tab.key ? config.cardBg : "transparent",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Right — Dynamic Content */}
+          <div className="flex-1 pl-8">
+            <h4
+              className="text-xs font-semibold uppercase tracking-wider mb-4"
+              style={{ color: config.secondaryColor }}
+            >
+              {activeContent?.label}
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-3">
+              {activeContent?.items.map((item) => (
+                <button
+                  key={item}
+                  onClick={onClose}
+                  className="text-left text-sm py-1.5 transition-colors cursor-pointer"
+                  style={{ color: "#374151" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = config.primaryColor)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#374151")}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
