@@ -5,8 +5,8 @@ import {
   AppstoreOutlined,
   GiftOutlined,
   FileTextOutlined,
-  PictureOutlined,
 } from "@ant-design/icons";
+import HeroBanner from "../components/home/HeroBanner";
 import { activeBrandConfig } from "../config/brandConfig";
 
 interface SectionPlaceholderProps {
@@ -61,11 +61,7 @@ export default function Index() {
       <Row gutter={[24, 32]}>
         {/* Hero Banner — Full Width */}
         <Col xs={24}>
-          <SectionPlaceholder
-            label="Hero Banner"
-            icon={<PictureOutlined />}
-            minHeight={280}
-          />
+          <HeroBanner />
         </Col>
 
         {/* Quick Actions — 8 cols (2/3 width) */}
