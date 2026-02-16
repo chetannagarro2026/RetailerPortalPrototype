@@ -15,8 +15,8 @@ export default function HeroBanner() {
     >
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${HERO_IMAGE})` }}
+        className="absolute inset-0 bg-cover"
+        style={{ backgroundImage: `url(${HERO_IMAGE})`, backgroundPosition: "center 15%" }}
       />
 
       {/* Gradient Overlay — left-heavy for text readability */}
@@ -29,7 +29,7 @@ export default function HeroBanner() {
       />
 
       {/* Content */}
-      <div className="relative h-full flex items-center" style={{ padding: "0 48px" }}>
+      <div className="relative h-full w-full flex items-center justify-start self-center" style={{ padding: "0 48px" }}>
         <div style={{ maxWidth: "58%" }}>
           {/* Eyebrow */}
           <span
