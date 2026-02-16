@@ -41,7 +41,7 @@ export default function Header() {
         borderBottom: `1px solid ${config.borderColor}`,
       }}
     >
-      <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-6 lg:px-8">
+      <div className="h-full flex items-center justify-between px-4">
         {/* Left — Brand Identity (links to home) */}
         <Link to="/" className="flex items-center gap-3 shrink-0 no-underline">
           {config.logoUrl ? (

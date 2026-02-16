@@ -63,7 +63,7 @@ export default function Navigation() {
           borderBottom: `1px solid ${config.borderColor}`,
         }}
       >
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div className="px-4">
           <div className="flex items-center h-[56px] gap-1">
             {config.navItems.map((item) => {
               // Collections — triggers mega menu
