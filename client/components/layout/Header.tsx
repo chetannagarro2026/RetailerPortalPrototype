@@ -1,13 +1,37 @@
+import { useState, useRef, useCallback } from "react";
 import { Input, Badge } from "antd";
 import {
   SearchOutlined,
   BellOutlined,
+  ShoppingCartOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
+import CartDropdown, { useCartCount } from "./CartDropdown";
 
 export default function Header() {
   const config = activeBrandConfig;
+  const cartCount = useCartCount();
+  const [cartOpen, setCartOpen] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTimer = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const handleCartEnter = useCallback(() => {
+    clearTimer();
+    setCartOpen(true);
+  }, [clearTimer]);
+
+  const handleCartLeave = useCallback(() => {
+    closeTimerRef.current = setTimeout(() => {
+      setCartOpen(false);
+    }, 200);
+  }, []);
 
   return (
     <header
@@ -64,7 +88,7 @@ export default function Header() {
         </div>
 
         {/* Right — Utility Actions */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           {/* Mobile search icon */}
           <button className="md:hidden p-2 text-gray-500 hover:text-gray-700 transition-colors">
             <SearchOutlined className="text-lg" />
@@ -75,6 +99,23 @@ export default function Header() {
               <BellOutlined className="text-lg" />
             </button>
           </Badge>
+
+          {/* Cart Icon */}
+          <div
+            className="relative"
+            onMouseEnter={handleCartEnter}
+            onMouseLeave={handleCartLeave}
+          >
+            <Badge count={cartCount} size="small" offset={[-4, 4]}>
+              <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50 cursor-pointer">
+                <ShoppingCartOutlined className="text-lg" />
+              </button>
+            </Badge>
+            <CartDropdown
+              visible={cartOpen}
+              onClose={() => setCartOpen(false)}
+            />
+          </div>
         </div>
       </div>
     </header>
