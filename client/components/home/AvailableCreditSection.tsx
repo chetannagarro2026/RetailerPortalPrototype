@@ -33,30 +33,27 @@ export default function AvailableCreditSection() {
 
   return (
     <div
-      className="rounded-xl p-5 h-full flex flex-col"
+      className="rounded-xl px-2 py-1 flex flex-col"
       style={{
         border: `1px solid ${config.borderColor}`,
         backgroundColor: "#fff",
       }}
     >
       {/* Header */}
-      <h2 className="text-base font-semibold mb-5" style={{ color: config.primaryColor }}>
+      <div className="text-xs" style={{ color: config.primaryColor }}>
         Available Credit
-      </h2>
+      </div>
 
       {/* Available Credit — Large */}
       <div className="mb-5">
-        <p className="text-[11px] font-medium uppercase tracking-wider mb-1" style={{ color: config.secondaryColor }}>
-          Available
-        </p>
-        <p className="text-2xl font-semibold" style={{ color: config.primaryColor }}>
+        <p className="text-2xl font-semibold h-8" style={{ color: config.primaryColor }}>
           {formatCurrency(available)}
         </p>
       </div>
 
       {/* Utilization Bar */}
       <div className="mb-2">
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center justify-between mb-0.5">
           <span className="text-[11px] font-medium" style={{ color: config.secondaryColor }}>
             Utilization – {creditData.period}
           </span>
@@ -82,7 +79,7 @@ export default function AvailableCreditSection() {
       </div>
 
       {/* Breakdown */}
-      <div className="space-y-2.5 mt-4 mb-5">
+      <div className="space-y-2.5 my-1">
         <div className="flex items-center justify-between">
           <span className="text-xs" style={{ color: config.secondaryColor }}>Credit Limit</span>
           <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
@@ -122,7 +119,7 @@ export default function AvailableCreditSection() {
       )}
 
       {/* CTA */}
-      <div className="mt-auto">
+      <div className="mt-2">
         <button
           className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
           style={{ color: config.primaryColor }}
