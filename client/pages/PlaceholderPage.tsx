@@ -20,10 +20,6 @@ export default function PlaceholderPage() {
         className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-24"
         style={{ borderColor: config.borderColor }}
       >
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-semibold mb-6"
-          style={{ backgroundColor: config.primaryColor, opacity: 0.15 }}
-        />
         <h1
           className="text-2xl font-semibold mb-2"
           style={{ color: config.primaryColor }}
