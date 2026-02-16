@@ -1,5 +1,5 @@
 import { Button } from "antd";
-import { ArrowRightOutlined, DownloadOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 
 const HERO_IMAGE =
@@ -85,22 +85,6 @@ export default function HeroBanner() {
               Explore Fall 2026
             </Button>
 
-            <Button
-              type="text"
-              size="middle"
-              icon={<DownloadOutlined />}
-              style={{
-                color: "rgba(255, 255, 255, 0.8)",
-                fontWeight: 500,
-                height: 38,
-                paddingLeft: 16,
-                paddingRight: 16,
-                borderRadius: 8,
-                border: "1px solid rgba(255, 255, 255, 0.25)",
-              }}
-            >
-              Download Lookbook
-            </Button>
           </div>
         </div>
       </div>
