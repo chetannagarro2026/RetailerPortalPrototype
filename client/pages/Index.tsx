@@ -70,7 +70,7 @@ export default function Index() {
         </Col>
 
         {/* Available Credit — 4 cols */}
-        <Col xs={24} lg={8}>
+        <Col xs={24} lg={8} className="py-2 h-auto grow-0">
           <AvailableCreditSection />
         </Col>
 

@@ -33,7 +33,7 @@ export default function AvailableCreditSection() {
 
   return (
     <div
-      className="rounded-xl p-3 flex flex-col h-[236px]"
+      className="rounded-xl p-3 flex flex-col my-0"
       style={{
         border: `1px solid ${config.borderColor}`,
         backgroundColor: "#fff",
@@ -129,7 +129,7 @@ export default function AvailableCreditSection() {
       {/* CTA */}
       <div className="mt-4">
         <button
-          className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+          className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none px-0 py-0"
           style={{ color: config.primaryColor }}
         >
           View Financials <RightOutlined className="text-[9px]" />
