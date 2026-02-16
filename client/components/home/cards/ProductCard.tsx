@@ -59,7 +59,7 @@ export default function ProductCard({ data }: { data: Product }) {
         <p className="text-xs mb-3" style={{ color: config.secondaryColor }}>
           {data.itemCode}
         </p>
-        <p className="text-sm font-semibold mb-4" style={{ color: config.primaryColor }}>
+        <p className="text-sm font-semibold mb-2" style={{ color: config.primaryColor }}>
           ${data.wholesalePrice.toFixed(2)}
         </p>
 
