@@ -16,7 +16,7 @@ export default function HeroBanner() {
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover"
-        style={{ backgroundImage: `url(${HERO_IMAGE})`, backgroundPosition: "center 15%" }}
+        style={{ backgroundImage: `url(${HERO_IMAGE})`, backgroundPosition: "center 25%" }}
       />
 
       {/* Gradient Overlay — left-heavy for text readability */}
