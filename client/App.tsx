@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import PlaceholderPage from "./pages/PlaceholderPage";
+import BulkOrder from "./pages/BulkOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -16,7 +17,7 @@ export default function App() {
             <Route path="/" element={<Index />} />
             <Route path="/collections" element={<PlaceholderPage />} />
             <Route path="/brands" element={<PlaceholderPage />} />
-            <Route path="/bulk-order" element={<PlaceholderPage />} />
+            <Route path="/bulk-order" element={<BulkOrder />} />
             <Route path="/purchase-orders" element={<PlaceholderPage />} />
             <Route path="/account/credit" element={<PlaceholderPage />} />
             <Route path="/account/invoices" element={<PlaceholderPage />} />
