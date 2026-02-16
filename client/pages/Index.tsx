@@ -75,7 +75,7 @@ export default function Index() {
         </Col>
 
         {/* Featured Collection — Full Width */}
-        <Col xs={24} className="mt-8">
+        <Col xs={24} className="mt-2">
           <FeaturedCollectionSection />
         </Col>
 
