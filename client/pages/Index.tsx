@@ -1,12 +1,12 @@
 import { Row, Col, Card } from "antd";
 import {
-  AppstoreOutlined,
   GiftOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
 import HeroBanner from "../components/home/HeroBanner";
 import UpdatesSection from "../components/home/UpdatesSection";
 import AvailableCreditSection from "../components/home/AvailableCreditSection";
+import FeaturedCollectionSection from "../components/home/FeaturedCollectionSection";
 import { activeBrandConfig } from "../config/brandConfig";
 
 interface SectionPlaceholderProps {
@@ -74,13 +74,9 @@ export default function Index() {
           <AvailableCreditSection />
         </Col>
 
-        {/* Active Collections — Full Width */}
-        <Col xs={24}>
-          <SectionPlaceholder
-            label="Active Collections"
-            icon={<AppstoreOutlined />}
-            minHeight={240}
-          />
+        {/* Featured Collection — Full Width */}
+        <Col xs={24} className="mt-8">
+          <FeaturedCollectionSection />
         </Col>
 
         {/* Promotions — Two Column */}
