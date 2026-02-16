@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { MenuOutlined, DownOutlined } from "@ant-design/icons";
+import { Avatar } from "antd";
+import { MenuOutlined, DownOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import MegaMenu from "./MegaMenu";
@@ -92,9 +93,14 @@ export default function Navigation() {
                   <div key={item.key} className="relative ml-auto">
                     <button
                       onClick={() => togglePanel("my-account")}
-                      className="flex items-center gap-1.5 h-[56px] px-4 text-sm transition-colors cursor-pointer bg-transparent"
+                      className="flex items-center gap-2 h-[56px] px-4 text-sm transition-colors cursor-pointer bg-transparent"
                       style={navItemStyle(item.key)}
                     >
+                      <Avatar
+                        size={24}
+                        icon={<UserOutlined />}
+                        style={{ backgroundColor: config.primaryColor, fontSize: 11 }}
+                      />
                       {item.label}
                       <DownOutlined
                         className="text-[10px] transition-transform"
