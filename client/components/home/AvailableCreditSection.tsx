@@ -46,9 +46,9 @@ export default function AvailableCreditSection() {
         </div>
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: config.borderColor, color: config.primaryColor }}
+          style={{ color: config.secondaryColor }}
         >
-          <DollarOutlined className="text-sm" />
+          <DollarOutlined className="text-2xl" />
         </div>
       </div>
 
