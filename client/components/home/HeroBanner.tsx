@@ -3,7 +3,7 @@ import { ArrowRightOutlined, DownloadOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 
 const HERO_IMAGE =
-  "https://images.pexels.com/photos/9968539/pexels-photo-9968539.jpeg?auto=compress&cs=tinysrgb&w=1400&h=560&fit=crop&crop=top";
+  "https://cdn.builder.io/api/v1/image/assets%2F0f4e56209ef24b2d922b97ec1205a84f%2Febd550cc0540439c8208cc9560cfb7fe";
 
 export default function HeroBanner() {
   const config = activeBrandConfig;
