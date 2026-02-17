@@ -92,7 +92,7 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
               <Link
                 to="/collections/all-products"
                 onClick={onClose}
-                className="flex items-center gap-1.5 text-xs font-medium no-underline transition-colors"
+                className="flex items-center gap-1.5 text-sm font-semibold no-underline transition-colors"
                 style={{ color: "#1677FF" }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = "#4096FF";
