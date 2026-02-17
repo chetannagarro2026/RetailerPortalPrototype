@@ -94,41 +94,41 @@ export const catalogNodes: CatalogNode[] = [
   { id: "w-outerwear", parentId: "women", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: true, productCount: 42, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/7679725/pexels-photo-7679725.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "w-dresses", parentId: "women", slug: "dresses", label: "Dresses", level: 2, hasChildren: true, productCount: 38, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5418888/pexels-photo-5418888.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "w-tops", parentId: "women", slug: "tops", label: "Tops & Blouses", level: 2, hasChildren: false, productCount: 56, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/27523237/pexels-photo-27523237.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-denim", parentId: "women", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 31, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/603022/pexels-photo-603022.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-denim", parentId: "women", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 31, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/2245035/pexels-photo-2245035.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "w-knitwear", parentId: "women", slug: "knitwear", label: "Knitwear", level: 2, hasChildren: false, productCount: 24, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/45982/pexels-photo-45982.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "w-activewear", parentId: "women", slug: "activewear", label: "Activewear", level: 2, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/6339395/pexels-photo-6339395.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Women > Outerwear
-  { id: "w-o-jackets", parentId: "w-outerwear", slug: "jackets", label: "Jackets", level: 3, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "w-o-coats", parentId: "w-outerwear", slug: "coats", label: "Coats", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "w-o-vests", parentId: "w-outerwear", slug: "vests", label: "Vests", level: 3, hasChildren: false, productCount: 6, filtersAvailable: ["brand", "size", "color", "price"] },
+  { id: "w-o-jackets", parentId: "w-outerwear", slug: "jackets", label: "Jackets", level: 3, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/7871149/pexels-photo-7871149.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-o-coats", parentId: "w-outerwear", slug: "coats", label: "Coats", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/35114785/pexels-photo-35114785.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-o-vests", parentId: "w-outerwear", slug: "vests", label: "Vests", level: 3, hasChildren: false, productCount: 6, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/30603543/pexels-photo-30603543.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Women > Dresses
-  { id: "w-d-casual", parentId: "w-dresses", slug: "casual", label: "Casual Dresses", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "w-d-formal", parentId: "w-dresses", slug: "formal", label: "Formal Dresses", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"] },
+  { id: "w-d-casual", parentId: "w-dresses", slug: "casual", label: "Casual Dresses", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/3756941/pexels-photo-3756941.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-d-formal", parentId: "w-dresses", slug: "formal", label: "Formal Dresses", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/35511824/pexels-photo-35511824.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Men subcategories
   { id: "m-shirts", parentId: "men", slug: "shirts", label: "Shirts", level: 2, hasChildren: true, productCount: 48, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/3735633/pexels-photo-3735633.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "m-pants", parentId: "men", slug: "pants", label: "Pants & Chinos", level: 2, hasChildren: false, productCount: 35, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/19071478/pexels-photo-19071478.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "m-outerwear", parentId: "men", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: false, productCount: 28, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5424909/pexels-photo-5424909.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-denim", parentId: "men", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/603022/pexels-photo-603022.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-denim", parentId: "men", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/7679722/pexels-photo-7679722.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "m-activewear", parentId: "men", slug: "activewear", label: "Activewear", level: 2, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/28758135/pexels-photo-28758135.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "m-suits", parentId: "men", slug: "suits", label: "Suits & Blazers", level: 2, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/2813515/pexels-photo-2813515.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Men > Shirts
-  { id: "m-s-dress", parentId: "m-shirts", slug: "dress-shirts", label: "Dress Shirts", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "m-s-casual", parentId: "m-shirts", slug: "casual-shirts", label: "Casual Shirts", level: 3, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "m-s-polo", parentId: "m-shirts", slug: "polo-shirts", label: "Polo Shirts", level: 3, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "size", "color", "price"] },
+  { id: "m-s-dress", parentId: "m-shirts", slug: "dress-shirts", label: "Dress Shirts", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/30875764/pexels-photo-30875764.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-s-casual", parentId: "m-shirts", slug: "casual-shirts", label: "Casual Shirts", level: 3, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5163400/pexels-photo-5163400.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-s-polo", parentId: "m-shirts", slug: "polo-shirts", label: "Polo Shirts", level: 3, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/11751211/pexels-photo-11751211.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Kids subcategories
   { id: "k-boys", parentId: "kids", slug: "boys", label: "Boys", level: 2, hasChildren: true, productCount: 40, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/2998987/pexels-photo-2998987.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "k-girls", parentId: "kids", slug: "girls", label: "Girls", level: 2, hasChildren: false, productCount: 36, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/7988715/pexels-photo-7988715.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-girls", parentId: "kids", slug: "girls", label: "Girls", level: 2, hasChildren: false, productCount: 36, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/17086870/pexels-photo-17086870.jpeg?auto=compress&cs=tinysrgb&w=600" },
   { id: "k-baby", parentId: "kids", slug: "baby", label: "Baby & Toddler", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/34121886/pexels-photo-34121886.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Kids > Boys
-  { id: "k-b-tops", parentId: "k-boys", slug: "tops", label: "Tops", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "k-b-bottoms", parentId: "k-boys", slug: "bottoms", label: "Bottoms", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "size", "color", "price"] },
-  { id: "k-b-outerwear", parentId: "k-boys", slug: "outerwear", label: "Outerwear", level: 3, hasChildren: false, productCount: 8, filtersAvailable: ["brand", "size", "color", "price"] },
+  { id: "k-b-tops", parentId: "k-boys", slug: "tops", label: "Tops", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/16642458/pexels-photo-16642458.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-b-bottoms", parentId: "k-boys", slug: "bottoms", label: "Bottoms", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/15914001/pexels-photo-15914001.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-b-outerwear", parentId: "k-boys", slug: "outerwear", label: "Outerwear", level: 3, hasChildren: false, productCount: 8, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/10725439/pexels-photo-10725439.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Accessories subcategories
   { id: "a-bags", parentId: "accessories", slug: "bags", label: "Bags & Handbags", level: 2, hasChildren: false, productCount: 30, filtersAvailable: ["brand", "color", "price", "material"], heroImage: "https://images.pexels.com/photos/9327162/pexels-photo-9327162.jpeg?auto=compress&cs=tinysrgb&w=600" },
@@ -186,62 +186,178 @@ export function getSiblings(nodeId: string): CatalogNode[] {
   return catalogNodes.filter((n) => n.parentId === node.parentId);
 }
 
-// ── Category-Specific Product Images ────────────────────────────────
-const categoryProductImages: Record<string, string[]> = {
-  women: [
-    "https://images.pexels.com/photos/21897127/pexels-photo-21897127.jpeg?auto=compress&cs=tinysrgb&w=600",
+// ── Subcategory-Specific Product Images ─────────────────────────────
+// Each subcategory (Level 2) and leaf (Level 3) gets its own distinct image pool.
+// Products always display images relevant to their specific subcategory.
+const subcategoryProductImages: Record<string, string[]> = {
+  // ── Women ─────────────────────────────────────────────────────────
+  "w-outerwear": [
+    "https://images.pexels.com/photos/16480587/pexels-photo-16480587.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/19289551/pexels-photo-19289551.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/18182283/pexels-photo-18182283.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/8801098/pexels-photo-8801098.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/2245035/pexels-photo-2245035.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/31443915/pexels-photo-31443915.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/20868118/pexels-photo-20868118.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/3393793/pexels-photo-3393793.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-dresses": [
+    "https://images.pexels.com/photos/21897127/pexels-photo-21897127.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/18898990/pexels-photo-18898990.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/30418852/pexels-photo-30418852.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/24847162/pexels-photo-24847162.jpeg?auto=compress&cs=tinysrgb&w=600",
   ],
-  men: [
-    "https://images.pexels.com/photos/18153495/pexels-photo-18153495.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/23915302/pexels-photo-23915302.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/19566191/pexels-photo-19566191.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/10429317/pexels-photo-10429317.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/10004179/pexels-photo-10004179.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "w-tops": [
+    "https://images.pexels.com/photos/18182283/pexels-photo-18182283.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/24960096/pexels-photo-24960096.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/27523237/pexels-photo-27523237.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31443915/pexels-photo-31443915.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-denim": [
+    "https://images.pexels.com/photos/2245035/pexels-photo-2245035.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31571020/pexels-photo-31571020.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/603022/pexels-photo-603022.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10133274/pexels-photo-10133274.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-knitwear": [
+    "https://images.pexels.com/photos/8801098/pexels-photo-8801098.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/14553511/pexels-photo-14553511.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/45982/pexels-photo-45982.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/20868118/pexels-photo-20868118.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-activewear": [
+    "https://images.pexels.com/photos/31443915/pexels-photo-31443915.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10112444/pexels-photo-10112444.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/6339395/pexels-photo-6339395.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/29346389/pexels-photo-29346389.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Men ───────────────────────────────────────────────────────────
+  "m-shirts": [
+    "https://images.pexels.com/photos/34913434/pexels-photo-34913434.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7276000/pexels-photo-7276000.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/18153495/pexels-photo-18153495.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/31438911/pexels-photo-31438911.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "m-pants": [
+    "https://images.pexels.com/photos/11990110/pexels-photo-11990110.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/19566191/pexels-photo-19566191.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/19071478/pexels-photo-19071478.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/23915302/pexels-photo-23915302.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "m-outerwear": [
+    "https://images.pexels.com/photos/10429317/pexels-photo-10429317.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/20267215/pexels-photo-20267215.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5424909/pexels-photo-5424909.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/7741187/pexels-photo-7741187.jpeg?auto=compress&cs=tinysrgb&w=600",
   ],
-  kids: [
-    "https://images.pexels.com/photos/590498/pexels-photo-590498.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/18785376/pexels-photo-18785376.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/5791337/pexels-photo-5791337.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/34043973/pexels-photo-34043973.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/2998987/pexels-photo-2998987.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/7988715/pexels-photo-7988715.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "m-denim": [
+    "https://images.pexels.com/photos/10004179/pexels-photo-10004179.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10133274/pexels-photo-10133274.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7679722/pexels-photo-7679722.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/603022/pexels-photo-603022.jpeg?auto=compress&cs=tinysrgb&w=600",
   ],
-  accessories: [
+  "m-activewear": [
+    "https://images.pexels.com/photos/29346389/pexels-photo-29346389.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/18359425/pexels-photo-18359425.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/28758135/pexels-photo-28758135.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31443915/pexels-photo-31443915.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "m-suits": [
+    "https://images.pexels.com/photos/23915302/pexels-photo-23915302.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/13939386/pexels-photo-13939386.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/2813515/pexels-photo-2813515.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/30875764/pexels-photo-30875764.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Kids ──────────────────────────────────────────────────────────
+  "k-boys": [
+    "https://images.pexels.com/photos/590498/pexels-photo-590498.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/16642458/pexels-photo-16642458.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/34043973/pexels-photo-34043973.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10725439/pexels-photo-10725439.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "k-girls": [
+    "https://images.pexels.com/photos/18785376/pexels-photo-18785376.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/17086870/pexels-photo-17086870.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7988715/pexels-photo-7988715.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/2998987/pexels-photo-2998987.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "k-baby": [
+    "https://images.pexels.com/photos/5791337/pexels-photo-5791337.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/34121886/pexels-photo-34121886.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/590498/pexels-photo-590498.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/34043973/pexels-photo-34043973.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Accessories ───────────────────────────────────────────────────
+  "a-bags": [
     "https://images.pexels.com/photos/29096397/pexels-photo-29096397.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/2373730/pexels-photo-2373730.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/4550884/pexels-photo-4550884.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/6540947/pexels-photo-6540947.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/22434773/pexels-photo-22434773.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/9327162/pexels-photo-9327162.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/1204464/pexels-photo-1204464.jpeg?auto=compress&cs=tinysrgb&w=600",
   ],
-  entertainment: [
+  "a-watches": [
+    "https://images.pexels.com/photos/2373730/pexels-photo-2373730.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31123762/pexels-photo-31123762.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/33451773/pexels-photo-33451773.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/2813515/pexels-photo-2813515.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "a-jewelry": [
+    "https://images.pexels.com/photos/4550884/pexels-photo-4550884.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5865384/pexels-photo-5865384.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/21897127/pexels-photo-21897127.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/1204464/pexels-photo-1204464.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "a-footwear": [
+    "https://images.pexels.com/photos/6540947/pexels-photo-6540947.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5264896/pexels-photo-5264896.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/19566191/pexels-photo-19566191.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/29096397/pexels-photo-29096397.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Entertainment ─────────────────────────────────────────────────
+  "e-lifestyle": [
     "https://images.pexels.com/photos/7309739/pexels-photo-7309739.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/3892900/pexels-photo-3892900.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/4452399/pexels-photo-4452399.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/15124841/pexels-photo-15124841.jpeg?auto=compress&cs=tinysrgb&w=600",
-    "https://images.pexels.com/photos/175724/pexels-photo-175724.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/4452399/pexels-photo-4452399.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/24847162/pexels-photo-24847162.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "e-sports": [
+    "https://images.pexels.com/photos/3892900/pexels-photo-3892900.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/34087791/pexels-photo-34087791.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/29346389/pexels-photo-29346389.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/18359425/pexels-photo-18359425.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "e-heritage": [
+    "https://images.pexels.com/photos/4452399/pexels-photo-4452399.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/175724/pexels-photo-175724.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5865384/pexels-photo-5865384.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31123762/pexels-photo-31123762.jpeg?auto=compress&cs=tinysrgb&w=600",
   ],
 };
 
-const fallbackImages = categoryProductImages.women;
-
-/** Resolves the Level-1 ancestor ID for any node to pick the right image pool */
+/**
+ * Resolves the best image pool for a node:
+ * 1. Exact match on nodeId (subcategory-specific)
+ * 2. Parent node match (Level 3 inherits from Level 2 parent)
+ * 3. Fallback to Level-1 generic pool
+ */
 function getCategoryImagePool(nodeId: string): string[] {
+  // Direct match — subcategory has its own pool
+  if (subcategoryProductImages[nodeId]) return subcategoryProductImages[nodeId];
+
+  // Try parent (Level 3 nodes use parent Level 2 pool)
+  const node = catalogNodes.find((n) => n.id === nodeId);
+  if (node?.parentId && subcategoryProductImages[node.parentId]) {
+    return subcategoryProductImages[node.parentId];
+  }
+
+  // Fallback: walk up to find any ancestor with a pool
   const ancestors = getAncestors(nodeId);
-  const level1 = ancestors.find((a) => a.level === 1);
-  const key = level1?.id ?? nodeId;
-  return categoryProductImages[key] || fallbackImages;
+  for (let i = ancestors.length - 1; i >= 0; i--) {
+    if (subcategoryProductImages[ancestors[i].id]) {
+      return subcategoryProductImages[ancestors[i].id];
+    }
+  }
+
+  return subcategoryProductImages["w-outerwear"]; // ultimate fallback
 }
 
 const brandNames = ["Calvin Klein", "Tommy Hilfiger", "IZOD", "Buffalo David Bitton", "Nautica", "Arrow", "Jessica Simpson", "Joe's Jeans", "Frye", "Hervé Léger"];
