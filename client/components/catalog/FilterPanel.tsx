@@ -21,7 +21,7 @@ export default function FilterPanel({
 }: FilterPanelProps) {
   const config = activeBrandConfig;
   const [openSections, setOpenSections] = useState<Set<string>>(
-    () => new Set(resolvedFilters.slice(0, 3).map((f) => f.def.key)),
+    () => new Set((resolvedFilters || []).slice(0, 3).map((f) => f.def.key)),
   );
 
   const toggle = (key: string) => {
