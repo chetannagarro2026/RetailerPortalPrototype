@@ -93,12 +93,12 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
                 to="/collections/all-products"
                 onClick={onClose}
                 className="flex items-center gap-1.5 text-xs font-medium no-underline transition-colors"
-                style={{ color: config.secondaryColor }}
+                style={{ color: "#1677FF" }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = config.primaryColor;
+                  e.currentTarget.style.color = "#4096FF";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = config.secondaryColor;
+                  e.currentTarget.style.color = "#1677FF";
                 }}
               >
                 View Full Catalog <RightOutlined className="text-[9px]" />
