@@ -1,29 +1,17 @@
-import { useState } from "react";
 import { RightOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import BrowseCategoriesPanel from "./mega-menu/BrowseCategoriesPanel";
-import PurchasedPanel from "./mega-menu/PurchasedPanel";
 
 interface MegaMenuProps {
   visible: boolean;
   onClose: () => void;
 }
 
-type TabKey = "categories" | "purchased";
-
-const tabs: { key: TabKey; label: string }[] = [
-  { key: "categories", label: "Browse Categories" },
-  { key: "purchased", label: "Purchased Items" },
-];
-
 export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
   const config = activeBrandConfig;
-  const [activeTab, setActiveTab] = useState<TabKey>("categories");
 
   if (!visible) return null;
-
-  const activeLabel = tabs.find((t) => t.key === activeTab)?.label;
 
   return (
     <>
@@ -40,69 +28,39 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
         }}
       >
         <div
-          className="max-w-[1280px] mx-auto flex"
-          style={{ padding: "32px", minHeight: 360 }}
+          className="max-w-[1280px] mx-auto"
+          style={{ padding: "32px" }}
         >
-          {/* Left — Vertical Tabs */}
+          {/* Header Row */}
           <div
-            className="shrink-0 pr-8 flex flex-col gap-2"
-            style={{
-              width: 240,
-              borderRight: `1px solid ${config.borderColor}`,
-            }}
+            className="flex items-center justify-between pb-4 mb-5"
+            style={{ borderBottom: `1px solid ${config.borderColor}` }}
           >
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className="w-full text-left px-4 py-2.5 rounded-lg text-sm transition-colors cursor-pointer border-none"
-                style={{
-                  fontWeight: activeTab === tab.key ? 600 : 400,
-                  color: activeTab === tab.key ? config.primaryColor : "#6B7280",
-                  backgroundColor: activeTab === tab.key ? config.cardBg : "transparent",
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
+            <h4
+              className="text-sm font-semibold"
+              style={{ color: config.primaryColor }}
+            >
+              Browse Categories
+            </h4>
+            <Link
+              to="/catalog"
+              onClick={onClose}
+              className="flex items-center gap-1.5 text-sm font-semibold no-underline transition-colors"
+              style={{ color: "#1677FF" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#4096FF";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#1677FF";
+              }}
+            >
+              View Full Catalog <RightOutlined className="text-[9px]" />
+            </Link>
           </div>
 
-          {/* Right — Header Row + Dynamic Content */}
-          <div className="flex-1 pl-8 flex flex-col" style={{ maxHeight: 416 }}>
-            {/* Global Header Row */}
-            <div
-              className="flex items-center justify-between pb-4 mb-5 shrink-0"
-              style={{ borderBottom: `1px solid ${config.borderColor}` }}
-            >
-              <h4
-                className="text-sm font-semibold"
-                style={{ color: config.primaryColor }}
-              >
-                {activeLabel}
-              </h4>
-              <Link
-                to="/catalog"
-                onClick={onClose}
-                className="flex items-center gap-1.5 text-sm font-semibold no-underline transition-colors"
-                style={{ color: "#1677FF" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#4096FF";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#1677FF";
-                }}
-              >
-                View Full Catalog <RightOutlined className="text-[9px]" />
-              </Link>
-            </div>
-
-            {/* Dynamic Content */}
-            <div className="flex-1 overflow-y-auto">
-              {activeTab === "categories" && (
-                <BrowseCategoriesPanel onClose={onClose} />
-              )}
-              {activeTab === "purchased" && <PurchasedPanel />}
-            </div>
+          {/* Categories Content */}
+          <div className="overflow-y-auto" style={{ maxHeight: 380 }}>
+            <BrowseCategoriesPanel onClose={onClose} />
           </div>
         </div>
       </div>
