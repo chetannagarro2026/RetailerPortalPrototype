@@ -623,6 +623,116 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
   return { products, total };
 }
 
+// ── Filter Attribute Registry ────────────────────────────────────────
+// Defines how each attribute is used for filtering: type, label, filterable flag.
+
+export type FilterType = "checkbox" | "range" | "boolean";
+
+export interface FilterAttributeDef {
+  key: string;
+  label: string;
+  filterType: FilterType;
+  /** Extracts value(s) from a product for this filter */
+  extract: (p: CatalogProduct) => string | string[] | number | undefined;
+  isFilterable: boolean;
+}
+
+/** Registry of all filterable attributes — industry-neutral */
+export const filterAttributeRegistry: FilterAttributeDef[] = [
+  {
+    key: "brand",
+    label: "Brand",
+    filterType: "checkbox",
+    extract: (p) => p.brand,
+    isFilterable: true,
+  },
+  {
+    key: "fit",
+    label: "Fit",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Fit")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "fabric",
+    label: "Fabric",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Fabric")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "price",
+    label: "Price",
+    filterType: "range",
+    extract: (p) => p.price,
+    isFilterable: true,
+  },
+  {
+    key: "availability",
+    label: "Availability",
+    filterType: "checkbox",
+    extract: (p) => p.availabilityStatus || "in-stock",
+    isFilterable: true,
+  },
+  {
+    key: "hasDiscount",
+    label: "On Sale",
+    filterType: "boolean",
+    extract: (p) => (p.originalPrice ? "true" : "false"),
+    isFilterable: true,
+  },
+];
+
+/** Get ALL products for a node (no pagination) — for filtering/sorting */
+export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
+  const node = catalogNodes.find((n) => n.id === nodeId);
+  if (!node) return [];
+
+  const total = node.productCount || 12;
+  const images = getCategoryImagePool(nodeId);
+
+  return Array.from({ length: total }, (_, i) => {
+    const idx = i;
+    const brand = brandNames[idx % brandNames.length];
+    const basePrice = 28 + ((idx * 17) % 120);
+    const badge = badges[idx % badges.length];
+    return {
+      id: `${nodeId}-p${idx}`,
+      name: `${node.label} Style ${idx + 1}`,
+      sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+      price: basePrice,
+      originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
+      imageUrl: images[idx % images.length],
+      badges: badge ? [badge] : undefined,
+      brand,
+      primaryDisplayAttributes: displayAttrs[idx % displayAttrs.length],
+      availabilityStatus: (idx % 7 === 0 ? "low-stock" : "in-stock") as CatalogProduct["availabilityStatus"],
+      tierPricing: idx % 4 === 0
+        ? [{ minQty: 1, price: basePrice }, { minQty: 12, price: Math.round(basePrice * 0.9) }, { minQty: 48, price: Math.round(basePrice * 0.8) }]
+        : undefined,
+      unitMeasure: "per unit",
+      minOrderQty: idx % 3 === 0 ? 6 : 1,
+      casePackQty: idx % 5 === 0 ? 6 : undefined,
+      attributes: { brand, category: node.label },
+      variantAttributes: variantAttrPools[idx % variantAttrPools.length],
+      variants: generateVariants(
+        `${nodeId}-p${idx}`,
+        `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+        basePrice,
+        variantAttrPools[idx % variantAttrPools.length],
+      ),
+      galleryImages: [
+        images[idx % images.length],
+        images[(idx + 1) % images.length],
+        images[(idx + 2) % images.length],
+        images[(idx + 3) % images.length],
+      ],
+      description: `Premium quality ${node.label} piece from ${brand}. Crafted with attention to detail and built for lasting comfort and style. Part of the latest collection designed for the modern buyer.`,
+      specifications: specPools[idx % specPools.length],
+    };
+  });
+}
+
 /** Get a single product by its ID */
 export function getProductById(productId: string): CatalogProduct | null {
   // Parse nodeId from productId format: "nodeId-pN"

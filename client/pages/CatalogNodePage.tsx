@@ -7,13 +7,14 @@ import {
   catalogConfig,
   getNodeBySlugPath,
   getChildren,
-  getProductsForNode,
   getAncestors,
 } from "../data/catalogData";
+import { useCatalogState, type SortKey } from "../hooks/useCatalogState";
 import CatalogBreadcrumb from "../components/catalog/CatalogBreadcrumb";
 import SubcategoryCardGrid from "../components/catalog/SubcategoryCardGrid";
 import CategoryTree from "../components/catalog/CategoryTree";
 import FilterPanel from "../components/catalog/FilterPanel";
+import ActiveFilterChips from "../components/catalog/ActiveFilterChips";
 import CatalogProductGrid from "../components/catalog/CatalogProductGrid";
 import SpreadsheetView from "../components/catalog/SpreadsheetView";
 
@@ -24,8 +25,12 @@ export default function CatalogNodePage() {
   const { "*": splat } = useParams();
   const slugPath = splat ? splat.split("/").filter(Boolean) : [];
   const node = getNodeBySlugPath(slugPath);
-  const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
+  // Use "root" as fallback nodeId for the catalog state hook
+  const nodeId = node?.id || "root";
+
+  const catalog = useCatalogState(nodeId, catalogConfig.pageSize);
 
   if (!node) {
     return (
@@ -48,10 +53,6 @@ export default function CatalogNodePage() {
   const treeRoot =
     ancestors.find((a) => a.level === 1) ||
     (node.level === 1 ? node : null);
-
-  const { products, total } = showTree
-    ? getProductsForNode(node.id, page, catalogConfig.pageSize)
-    : { products: [], total: 0 };
 
   const children = getChildren(node.id);
 
@@ -99,20 +100,27 @@ export default function CatalogNodePage() {
           >
             <CategoryTree activeNodeId={node.id} rootNodeId={treeRoot.id} />
 
-            {node.filtersAvailable && node.filtersAvailable.length > 0 && (
+            {/* Dynamic Filter Panel */}
+            {catalog.resolvedFilters.length > 0 && (
               <div
                 className="mt-5 pt-5"
                 style={{ borderTop: `1px solid ${config.borderColor}` }}
               >
-                <FilterPanel filtersAvailable={node.filtersAvailable} />
+                <FilterPanel
+                  resolvedFilters={catalog.resolvedFilters}
+                  activeFilters={catalog.activeFilters}
+                  priceRange={catalog.priceRange}
+                  onFilterChange={catalog.setFilter}
+                  onPriceRangeChange={catalog.setPriceRange}
+                />
               </div>
             )}
           </aside>
         )}
 
-        {/* Right: Header + Grid/Table */}
+        {/* Right: Header + Chips + Grid/Table */}
         <div className="flex-1 min-w-0">
-          {/* Node Header with View Toggle */}
+          {/* Node Header with View Toggle + Sort */}
           <div className="flex items-start justify-between mb-5">
             <div>
               <h1
@@ -122,7 +130,8 @@ export default function CatalogNodePage() {
                 {node.label}
               </h1>
               <p className="text-xs" style={{ color: config.secondaryColor }}>
-                {total} product{total !== 1 ? "s" : ""}
+                {catalog.filteredTotal} product{catalog.filteredTotal !== 1 ? "s" : ""}
+                {catalog.hasActiveFilters && ` (filtered from ${catalog.allProducts.length})`}
                 {children.length > 0 && ` · ${children.length} subcategories`}
               </p>
             </div>
@@ -134,19 +143,32 @@ export default function CatalogNodePage() {
               )}
 
               <Select
-                defaultValue="relevance"
+                value={catalog.sortBy}
+                onChange={(val) => catalog.setSortBy(val as SortKey)}
                 size="small"
-                style={{ width: 160 }}
+                style={{ width: 180 }}
                 options={[
                   { value: "relevance", label: "Sort: Relevance" },
                   { value: "price-asc", label: "Price: Low → High" },
                   { value: "price-desc", label: "Price: High → Low" },
+                  { value: "alpha-asc", label: "Name: A → Z" },
+                  { value: "alpha-desc", label: "Name: Z → A" },
                   { value: "newest", label: "Newest First" },
                   { value: "bestselling", label: "Best Selling" },
                 ]}
               />
             </div>
           </div>
+
+          {/* Active Filter Chips */}
+          <ActiveFilterChips
+            activeFilters={catalog.activeFilters}
+            priceRange={catalog.priceRange}
+            onRemoveValue={catalog.removeFilterValue}
+            onRemoveFilter={catalog.removeFilter}
+            onClearAll={catalog.clearAllFilters}
+            onClearPriceRange={() => catalog.setPriceRange(null)}
+          />
 
           {/* Subcategory pills */}
           {children.length > 0 && (
@@ -177,19 +199,19 @@ export default function CatalogNodePage() {
           {/* Products — Grid or Table */}
           {viewMode === "grid" ? (
             <CatalogProductGrid
-              products={products}
-              total={total}
-              page={page}
+              products={catalog.paginatedProducts}
+              total={catalog.filteredTotal}
+              page={catalog.page}
               pageSize={catalogConfig.pageSize}
-              onPageChange={setPage}
+              onPageChange={catalog.setPage}
             />
           ) : (
             <SpreadsheetView
-              products={products}
-              total={total}
-              page={page}
+              products={catalog.paginatedProducts}
+              total={catalog.filteredTotal}
+              page={catalog.page}
               pageSize={catalogConfig.pageSize}
-              onPageChange={setPage}
+              onPageChange={catalog.setPage}
             />
           )}
         </div>

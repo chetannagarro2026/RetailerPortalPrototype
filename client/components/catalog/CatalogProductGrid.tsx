@@ -29,7 +29,7 @@ export default function CatalogProductGrid({
         className="text-center py-16 text-sm"
         style={{ color: config.secondaryColor }}
       >
-        No products found in this category.
+        No products match the current filters.
       </div>
     );
   }
