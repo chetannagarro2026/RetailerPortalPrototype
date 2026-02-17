@@ -358,6 +358,80 @@ const subcategoryProductImages: Record<string, string[]> = {
     "https://images.pexels.com/photos/5865384/pexels-photo-5865384.jpeg?auto=compress&cs=tinysrgb&w=600",
     "https://images.pexels.com/photos/31123762/pexels-photo-31123762.jpeg?auto=compress&cs=tinysrgb&w=600",
   ],
+
+  // ── Level 3: Women > Outerwear ────────────────────────────────────
+  "w-o-jackets": [
+    "https://images.pexels.com/photos/12544466/pexels-photo-12544466.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/26011846/pexels-photo-26011846.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/16480587/pexels-photo-16480587.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7871149/pexels-photo-7871149.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-o-coats": [
+    "https://images.pexels.com/photos/35114786/pexels-photo-35114786.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5119921/pexels-photo-5119921.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/3393793/pexels-photo-3393793.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/35114785/pexels-photo-35114785.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-o-vests": [
+    "https://images.pexels.com/photos/34329607/pexels-photo-34329607.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/17597081/pexels-photo-17597081.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/14688509/pexels-photo-14688509.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/30603543/pexels-photo-30603543.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Level 3: Women > Dresses ──────────────────────────────────────
+  "w-d-casual": [
+    "https://images.pexels.com/photos/1140908/pexels-photo-1140908.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7627840/pexels-photo-7627840.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/35262853/pexels-photo-35262853.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/3756941/pexels-photo-3756941.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "w-d-formal": [
+    "https://images.pexels.com/photos/16890870/pexels-photo-16890870.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/29886212/pexels-photo-29886212.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/14940765/pexels-photo-14940765.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/35511824/pexels-photo-35511824.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Level 3: Men > Shirts ─────────────────────────────────────────
+  "m-s-dress": [
+    "https://images.pexels.com/photos/161030/pexels-photo-161030.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5083017/pexels-photo-5083017.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/3214788/pexels-photo-3214788.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/30875764/pexels-photo-30875764.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "m-s-casual": [
+    "https://images.pexels.com/photos/4062841/pexels-photo-4062841.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/6995732/pexels-photo-6995732.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/17251247/pexels-photo-17251247.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5163400/pexels-photo-5163400.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "m-s-polo": [
+    "https://images.pexels.com/photos/17987934/pexels-photo-17987934.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7648278/pexels-photo-7648278.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/28640734/pexels-photo-28640734.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/11751211/pexels-photo-11751211.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+
+  // ── Level 3: Kids > Boys ──────────────────────────────────────────
+  "k-b-tops": [
+    "https://images.pexels.com/photos/9661972/pexels-photo-9661972.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/8385026/pexels-photo-8385026.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5724960/pexels-photo-5724960.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/16642458/pexels-photo-16642458.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "k-b-bottoms": [
+    "https://images.pexels.com/photos/5560019/pexels-photo-5560019.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/15179149/pexels-photo-15179149.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/1620753/pexels-photo-1620753.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/15914001/pexels-photo-15914001.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  "k-b-outerwear": [
+    "https://images.pexels.com/photos/15268261/pexels-photo-15268261.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/15237057/pexels-photo-15237057.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7026778/pexels-photo-7026778.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10725439/pexels-photo-10725439.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
 };
 
 /**
