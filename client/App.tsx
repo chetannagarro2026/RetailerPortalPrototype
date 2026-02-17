@@ -16,6 +16,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/collections" element={<PlaceholderPage />} />
+            <Route path="/collections/all-products" element={<PlaceholderPage />} />
             <Route path="/brands" element={<PlaceholderPage />} />
             <Route path="/bulk-order" element={<BulkOrder />} />
             <Route path="/purchase-orders" element={<PlaceholderPage />} />
