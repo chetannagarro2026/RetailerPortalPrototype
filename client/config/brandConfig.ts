@@ -7,6 +7,7 @@ export interface NavItem {
 }
 
 export type CategoryCardVariant = "hero" | "thumbnail";
+export type ProductCardVariant = "compact" | "standard" | "detailed";
 
 export interface BrandConfig {
   // Identity
@@ -33,6 +34,7 @@ export interface BrandConfig {
 
   // Catalog display
   categoryCardVariant: CategoryCardVariant;
+  productCardVariant: ProductCardVariant;
 
   // Navigation items (configurable per tenant)
   navItems: NavItem[];
@@ -56,6 +58,7 @@ export const centricBrandsConfig: BrandConfig = {
   searchPlaceholder: "Search by Style Code, Collection, Brand...",
 
   categoryCardVariant: "hero",
+  productCardVariant: "standard",
 
   navItems: [
     { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },

@@ -1,6 +1,7 @@
 import { activeBrandConfig } from "../../config/brandConfig";
 import { type CatalogNode, getChildren } from "../../data/catalogData";
 import CategoryCard from "./CategoryCard";
+import NodeCard from "./NodeCard";
 
 interface SubcategoryCardGridProps {
   node: CatalogNode;
@@ -12,22 +13,30 @@ export default function SubcategoryCardGrid({ node }: SubcategoryCardGridProps) 
 
   if (children.length === 0) return null;
 
-  // Use hero variant for Level 0 (root → Level 1 cards)
-  // Use thumbnail for deeper levels unless tenant overrides
-  const variant = node.level === 0 ? config.categoryCardVariant : "thumbnail";
+  // Level 0 → CategoryCard (hero/thumbnail per tenant config)
+  // Level 1+ → NodeCard (mid-level subcategory display)
+  if (node.level === 0) {
+    const variant = config.categoryCardVariant;
+    const gridCols =
+      variant === "hero"
+        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+    const gap = variant === "hero" ? "gap-6" : "gap-4";
 
-  // Grid columns: hero = 3 cols max, thumbnail = 4 cols max
-  const gridCols =
-    variant === "hero"
-      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+    return (
+      <div className={`grid ${gridCols} ${gap}`}>
+        {children.map((child) => (
+          <CategoryCard key={child.id} node={child} variant={variant} />
+        ))}
+      </div>
+    );
+  }
 
-  const gap = variant === "hero" ? "gap-6" : "gap-4";
-
+  // Level 1+: NodeCard grid (3-4 cols, 24px gap)
   return (
-    <div className={`grid ${gridCols} ${gap}`}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {children.map((child) => (
-        <CategoryCard key={child.id} node={child} variant={variant} />
+        <NodeCard key={child.id} node={child} />
       ))}
     </div>
   );

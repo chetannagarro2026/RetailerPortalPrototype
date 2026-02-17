@@ -1,4 +1,10 @@
 // ── Catalog Node Model ──────────────────────────────────────────────
+/** Dynamic label-value pair for industry-neutral meta display */
+export interface MetaAttribute {
+  label: string;
+  value: string;
+}
+
 export interface CatalogNode {
   id: string;
   parentId: string | null;
@@ -15,17 +21,48 @@ export interface CatalogNode {
   description?: string;
   /** Optional badge label (e.g. "New", "Updated") */
   badge?: string;
+  /** Dynamic meta attributes for NodeCard display */
+  metaAttributes?: MetaAttribute[];
+}
+
+/** A single pricing tier for volume/tier pricing */
+export interface PriceTier {
+  minQty: number;
+  price: number;
+}
+
+/** Dynamic display attribute (industry-neutral) */
+export interface DisplayAttribute {
+  label: string;
+  value: string;
 }
 
 export interface CatalogProduct {
   id: string;
   name: string;
-  brandName: string;
-  itemCode: string;
-  wholesalePrice: number;
+  sku: string;
   imageUrl: string;
-  badge?: "New" | "Bestseller" | "Limited";
-  attributes: Record<string, string>;
+  price: number;
+  /** Optional strike-through original price */
+  originalPrice?: number;
+  /** Dynamic badges — not hardcoded to specific types */
+  badges?: Array<{ label: string; color?: string; bg?: string }>;
+  /** Dynamic display attributes chosen per taxonomy config */
+  primaryDisplayAttributes?: DisplayAttribute[];
+  /** Availability status */
+  availabilityStatus?: "in-stock" | "low-stock" | "out-of-stock" | "pre-order";
+  /** Brand name (optional — not every industry uses brands) */
+  brand?: string;
+  /** Volume/tier pricing */
+  tierPricing?: PriceTier[];
+  /** Unit measure label (e.g. "per unit", "per case", "per meter") */
+  unitMeasure?: string;
+  /** Minimum order quantity */
+  minOrderQty?: number;
+  /** Case pack quantity (qty must be multiples of this) */
+  casePackQty?: number;
+  /** Catch-all attributes */
+  attributes?: Record<string, string>;
 }
 
 // ── Engine Config ───────────────────────────────────────────────────
@@ -47,11 +84,11 @@ export const catalogNodes: CatalogNode[] = [
   { id: "root", parentId: null, slug: "", label: "Full Catalog", level: 0, hasChildren: true, productCount: 0 },
 
   // Level 1 — Primary Categories
-  { id: "women", parentId: "root", slug: "women", label: "Women", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/8031786/pexels-photo-8031786.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Outerwear, dresses, tops, denim and more" },
-  { id: "men", parentId: "root", slug: "men", label: "Men", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/5264900/pexels-photo-5264900.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Shirts, pants, suits, outerwear and activewear" },
-  { id: "kids", parentId: "root", slug: "kids", label: "Kids", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/7988715/pexels-photo-7988715.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Boys, girls, baby & toddler collections", badge: "New" },
-  { id: "accessories", parentId: "root", slug: "accessories", label: "Accessories", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/1204464/pexels-photo-1204464.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Bags, watches, jewelry and footwear" },
-  { id: "entertainment", parentId: "root", slug: "entertainment", label: "Entertainment", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/159400/television-camera-men-outdoors-ballgame-159400.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Lifestyle, sports and heritage collections" },
+  { id: "women", parentId: "root", slug: "women", label: "Women", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/8031786/pexels-photo-8031786.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Outerwear, dresses, tops, denim and more", metaAttributes: [{ label: "Brands", value: "14" }, { label: "SKUs", value: "209" }] },
+  { id: "men", parentId: "root", slug: "men", label: "Men", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/5264900/pexels-photo-5264900.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Shirts, pants, suits, outerwear and activewear", metaAttributes: [{ label: "Brands", value: "12" }, { label: "SKUs", value: "161" }] },
+  { id: "kids", parentId: "root", slug: "kids", label: "Kids", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/7988715/pexels-photo-7988715.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Boys, girls, baby & toddler collections", badge: "New", metaAttributes: [{ label: "Brands", value: "8" }, { label: "SKUs", value: "98" }] },
+  { id: "accessories", parentId: "root", slug: "accessories", label: "Accessories", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/1204464/pexels-photo-1204464.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Bags, watches, jewelry and footwear", metaAttributes: [{ label: "Brands", value: "10" }, { label: "SKUs", value: "88" }] },
+  { id: "entertainment", parentId: "root", slug: "entertainment", label: "Entertainment", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/159400/television-camera-men-outdoors-ballgame-159400.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Lifestyle, sports and heritage collections", metaAttributes: [{ label: "Brands", value: "6" }, { label: "SKUs", value: "45" }] },
 
   // Level 2 — Women subcategories
   { id: "w-outerwear", parentId: "women", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: true, productCount: 42, filtersAvailable: ["brand", "size", "color", "price"] },
@@ -162,7 +199,24 @@ const productImages = [
 ];
 
 const brandNames = ["Calvin Klein", "Tommy Hilfiger", "IZOD", "Buffalo David Bitton", "Nautica", "Arrow", "Jessica Simpson", "Joe's Jeans", "Frye", "Hervé Léger"];
-const badges: (CatalogProduct["badge"] | undefined)[] = [undefined, "New", "Bestseller", undefined, "Limited", undefined, "New", undefined];
+type BadgeEntry = { label: string; color?: string; bg?: string } | undefined;
+const badges: BadgeEntry[] = [
+  undefined,
+  { label: "New", bg: "#EEF2FF", color: "#4338CA" },
+  { label: "Bestseller", bg: "#F0FDF4", color: "#166534" },
+  undefined,
+  { label: "Limited Stock", bg: "#FFF7ED", color: "#9A3412" },
+  undefined,
+  { label: "New", bg: "#EEF2FF", color: "#4338CA" },
+  undefined,
+];
+
+const displayAttrs: DisplayAttribute[][] = [
+  [{ label: "Fit", value: "Regular" }, { label: "Fabric", value: "Cotton Blend" }],
+  [{ label: "Fit", value: "Slim" }, { label: "Fabric", value: "100% Cotton" }],
+  [{ label: "Fit", value: "Relaxed" }, { label: "Fabric", value: "Linen" }],
+  [{ label: "Fit", value: "Oversized" }, { label: "Fabric", value: "Polyester" }],
+];
 
 export function getProductsForNode(nodeId: string, page: number, pageSize: number): { products: CatalogProduct[]; total: number } {
   const node = catalogNodes.find((n) => n.id === nodeId);
@@ -176,14 +230,25 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
   const products: CatalogProduct[] = Array.from({ length: count }, (_, i) => {
     const idx = start + i;
     const brand = brandNames[idx % brandNames.length];
+    const basePrice = 28 + ((idx * 17) % 120);
+    const badge = badges[idx % badges.length];
     return {
       id: `${nodeId}-p${idx}`,
       name: `${node.label} Style ${idx + 1}`,
-      brandName: brand,
-      itemCode: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
-      wholesalePrice: 28 + ((idx * 17) % 120),
+      sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+      price: basePrice,
+      originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
       imageUrl: productImages[idx % productImages.length],
-      badge: badges[idx % badges.length],
+      badges: badge ? [badge] : undefined,
+      brand,
+      primaryDisplayAttributes: displayAttrs[idx % displayAttrs.length],
+      availabilityStatus: idx % 7 === 0 ? "low-stock" : "in-stock",
+      tierPricing: idx % 4 === 0
+        ? [{ minQty: 1, price: basePrice }, { minQty: 12, price: Math.round(basePrice * 0.9) }, { minQty: 48, price: Math.round(basePrice * 0.8) }]
+        : undefined,
+      unitMeasure: "per unit",
+      minOrderQty: idx % 3 === 0 ? 6 : 1,
+      casePackQty: idx % 5 === 0 ? 6 : undefined,
       attributes: { brand, category: node.label },
     };
   });
