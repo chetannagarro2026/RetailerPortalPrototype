@@ -186,17 +186,63 @@ export function getSiblings(nodeId: string): CatalogNode[] {
   return catalogNodes.filter((n) => n.parentId === node.parentId);
 }
 
-// ── Mock Products ───────────────────────────────────────────────────
-const productImages = [
-  "https://images.pexels.com/photos/4260394/pexels-photo-4260394.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/10952730/pexels-photo-10952730.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/7764611/pexels-photo-7764611.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/19354617/pexels-photo-19354617.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/15615051/pexels-photo-15615051.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/27992044/pexels-photo-27992044.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/30229957/pexels-photo-30229957.jpeg?auto=compress&cs=tinysrgb&w=600",
-  "https://images.pexels.com/photos/7256158/pexels-photo-7256158.jpeg?auto=compress&cs=tinysrgb&w=600",
-];
+// ── Category-Specific Product Images ────────────────────────────────
+const categoryProductImages: Record<string, string[]> = {
+  women: [
+    "https://images.pexels.com/photos/21897127/pexels-photo-21897127.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/19289551/pexels-photo-19289551.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/18182283/pexels-photo-18182283.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/8801098/pexels-photo-8801098.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/2245035/pexels-photo-2245035.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31443915/pexels-photo-31443915.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/20868118/pexels-photo-20868118.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/24847162/pexels-photo-24847162.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  men: [
+    "https://images.pexels.com/photos/18153495/pexels-photo-18153495.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/23915302/pexels-photo-23915302.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/19566191/pexels-photo-19566191.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10429317/pexels-photo-10429317.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/10004179/pexels-photo-10004179.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/29346389/pexels-photo-29346389.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/31438911/pexels-photo-31438911.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7741187/pexels-photo-7741187.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  kids: [
+    "https://images.pexels.com/photos/590498/pexels-photo-590498.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/18785376/pexels-photo-18785376.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/5791337/pexels-photo-5791337.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/34043973/pexels-photo-34043973.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/2998987/pexels-photo-2998987.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/7988715/pexels-photo-7988715.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  accessories: [
+    "https://images.pexels.com/photos/29096397/pexels-photo-29096397.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/2373730/pexels-photo-2373730.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/4550884/pexels-photo-4550884.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/6540947/pexels-photo-6540947.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/22434773/pexels-photo-22434773.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/9327162/pexels-photo-9327162.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+  entertainment: [
+    "https://images.pexels.com/photos/7309739/pexels-photo-7309739.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/3892900/pexels-photo-3892900.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/4452399/pexels-photo-4452399.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/15124841/pexels-photo-15124841.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/175724/pexels-photo-175724.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.pexels.com/photos/34087791/pexels-photo-34087791.jpeg?auto=compress&cs=tinysrgb&w=600",
+  ],
+};
+
+const fallbackImages = categoryProductImages.women;
+
+/** Resolves the Level-1 ancestor ID for any node to pick the right image pool */
+function getCategoryImagePool(nodeId: string): string[] {
+  const ancestors = getAncestors(nodeId);
+  const level1 = ancestors.find((a) => a.level === 1);
+  const key = level1?.id ?? nodeId;
+  return categoryProductImages[key] || fallbackImages;
+}
 
 const brandNames = ["Calvin Klein", "Tommy Hilfiger", "IZOD", "Buffalo David Bitton", "Nautica", "Arrow", "Jessica Simpson", "Joe's Jeans", "Frye", "Hervé Léger"];
 type BadgeEntry = { label: string; color?: string; bg?: string } | undefined;
@@ -227,6 +273,8 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
   const count = Math.min(pageSize, total - start);
   if (count <= 0) return { products: [], total };
 
+  const images = getCategoryImagePool(nodeId);
+
   const products: CatalogProduct[] = Array.from({ length: count }, (_, i) => {
     const idx = start + i;
     const brand = brandNames[idx % brandNames.length];
@@ -238,7 +286,7 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
       sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
-      imageUrl: productImages[idx % productImages.length],
+      imageUrl: images[idx % images.length],
       badges: badge ? [badge] : undefined,
       brand,
       primaryDisplayAttributes: displayAttrs[idx % displayAttrs.length],
