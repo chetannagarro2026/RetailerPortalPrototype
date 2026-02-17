@@ -6,6 +6,8 @@ export interface NavItem {
   hasDropdown?: boolean;
 }
 
+export type CategoryCardVariant = "hero" | "thumbnail";
+
 export interface BrandConfig {
   // Identity
   brandName: string;
@@ -29,6 +31,9 @@ export interface BrandConfig {
   // Search
   searchPlaceholder: string;
 
+  // Catalog display
+  categoryCardVariant: CategoryCardVariant;
+
   // Navigation items (configurable per tenant)
   navItems: NavItem[];
 }
@@ -49,6 +54,8 @@ export const centricBrandsConfig: BrandConfig = {
   fontFamily: "'Inter', sans-serif",
 
   searchPlaceholder: "Search by Style Code, Collection, Brand...",
+
+  categoryCardVariant: "hero",
 
   navItems: [
     { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },

@@ -67,7 +67,7 @@ export default function CatalogNodePage() {
           </h1>
           {node.level === 0 && (
             <p className="text-sm" style={{ color: config.secondaryColor }}>
-              Browse the complete Centric Brands portfolio.
+              Browse the complete {config.brandName} portfolio.
             </p>
           )}
         </div>
