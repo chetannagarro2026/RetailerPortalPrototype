@@ -53,8 +53,8 @@ export const centricBrandsConfig: BrandConfig = {
   navItems: [
     { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },
     { key: "brands", label: "Brands", path: "/brands" },
-    { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "purchase-orders", label: "Purchase Orders", path: "/purchase-orders" },
+    { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "my-account", label: "My Account", path: "/account", hasDropdown: true },
   ],
 };
