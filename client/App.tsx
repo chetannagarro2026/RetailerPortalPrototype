@@ -4,6 +4,7 @@ import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import BulkOrder from "./pages/BulkOrder";
+import CatalogNodePage from "./pages/CatalogNodePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -16,7 +17,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/collections" element={<PlaceholderPage />} />
-            <Route path="/collections/all-products" element={<PlaceholderPage />} />
+            <Route path="/catalog" element={<CatalogNodePage />} />
+            <Route path="/catalog/*" element={<CatalogNodePage />} />
             <Route path="/brands" element={<PlaceholderPage />} />
             <Route path="/bulk-order" element={<BulkOrder />} />
             <Route path="/purchase-orders" element={<PlaceholderPage />} />

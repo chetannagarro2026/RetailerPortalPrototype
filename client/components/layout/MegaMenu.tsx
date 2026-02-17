@@ -2,8 +2,7 @@ import { useState } from "react";
 import { RightOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
-import DepartmentPanel from "./mega-menu/DepartmentPanel";
-import BrandPanel from "./mega-menu/BrandPanel";
+import BrowseCategoriesPanel from "./mega-menu/BrowseCategoriesPanel";
 import PurchasedPanel from "./mega-menu/PurchasedPanel";
 
 interface MegaMenuProps {
@@ -11,27 +10,19 @@ interface MegaMenuProps {
   onClose: () => void;
 }
 
-type TabKey = "department" | "brand" | "purchased";
+type TabKey = "categories" | "purchased";
 
 const tabs: { key: TabKey; label: string }[] = [
-  { key: "department", label: "Shop by Department" },
-  { key: "brand", label: "Shop by Brand" },
+  { key: "categories", label: "Browse Categories" },
   { key: "purchased", label: "Purchased Items" },
 ];
 
-const panelMap: Record<TabKey, React.FC> = {
-  department: DepartmentPanel,
-  brand: BrandPanel,
-  purchased: PurchasedPanel,
-};
-
 export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
   const config = activeBrandConfig;
-  const [activeTab, setActiveTab] = useState<TabKey>("department");
+  const [activeTab, setActiveTab] = useState<TabKey>("categories");
 
   if (!visible) return null;
 
-  const ActivePanel = panelMap[activeTab];
   const activeLabel = tabs.find((t) => t.key === activeTab)?.label;
 
   return (
@@ -90,7 +81,7 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
                 {activeLabel}
               </h4>
               <Link
-                to="/collections/all-products"
+                to="/catalog"
                 onClick={onClose}
                 className="flex items-center gap-1.5 text-sm font-semibold no-underline transition-colors"
                 style={{ color: "#1677FF" }}
@@ -107,7 +98,10 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
 
             {/* Dynamic Content */}
             <div className="flex-1 overflow-y-auto">
-              <ActivePanel />
+              {activeTab === "categories" && (
+                <BrowseCategoriesPanel onClose={onClose} />
+              )}
+              {activeTab === "purchased" && <PurchasedPanel />}
             </div>
           </div>
         </div>
