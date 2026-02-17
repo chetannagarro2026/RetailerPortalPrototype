@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { InputNumber, message } from "antd";
+import { InputNumber, App } from "antd";
 import { ShoppingCartOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
@@ -329,6 +329,7 @@ function QuantityAddBlock({
   compact?: boolean;
 }) {
   const config = activeBrandConfig;
+  const { message } = App.useApp();
   const minQty = product.minOrderQty || 1;
   const step = product.casePackQty || 1;
   const [qty, setQty] = useState<number>(minQty);
@@ -344,7 +345,7 @@ function QuantityAddBlock({
 
   const handleAdd = useCallback(() => {
     message.success({ content: `${qty}× ${product.name} added to order`, duration: 2 });
-  }, [qty, product.name]);
+  }, [qty, product.name, message]);
 
   const disabled = product.availabilityStatus === "out-of-stock";
 

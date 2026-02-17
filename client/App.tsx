@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { App as AntApp } from "antd";
 import { OrderProvider } from "./context/OrderContext";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
@@ -14,8 +15,9 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <OrderProvider>
-        <BrowserRouter>
+      <AntApp>
+        <OrderProvider>
+          <BrowserRouter>
           <Layout>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -38,8 +40,9 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
-        </BrowserRouter>
-      </OrderProvider>
+          </BrowserRouter>
+        </OrderProvider>
+      </AntApp>
     </QueryClientProvider>
   );
 }

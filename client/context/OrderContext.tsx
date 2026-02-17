@@ -1,5 +1,5 @@
 import { createContext, useContext, useCallback, useState, type ReactNode } from "react";
-import { message } from "antd";
+import { App } from "antd";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -41,6 +41,7 @@ interface OrderContextValue {
 const OrderContext = createContext<OrderContextValue | null>(null);
 
 export function OrderProvider({ children }: { children: ReactNode }) {
+  const { message } = App.useApp();
   const [items, setItems] = useState<OrderLineItem[]>([]);
 
   const addItem = useCallback(
@@ -59,7 +60,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       });
       message.success({ content: `${newItem.quantity}× ${newItem.productName} added`, duration: 2 });
     },
-    [],
+    [message],
   );
 
   const addItems = useCallback(
@@ -83,7 +84,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const totalQty = valid.reduce((s, i) => s + i.quantity, 0);
       message.success({ content: `${totalQty} units across ${valid.length} variants added to order`, duration: 2 });
     },
-    [],
+    [message],
   );
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
