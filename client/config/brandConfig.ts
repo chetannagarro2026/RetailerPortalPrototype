@@ -36,6 +36,12 @@ export interface BrandConfig {
   categoryCardVariant: CategoryCardVariant;
   productCardVariant: ProductCardVariant;
 
+  // Ordering modes
+  enableMatrixOnPDP: boolean;
+  enableQuickMatrixInGrid: boolean;
+  enableSpreadsheetMode: boolean;
+  quickMatrixVariantLimit: number;
+
   // Navigation items (configurable per tenant)
   navItems: NavItem[];
 }
@@ -59,6 +65,11 @@ export const centricBrandsConfig: BrandConfig = {
 
   categoryCardVariant: "hero",
   productCardVariant: "standard",
+
+  enableMatrixOnPDP: true,
+  enableQuickMatrixInGrid: true,
+  enableSpreadsheetMode: true,
+  quickMatrixVariantLimit: 12,
 
   navItems: [
     { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },

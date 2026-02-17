@@ -1,29 +1,77 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { InputNumber, message } from "antd";
-import { ShoppingCartOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
+import QuickMatrix from "./QuickMatrix";
 
 interface ProductCardProps {
   product: CatalogProduct;
   variant: ProductCardVariant;
+  /** ID of the currently expanded quick-matrix card (only one at a time) */
+  expandedCardId?: string | null;
+  /** Callback to expand/collapse quick matrix */
+  onToggleExpand?: (productId: string | null) => void;
 }
 
-export default function ProductCard({ product, variant }: ProductCardProps) {
+export default function ProductCard({ product, variant, expandedCardId, onToggleExpand }: ProductCardProps) {
+  const isExpanded = expandedCardId === product.id;
+
   switch (variant) {
     case "compact":
-      return <CompactCard product={product} />;
+      return <CompactCard product={product} isExpanded={isExpanded} onToggleExpand={onToggleExpand} />;
     case "detailed":
-      return <DetailedCard product={product} />;
+      return <DetailedCard product={product} isExpanded={isExpanded} onToggleExpand={onToggleExpand} />;
     default:
-      return <StandardCard product={product} />;
+      return <StandardCard product={product} isExpanded={isExpanded} onToggleExpand={onToggleExpand} />;
   }
+}
+
+// ── Quick Matrix Toggle Button ──────────────────────────────────────
+
+function QuickMatrixToggle({
+  product,
+  isExpanded,
+  onToggle,
+}: {
+  product: CatalogProduct;
+  isExpanded: boolean;
+  onToggle?: (id: string | null) => void;
+}) {
+  const config = activeBrandConfig;
+  const canShow =
+    config.enableQuickMatrixInGrid &&
+    product.variants &&
+    product.variantAttributes &&
+    product.variantAttributes.length > 0 &&
+    product.variants.length <= config.quickMatrixVariantLimit;
+
+  if (!canShow) return null;
+
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggle?.(isExpanded ? null : product.id);
+      }}
+      className="text-[10px] font-medium flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer transition-colors mb-1"
+      style={{
+        backgroundColor: isExpanded ? config.primaryColor : "transparent",
+        color: isExpanded ? "#fff" : config.secondaryColor,
+        border: `1px solid ${isExpanded ? config.primaryColor : config.borderColor}`,
+      }}
+    >
+      <AppstoreOutlined className="text-[9px]" />
+      {isExpanded ? "Close Matrix" : "Quick Order"}
+    </button>
+  );
 }
 
 // ── Standard Variant ────────────────────────────────────────────────
 
-function StandardCard({ product }: { product: CatalogProduct }) {
+function StandardCard({ product, isExpanded, onToggleExpand }: { product: CatalogProduct; isExpanded: boolean; onToggleExpand?: (id: string | null) => void }) {
   const config = activeBrandConfig;
 
   return (
@@ -36,15 +84,20 @@ function StandardCard({ product }: { product: CatalogProduct }) {
       <div className="p-3.5 flex flex-col flex-1">
         <ProductMeta product={product} maxAttributes={2} />
         <PricingBlock product={product} />
+        <QuickMatrixToggle product={product} isExpanded={isExpanded} onToggle={onToggleExpand} />
         <QuantityAddBlock product={product} />
       </div>
+
+      {isExpanded && (
+        <QuickMatrix product={product} onClose={() => onToggleExpand?.(null)} />
+      )}
     </div>
   );
 }
 
 // ── Compact Variant ─────────────────────────────────────────────────
 
-function CompactCard({ product }: { product: CatalogProduct }) {
+function CompactCard({ product, isExpanded, onToggleExpand }: { product: CatalogProduct; isExpanded: boolean; onToggleExpand?: (id: string | null) => void }) {
   const config = activeBrandConfig;
 
   return (
@@ -57,15 +110,20 @@ function CompactCard({ product }: { product: CatalogProduct }) {
       <div className="p-2.5 flex flex-col flex-1">
         <ProductMeta product={product} maxAttributes={0} compact />
         <PricingBlock product={product} compact />
+        <QuickMatrixToggle product={product} isExpanded={isExpanded} onToggle={onToggleExpand} />
         <QuantityAddBlock product={product} compact />
       </div>
+
+      {isExpanded && (
+        <QuickMatrix product={product} onClose={() => onToggleExpand?.(null)} />
+      )}
     </div>
   );
 }
 
 // ── Detailed Variant ────────────────────────────────────────────────
 
-function DetailedCard({ product }: { product: CatalogProduct }) {
+function DetailedCard({ product, isExpanded, onToggleExpand }: { product: CatalogProduct; isExpanded: boolean; onToggleExpand?: (id: string | null) => void }) {
   const config = activeBrandConfig;
 
   return (
@@ -78,8 +136,13 @@ function DetailedCard({ product }: { product: CatalogProduct }) {
       <div className="p-4 flex flex-col flex-1">
         <ProductMeta product={product} maxAttributes={4} />
         <PricingBlock product={product} showTiers />
+        <QuickMatrixToggle product={product} isExpanded={isExpanded} onToggle={onToggleExpand} />
         <QuantityAddBlock product={product} />
       </div>
+
+      {isExpanded && (
+        <QuickMatrix product={product} onClose={() => onToggleExpand?.(null)} />
+      )}
     </div>
   );
 }
@@ -273,7 +336,6 @@ function QuantityAddBlock({
   const handleQtyChange = useCallback(
     (value: number | null) => {
       if (value === null) return;
-      // Snap to nearest valid step
       const snapped = Math.max(minQty, Math.round(value / step) * step || step);
       setQty(snapped);
     },
@@ -288,7 +350,6 @@ function QuantityAddBlock({
 
   return (
     <div className="mt-auto">
-      {/* Min qty / case pack hint */}
       {(minQty > 1 || step > 1) && (
         <p className="text-[10px] mb-1" style={{ color: config.secondaryColor }}>
           {minQty > 1 && `Min: ${minQty}`}

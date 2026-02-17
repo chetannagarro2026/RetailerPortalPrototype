@@ -37,6 +37,23 @@ export interface DisplayAttribute {
   value: string;
 }
 
+/** Variant-defining attribute definition */
+export interface VariantAttribute {
+  name: string;        // e.g. "Size", "Color", "Voltage"
+  values: string[];    // e.g. ["S", "M", "L", "XL"]
+}
+
+/** A single purchasable variant (one cell in the matrix) */
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  /** Map of attribute name → value for this variant */
+  attributes: Record<string, string>;
+  price: number;
+  availabilityStatus: "in-stock" | "low-stock" | "out-of-stock" | "pre-order";
+  stockQty: number;
+}
+
 export interface CatalogProduct {
   id: string;
   name: string;
@@ -63,6 +80,16 @@ export interface CatalogProduct {
   casePackQty?: number;
   /** Catch-all attributes */
   attributes?: Record<string, string>;
+  /** Variant-defining attributes (determines matrix dimensions) */
+  variantAttributes?: VariantAttribute[];
+  /** All purchasable variants */
+  variants?: ProductVariant[];
+  /** Gallery images for PDP */
+  galleryImages?: string[];
+  /** Long description for PDP */
+  description?: string;
+  /** Specification key-value pairs */
+  specifications?: Array<{ label: string; value: string }>;
 }
 
 // ── Engine Config ───────────────────────────────────────────────────
@@ -360,6 +387,91 @@ function getCategoryImagePool(nodeId: string): string[] {
   return subcategoryProductImages["w-outerwear"]; // ultimate fallback
 }
 
+// ── Variant Attribute Pools (industry-neutral) ─────────────────────
+const variantAttrPools: VariantAttribute[][] = [
+  // 2D: Size × Color (apparel-style)
+  [
+    { name: "Size", values: ["XS", "S", "M", "L", "XL"] },
+    { name: "Color", values: ["Black", "Navy", "White", "Red"] },
+  ],
+  // 1D: Size only
+  [
+    { name: "Size", values: ["S", "M", "L", "XL", "XXL"] },
+  ],
+  // 2D: Width × Length
+  [
+    { name: "Width", values: ["30", "32", "34", "36"] },
+    { name: "Length", values: ["30", "32", "34"] },
+  ],
+  // 1D: Color only
+  [
+    { name: "Color", values: ["Black", "Brown", "Tan", "White", "Navy"] },
+  ],
+  // 3D: Size × Color × Pack Size
+  [
+    { name: "Size", values: ["S", "M", "L"] },
+    { name: "Color", values: ["Black", "White"] },
+    { name: "Pack Size", values: ["3-Pack", "6-Pack"] },
+  ],
+];
+
+const specPools: Array<Array<{ label: string; value: string }>> = [
+  [
+    { label: "Material", value: "100% Cotton" },
+    { label: "Weight", value: "180 GSM" },
+    { label: "Care", value: "Machine wash cold" },
+    { label: "Origin", value: "Imported" },
+  ],
+  [
+    { label: "Material", value: "Cotton/Polyester Blend" },
+    { label: "Weight", value: "220 GSM" },
+    { label: "Care", value: "Dry clean recommended" },
+    { label: "Origin", value: "Made in USA" },
+  ],
+  [
+    { label: "Material", value: "Premium Leather" },
+    { label: "Closure", value: "Zipper" },
+    { label: "Lining", value: "Satin" },
+    { label: "Origin", value: "Italy" },
+  ],
+];
+
+/** Generate variants for a product based on its variant attributes */
+function generateVariants(
+  productId: string,
+  skuPrefix: string,
+  basePrice: number,
+  attrs: VariantAttribute[],
+): ProductVariant[] {
+  const variants: ProductVariant[] = [];
+  const dimensions = attrs.map((a) => a.values);
+
+  function recurse(depth: number, combo: Record<string, string>) {
+    if (depth === attrs.length) {
+      const idx = variants.length;
+      const priceMod = 1 + (idx % 5) * 0.02; // slight variation
+      const stockVal = ((idx * 37 + 11) % 200);
+      const status: ProductVariant["availabilityStatus"] =
+        stockVal === 0 ? "out-of-stock" : stockVal < 15 ? "low-stock" : "in-stock";
+      variants.push({
+        id: `${productId}-v${idx}`,
+        sku: `${skuPrefix}-${Object.values(combo).map((v) => v.replace(/\s+/g, "").slice(0, 3).toUpperCase()).join("-")}`,
+        attributes: { ...combo },
+        price: Math.round(basePrice * priceMod * 100) / 100,
+        availabilityStatus: status,
+        stockQty: stockVal,
+      });
+      return;
+    }
+    for (const val of dimensions[depth]) {
+      recurse(depth + 1, { ...combo, [attrs[depth].name]: val });
+    }
+  }
+
+  recurse(0, {});
+  return variants;
+}
+
 const brandNames = ["Calvin Klein", "Tommy Hilfiger", "IZOD", "Buffalo David Bitton", "Nautica", "Arrow", "Jessica Simpson", "Joe's Jeans", "Frye", "Hervé Léger"];
 type BadgeEntry = { label: string; color?: string; bg?: string } | undefined;
 const badges: BadgeEntry[] = [
@@ -414,8 +526,40 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
       minOrderQty: idx % 3 === 0 ? 6 : 1,
       casePackQty: idx % 5 === 0 ? 6 : undefined,
       attributes: { brand, category: node.label },
+
+      // Variant data — deterministic per product
+      variantAttributes: variantAttrPools[idx % variantAttrPools.length],
+      variants: generateVariants(
+        `${nodeId}-p${idx}`,
+        `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+        basePrice,
+        variantAttrPools[idx % variantAttrPools.length],
+      ),
+      galleryImages: [
+        images[idx % images.length],
+        images[(idx + 1) % images.length],
+        images[(idx + 2) % images.length],
+        images[(idx + 3) % images.length],
+      ],
+      description: `Premium quality ${node.label} piece from ${brand}. Crafted with attention to detail and built for lasting comfort and style. Part of the latest collection designed for the modern buyer.`,
+      specifications: specPools[idx % specPools.length],
     };
   });
 
   return { products, total };
+}
+
+/** Get a single product by its ID */
+export function getProductById(productId: string): CatalogProduct | null {
+  // Parse nodeId from productId format: "nodeId-pN"
+  const match = productId.match(/^(.+)-p(\d+)$/);
+  if (!match) return null;
+  const [, nodeId, indexStr] = match;
+  const idx = parseInt(indexStr, 10);
+  const node = catalogNodes.find((n) => n.id === nodeId);
+  if (!node) return null;
+
+  // Generate just this one product
+  const { products } = getProductsForNode(nodeId, 1, node.productCount || 12);
+  return products.find((p) => p.id === productId) || null;
 }

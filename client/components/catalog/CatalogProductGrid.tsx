@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Pagination } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
@@ -20,6 +21,7 @@ export default function CatalogProductGrid({
 }: CatalogProductGridProps) {
   const config = activeBrandConfig;
   const variant = config.productCardVariant;
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
 
   if (products.length === 0) {
     return (
@@ -32,7 +34,6 @@ export default function CatalogProductGrid({
     );
   }
 
-  // Grid density varies by variant
   const gridCols =
     variant === "compact"
       ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
@@ -44,7 +45,13 @@ export default function CatalogProductGrid({
     <div>
       <div className={`grid ${gridCols} ${gap}`}>
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} variant={variant} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            variant={variant}
+            expandedCardId={expandedCardId}
+            onToggleExpand={setExpandedCardId}
+          />
         ))}
       </div>
 
