@@ -1,29 +1,28 @@
 import { useState } from "react";
+import { RightOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import DepartmentPanel from "./mega-menu/DepartmentPanel";
 import BrandPanel from "./mega-menu/BrandPanel";
 import PurchasedPanel from "./mega-menu/PurchasedPanel";
-import CatalogPanel from "./mega-menu/CatalogPanel";
 
 interface MegaMenuProps {
   visible: boolean;
   onClose: () => void;
 }
 
-type TabKey = "department" | "brand" | "purchased" | "catalog";
+type TabKey = "department" | "brand" | "purchased";
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: "department", label: "Shop by Department" },
   { key: "brand", label: "Shop by Brand" },
   { key: "purchased", label: "Purchased Items" },
-  { key: "catalog", label: "View Full Catalog" },
 ];
 
 const panelMap: Record<TabKey, React.FC> = {
   department: DepartmentPanel,
   brand: BrandPanel,
   purchased: PurchasedPanel,
-  catalog: CatalogPanel,
 };
 
 export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
@@ -33,6 +32,7 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
   if (!visible) return null;
 
   const ActivePanel = panelMap[activeTab];
+  const activeLabel = tabs.find((t) => t.key === activeTab)?.label;
 
   return (
     <>
@@ -76,9 +76,39 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
             ))}
           </div>
 
-          {/* Right — Dynamic Content */}
-          <div className="flex-1 pl-8 overflow-y-auto" style={{ maxHeight: 416 }}>
-            <ActivePanel />
+          {/* Right — Header Row + Dynamic Content */}
+          <div className="flex-1 pl-8 flex flex-col" style={{ maxHeight: 416 }}>
+            {/* Global Header Row */}
+            <div
+              className="flex items-center justify-between pb-4 mb-5 shrink-0"
+              style={{ borderBottom: `1px solid ${config.borderColor}` }}
+            >
+              <h4
+                className="text-sm font-semibold"
+                style={{ color: config.primaryColor }}
+              >
+                {activeLabel}
+              </h4>
+              <Link
+                to="/collections/all-products"
+                onClick={onClose}
+                className="flex items-center gap-1.5 text-xs font-medium no-underline transition-colors"
+                style={{ color: config.secondaryColor }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = config.primaryColor;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = config.secondaryColor;
+                }}
+              >
+                View Full Catalog <RightOutlined className="text-[9px]" />
+              </Link>
+            </div>
+
+            {/* Dynamic Content */}
+            <div className="flex-1 overflow-y-auto">
+              <ActivePanel />
+            </div>
           </div>
         </div>
       </div>

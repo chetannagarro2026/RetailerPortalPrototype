@@ -18,12 +18,6 @@ export default function BrandPanel() {
 
   return (
     <div>
-      <h4
-        className="text-[10px] font-semibold uppercase tracking-widest mb-5"
-        style={{ color: config.secondaryColor }}
-      >
-        Shop by Brand
-      </h4>
       <div className="grid grid-cols-4 gap-x-8 gap-y-2.5">
         {brands.map((brand) => (
           <button

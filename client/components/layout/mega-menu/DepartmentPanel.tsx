@@ -33,12 +33,6 @@ export default function DepartmentPanel() {
 
   return (
     <div>
-      <h4
-        className="text-[10px] font-semibold uppercase tracking-widest mb-5"
-        style={{ color: config.secondaryColor }}
-      >
-        Shop by Department
-      </h4>
       <div className="grid grid-cols-3 gap-x-10 gap-y-6">
         {departments.map((dept) => (
           <div key={dept.name}>
