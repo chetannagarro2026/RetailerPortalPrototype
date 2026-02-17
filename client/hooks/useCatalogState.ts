@@ -66,7 +66,7 @@ export interface CatalogState {
 
 // ── Hook ────────────────────────────────────────────────────────────
 
-export function useCatalogState(nodeId: string, pageSize: number): CatalogState {
+export function useCatalogState(nodeId: string, pageSize: number, filtersAvailable?: string[]): CatalogState {
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
   const [priceRange, setPriceRangeState] = useState<PriceRange | null>(null);
   const [sortBy, setSortByState] = useState<SortKey>("relevance");
@@ -79,7 +79,12 @@ export function useCatalogState(nodeId: string, pageSize: number): CatalogState 
   const resolvedFilters = useMemo<ResolvedFilter[]>(() => {
     const results: ResolvedFilter[] = [];
 
-    for (const def of filterAttributeRegistry) {
+    // Only show filters whitelisted by the current category node
+    const registry = filtersAvailable
+      ? filterAttributeRegistry.filter((d) => filtersAvailable.includes(d.key))
+      : filterAttributeRegistry;
+
+    for (const def of registry) {
       if (!def.isFilterable) continue;
 
       if (def.filterType === "range") {
@@ -119,7 +124,7 @@ export function useCatalogState(nodeId: string, pageSize: number): CatalogState 
     }
 
     return results;
-  }, [allProducts]);
+  }, [allProducts, filtersAvailable]);
 
   // Apply filters (AND across attributes, OR within same attribute)
   const filteredProducts = useMemo(() => {

@@ -118,55 +118,55 @@ export const catalogNodes: CatalogNode[] = [
   { id: "entertainment", parentId: "root", slug: "entertainment", label: "Entertainment", level: 1, hasChildren: true, productCount: 0, heroImage: "https://images.pexels.com/photos/159400/television-camera-men-outdoors-ballgame-159400.jpeg?auto=compress&cs=tinysrgb&w=800", description: "Lifestyle, sports and heritage collections", metaAttributes: [{ label: "Brands", value: "6" }, { label: "SKUs", value: "45" }] },
 
   // Level 2 — Women subcategories
-  { id: "w-outerwear", parentId: "women", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: true, productCount: 42, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/7679725/pexels-photo-7679725.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-dresses", parentId: "women", slug: "dresses", label: "Dresses", level: 2, hasChildren: true, productCount: 38, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5418888/pexels-photo-5418888.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-tops", parentId: "women", slug: "tops", label: "Tops & Blouses", level: 2, hasChildren: false, productCount: 56, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/27523237/pexels-photo-27523237.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-denim", parentId: "women", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 31, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/2245035/pexels-photo-2245035.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-knitwear", parentId: "women", slug: "knitwear", label: "Knitwear", level: 2, hasChildren: false, productCount: 24, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/45982/pexels-photo-45982.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-activewear", parentId: "women", slug: "activewear", label: "Activewear", level: 2, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/6339395/pexels-photo-6339395.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-outerwear", parentId: "women", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: true, productCount: 42, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/7679725/pexels-photo-7679725.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-dresses", parentId: "women", slug: "dresses", label: "Dresses", level: 2, hasChildren: true, productCount: 38, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/5418888/pexels-photo-5418888.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-tops", parentId: "women", slug: "tops", label: "Tops & Blouses", level: 2, hasChildren: false, productCount: 56, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/27523237/pexels-photo-27523237.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-denim", parentId: "women", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 31, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/2245035/pexels-photo-2245035.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-knitwear", parentId: "women", slug: "knitwear", label: "Knitwear", level: 2, hasChildren: false, productCount: 24, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/45982/pexels-photo-45982.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-activewear", parentId: "women", slug: "activewear", label: "Activewear", level: 2, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/6339395/pexels-photo-6339395.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Women > Outerwear
-  { id: "w-o-jackets", parentId: "w-outerwear", slug: "jackets", label: "Jackets", level: 3, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/7871149/pexels-photo-7871149.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-o-coats", parentId: "w-outerwear", slug: "coats", label: "Coats", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/35114785/pexels-photo-35114785.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-o-vests", parentId: "w-outerwear", slug: "vests", label: "Vests", level: 3, hasChildren: false, productCount: 6, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/30603543/pexels-photo-30603543.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-o-jackets", parentId: "w-outerwear", slug: "jackets", label: "Jackets", level: 3, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/7871149/pexels-photo-7871149.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-o-coats", parentId: "w-outerwear", slug: "coats", label: "Coats", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/35114785/pexels-photo-35114785.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-o-vests", parentId: "w-outerwear", slug: "vests", label: "Vests", level: 3, hasChildren: false, productCount: 6, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/30603543/pexels-photo-30603543.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Women > Dresses
-  { id: "w-d-casual", parentId: "w-dresses", slug: "casual", label: "Casual Dresses", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/3756941/pexels-photo-3756941.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "w-d-formal", parentId: "w-dresses", slug: "formal", label: "Formal Dresses", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/35511824/pexels-photo-35511824.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-d-casual", parentId: "w-dresses", slug: "casual", label: "Casual Dresses", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/3756941/pexels-photo-3756941.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "w-d-formal", parentId: "w-dresses", slug: "formal", label: "Formal Dresses", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/35511824/pexels-photo-35511824.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Men subcategories
-  { id: "m-shirts", parentId: "men", slug: "shirts", label: "Shirts", level: 2, hasChildren: true, productCount: 48, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/3735633/pexels-photo-3735633.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-pants", parentId: "men", slug: "pants", label: "Pants & Chinos", level: 2, hasChildren: false, productCount: 35, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/19071478/pexels-photo-19071478.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-outerwear", parentId: "men", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: false, productCount: 28, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5424909/pexels-photo-5424909.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-denim", parentId: "men", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price", "fit"], heroImage: "https://images.pexels.com/photos/7679722/pexels-photo-7679722.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-activewear", parentId: "men", slug: "activewear", label: "Activewear", level: 2, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/28758135/pexels-photo-28758135.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-suits", parentId: "men", slug: "suits", label: "Suits & Blazers", level: 2, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/2813515/pexels-photo-2813515.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-shirts", parentId: "men", slug: "shirts", label: "Shirts", level: 2, hasChildren: true, productCount: 48, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/3735633/pexels-photo-3735633.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-pants", parentId: "men", slug: "pants", label: "Pants & Chinos", level: 2, hasChildren: false, productCount: 35, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/19071478/pexels-photo-19071478.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-outerwear", parentId: "men", slug: "outerwear", label: "Outerwear", level: 2, hasChildren: false, productCount: 28, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/5424909/pexels-photo-5424909.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-denim", parentId: "men", slug: "denim", label: "Denim", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/7679722/pexels-photo-7679722.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-activewear", parentId: "men", slug: "activewear", label: "Activewear", level: 2, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/28758135/pexels-photo-28758135.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-suits", parentId: "men", slug: "suits", label: "Suits & Blazers", level: 2, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/2813515/pexels-photo-2813515.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Men > Shirts
-  { id: "m-s-dress", parentId: "m-shirts", slug: "dress-shirts", label: "Dress Shirts", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/30875764/pexels-photo-30875764.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-s-casual", parentId: "m-shirts", slug: "casual-shirts", label: "Casual Shirts", level: 3, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5163400/pexels-photo-5163400.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "m-s-polo", parentId: "m-shirts", slug: "polo-shirts", label: "Polo Shirts", level: 3, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/11751211/pexels-photo-11751211.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-s-dress", parentId: "m-shirts", slug: "dress-shirts", label: "Dress Shirts", level: 3, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/30875764/pexels-photo-30875764.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-s-casual", parentId: "m-shirts", slug: "casual-shirts", label: "Casual Shirts", level: 3, hasChildren: false, productCount: 16, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/5163400/pexels-photo-5163400.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "m-s-polo", parentId: "m-shirts", slug: "polo-shirts", label: "Polo Shirts", level: 3, hasChildren: false, productCount: 12, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/11751211/pexels-photo-11751211.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Kids subcategories
-  { id: "k-boys", parentId: "kids", slug: "boys", label: "Boys", level: 2, hasChildren: true, productCount: 40, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/2998987/pexels-photo-2998987.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "k-girls", parentId: "kids", slug: "girls", label: "Girls", level: 2, hasChildren: false, productCount: 36, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/17086870/pexels-photo-17086870.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "k-baby", parentId: "kids", slug: "baby", label: "Baby & Toddler", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "size", "color", "price", "age"], heroImage: "https://images.pexels.com/photos/34121886/pexels-photo-34121886.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-boys", parentId: "kids", slug: "boys", label: "Boys", level: 2, hasChildren: true, productCount: 40, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/2998987/pexels-photo-2998987.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-girls", parentId: "kids", slug: "girls", label: "Girls", level: 2, hasChildren: false, productCount: 36, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/17086870/pexels-photo-17086870.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-baby", parentId: "kids", slug: "baby", label: "Baby & Toddler", level: 2, hasChildren: false, productCount: 22, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/34121886/pexels-photo-34121886.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 3 — Kids > Boys
-  { id: "k-b-tops", parentId: "k-boys", slug: "tops", label: "Tops", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/16642458/pexels-photo-16642458.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "k-b-bottoms", parentId: "k-boys", slug: "bottoms", label: "Bottoms", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/15914001/pexels-photo-15914001.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "k-b-outerwear", parentId: "k-boys", slug: "outerwear", label: "Outerwear", level: 3, hasChildren: false, productCount: 8, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/10725439/pexels-photo-10725439.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-b-tops", parentId: "k-boys", slug: "tops", label: "Tops", level: 3, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/16642458/pexels-photo-16642458.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-b-bottoms", parentId: "k-boys", slug: "bottoms", label: "Bottoms", level: 3, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/15914001/pexels-photo-15914001.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "k-b-outerwear", parentId: "k-boys", slug: "outerwear", label: "Outerwear", level: 3, hasChildren: false, productCount: 8, filtersAvailable: ["brand", "fit", "fabric", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/10725439/pexels-photo-10725439.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Accessories subcategories
-  { id: "a-bags", parentId: "accessories", slug: "bags", label: "Bags & Handbags", level: 2, hasChildren: false, productCount: 30, filtersAvailable: ["brand", "color", "price", "material"], heroImage: "https://images.pexels.com/photos/9327162/pexels-photo-9327162.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "a-watches", parentId: "accessories", slug: "watches", label: "Watches", level: 2, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "price", "material"], heroImage: "https://images.pexels.com/photos/33451773/pexels-photo-33451773.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "a-jewelry", parentId: "accessories", slug: "jewelry", label: "Jewelry", level: 2, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "price", "material"], heroImage: "https://images.pexels.com/photos/5865384/pexels-photo-5865384.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "a-footwear", parentId: "accessories", slug: "footwear", label: "Footwear", level: 2, hasChildren: false, productCount: 26, filtersAvailable: ["brand", "size", "color", "price"], heroImage: "https://images.pexels.com/photos/5264896/pexels-photo-5264896.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "a-bags", parentId: "accessories", slug: "bags", label: "Bags & Handbags", level: 2, hasChildren: false, productCount: 30, filtersAvailable: ["brand", "material", "style", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/9327162/pexels-photo-9327162.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "a-watches", parentId: "accessories", slug: "watches", label: "Watches", level: 2, hasChildren: false, productCount: 18, filtersAvailable: ["brand", "movement", "caseMaterial", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/33451773/pexels-photo-33451773.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "a-jewelry", parentId: "accessories", slug: "jewelry", label: "Jewelry", level: 2, hasChildren: false, productCount: 14, filtersAvailable: ["brand", "material", "stone", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/5865384/pexels-photo-5865384.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "a-footwear", parentId: "accessories", slug: "footwear", label: "Footwear", level: 2, hasChildren: false, productCount: 26, filtersAvailable: ["brand", "fit", "material", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/5264896/pexels-photo-5264896.jpeg?auto=compress&cs=tinysrgb&w=600" },
 
   // Level 2 — Entertainment subcategories
-  { id: "e-lifestyle", parentId: "entertainment", slug: "lifestyle", label: "Lifestyle", level: 2, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "price"], heroImage: "https://images.pexels.com/photos/15124841/pexels-photo-15124841.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "e-sports", parentId: "entertainment", slug: "sports", label: "Sports & Outdoor", level: 2, hasChildren: false, productCount: 15, filtersAvailable: ["brand", "price", "activity"], heroImage: "https://images.pexels.com/photos/34087791/pexels-photo-34087791.jpeg?auto=compress&cs=tinysrgb&w=600" },
-  { id: "e-heritage", parentId: "entertainment", slug: "heritage", label: "Heritage", level: 2, hasChildren: false, productCount: 10, filtersAvailable: ["brand", "price"], heroImage: "https://images.pexels.com/photos/175724/pexels-photo-175724.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "e-lifestyle", parentId: "entertainment", slug: "lifestyle", label: "Lifestyle", level: 2, hasChildren: false, productCount: 20, filtersAvailable: ["brand", "type", "material", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/15124841/pexels-photo-15124841.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "e-sports", parentId: "entertainment", slug: "sports", label: "Sports & Outdoor", level: 2, hasChildren: false, productCount: 15, filtersAvailable: ["brand", "activity", "material", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/34087791/pexels-photo-34087791.jpeg?auto=compress&cs=tinysrgb&w=600" },
+  { id: "e-heritage", parentId: "entertainment", slug: "heritage", label: "Heritage", level: 2, hasChildren: false, productCount: 10, filtersAvailable: ["brand", "era", "material", "price", "availability", "hasDiscount"], heroImage: "https://images.pexels.com/photos/175724/pexels-photo-175724.jpeg?auto=compress&cs=tinysrgb&w=600" },
 ];
 
 // ── Helper Functions ────────────────────────────────────────────────
@@ -559,12 +559,90 @@ const badges: BadgeEntry[] = [
   undefined,
 ];
 
-const displayAttrs: DisplayAttribute[][] = [
-  [{ label: "Fit", value: "Regular" }, { label: "Fabric", value: "Cotton Blend" }],
-  [{ label: "Fit", value: "Slim" }, { label: "Fabric", value: "100% Cotton" }],
-  [{ label: "Fit", value: "Relaxed" }, { label: "Fabric", value: "Linen" }],
-  [{ label: "Fit", value: "Oversized" }, { label: "Fabric", value: "Polyester" }],
-];
+// ── Category-Specific Display Attributes ────────────────────────────
+// Each category gets attributes relevant to its domain.
+// Clothing uses Fit+Fabric, Watches use Movement+Case Material, etc.
+
+const categoryDisplayAttrs: Record<string, DisplayAttribute[][]> = {
+  // ── Clothing (Women, Men, Kids) — Fit + Fabric ────────────────────
+  "_clothing_default": [
+    [{ label: "Fit", value: "Regular" }, { label: "Fabric", value: "Cotton Blend" }],
+    [{ label: "Fit", value: "Slim" }, { label: "Fabric", value: "100% Cotton" }],
+    [{ label: "Fit", value: "Relaxed" }, { label: "Fabric", value: "Linen" }],
+    [{ label: "Fit", value: "Oversized" }, { label: "Fabric", value: "Polyester" }],
+  ],
+  // ── Bags & Handbags — Material + Style ─────────────────────────────
+  "a-bags": [
+    [{ label: "Material", value: "Leather" }, { label: "Style", value: "Tote" }],
+    [{ label: "Material", value: "Canvas" }, { label: "Style", value: "Crossbody" }],
+    [{ label: "Material", value: "Nylon" }, { label: "Style", value: "Backpack" }],
+    [{ label: "Material", value: "Vegan Leather" }, { label: "Style", value: "Clutch" }],
+  ],
+  // ── Watches — Movement + Case Material ─────────────────────────────
+  "a-watches": [
+    [{ label: "Movement", value: "Automatic" }, { label: "Case Material", value: "Stainless Steel" }],
+    [{ label: "Movement", value: "Quartz" }, { label: "Case Material", value: "Titanium" }],
+    [{ label: "Movement", value: "Mechanical" }, { label: "Case Material", value: "Gold" }],
+    [{ label: "Movement", value: "Solar" }, { label: "Case Material", value: "Ceramic" }],
+  ],
+  // ── Jewelry — Material + Stone ────────────────────────────────────
+  "a-jewelry": [
+    [{ label: "Material", value: "Gold" }, { label: "Stone", value: "Diamond" }],
+    [{ label: "Material", value: "Silver" }, { label: "Stone", value: "Ruby" }],
+    [{ label: "Material", value: "Platinum" }, { label: "Stone", value: "Sapphire" }],
+    [{ label: "Material", value: "Rose Gold" }, { label: "Stone", value: "Emerald" }],
+  ],
+  // ── Footwear — Fit + Material ─────────────────────────────────────
+  "a-footwear": [
+    [{ label: "Fit", value: "Regular" }, { label: "Material", value: "Leather" }],
+    [{ label: "Fit", value: "Wide" }, { label: "Material", value: "Suede" }],
+    [{ label: "Fit", value: "Narrow" }, { label: "Material", value: "Canvas" }],
+    [{ label: "Fit", value: "Regular" }, { label: "Material", value: "Synthetic" }],
+  ],
+  // ── Lifestyle — Type + Material ───────────────────────────────────
+  "e-lifestyle": [
+    [{ label: "Type", value: "Home Decor" }, { label: "Material", value: "Ceramic" }],
+    [{ label: "Type", value: "Fragrance" }, { label: "Material", value: "Glass" }],
+    [{ label: "Type", value: "Candle" }, { label: "Material", value: "Soy Wax" }],
+    [{ label: "Type", value: "Stationery" }, { label: "Material", value: "Paper" }],
+  ],
+  // ── Sports & Outdoor — Activity + Material ────────────────────────
+  "e-sports": [
+    [{ label: "Activity", value: "Running" }, { label: "Material", value: "Polyester" }],
+    [{ label: "Activity", value: "Yoga" }, { label: "Material", value: "Spandex" }],
+    [{ label: "Activity", value: "Hiking" }, { label: "Material", value: "Nylon" }],
+    [{ label: "Activity", value: "Swimming" }, { label: "Material", value: "Chlorine-Resistant" }],
+  ],
+  // ── Heritage — Era + Material ─────────────────────────────────────
+  "e-heritage": [
+    [{ label: "Era", value: "1920s" }, { label: "Material", value: "Silk" }],
+    [{ label: "Era", value: "1950s" }, { label: "Material", value: "Wool" }],
+    [{ label: "Era", value: "1970s" }, { label: "Material", value: "Leather" }],
+    [{ label: "Era", value: "1990s" }, { label: "Material", value: "Denim" }],
+  ],
+};
+
+/**
+ * Resolves the display attribute pool for a given node.
+ * Checks exact nodeId → parent → ancestors → clothing default.
+ */
+function getCategoryDisplayAttrs(nodeId: string): DisplayAttribute[][] {
+  if (categoryDisplayAttrs[nodeId]) return categoryDisplayAttrs[nodeId];
+
+  const node = catalogNodes.find((n) => n.id === nodeId);
+  if (node?.parentId && categoryDisplayAttrs[node.parentId]) {
+    return categoryDisplayAttrs[node.parentId];
+  }
+
+  const ancestors = getAncestors(nodeId);
+  for (let i = ancestors.length - 1; i >= 0; i--) {
+    if (categoryDisplayAttrs[ancestors[i].id]) {
+      return categoryDisplayAttrs[ancestors[i].id];
+    }
+  }
+
+  return categoryDisplayAttrs["_clothing_default"];
+}
 
 export function getProductsForNode(nodeId: string, page: number, pageSize: number): { products: CatalogProduct[]; total: number } {
   const node = catalogNodes.find((n) => n.id === nodeId);
@@ -576,6 +654,7 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
   if (count <= 0) return { products: [], total };
 
   const images = getCategoryImagePool(nodeId);
+  const displayAttrs = getCategoryDisplayAttrs(nodeId);
 
   const products: CatalogProduct[] = Array.from({ length: count }, (_, i) => {
     const idx = start + i;
@@ -681,6 +760,63 @@ export const filterAttributeRegistry: FilterAttributeDef[] = [
     extract: (p) => (p.originalPrice ? "true" : "false"),
     isFilterable: true,
   },
+  // ── Category-Specific Filter Attributes ──────────────────────────
+  {
+    key: "material",
+    label: "Material",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Material")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "movement",
+    label: "Movement",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Movement")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "caseMaterial",
+    label: "Case Material",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Case Material")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "style",
+    label: "Style",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Style")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "stone",
+    label: "Stone",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Stone")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "activity",
+    label: "Activity",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Activity")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "type",
+    label: "Type",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Type")?.value,
+    isFilterable: true,
+  },
+  {
+    key: "era",
+    label: "Era",
+    filterType: "checkbox",
+    extract: (p) => p.primaryDisplayAttributes?.find((a) => a.label === "Era")?.value,
+    isFilterable: true,
+  },
 ];
 
 /** Get ALL products for a node (no pagination) — for filtering/sorting */
@@ -690,6 +826,7 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
 
   const total = node.productCount || 12;
   const images = getCategoryImagePool(nodeId);
+  const displayAttrs = getCategoryDisplayAttrs(nodeId);
 
   return Array.from({ length: total }, (_, i) => {
     const idx = i;

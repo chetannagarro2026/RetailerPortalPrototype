@@ -30,7 +30,7 @@ export default function CatalogNodePage() {
   // Use "root" as fallback nodeId for the catalog state hook
   const nodeId = node?.id || "root";
 
-  const catalog = useCatalogState(nodeId, catalogConfig.pageSize);
+  const catalog = useCatalogState(nodeId, catalogConfig.pageSize, node?.filtersAvailable);
 
   if (!node) {
     return (
