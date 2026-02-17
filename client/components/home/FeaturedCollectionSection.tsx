@@ -94,7 +94,7 @@ export default function FeaturedCollectionSection() {
             Collection: {collectionLabel}
           </p>
           <h2 className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-            Featured Collection
+            Featured Brands
           </h2>
         </div>
         <button
