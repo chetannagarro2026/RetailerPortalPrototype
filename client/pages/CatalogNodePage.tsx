@@ -107,7 +107,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
               borderRight: `1px solid ${config.borderColor}`,
             }}
           >
-            <CategoryTree activeNodeId={node.id} rootNodeId={treeRoot.id} />
+            <CategoryTree activeNodeId={activeTab || node.id} rootNodeId={treeRoot.id} />
 
             {catalog.resolvedFilters.length > 0 && (
               <div
