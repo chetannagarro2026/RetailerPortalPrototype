@@ -73,10 +73,17 @@ export default function ProductDetailPage() {
         &larr; Back to Catalog
       </Link>
 
-      {/* Top Section: Gallery + Product Family Info */}
+      {/* Top Section: Gallery + Product Family Info + Specifications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <ProductGallery images={galleryImages} alt={product.name} />
-        <PDPHeader product={product} />
+        <div>
+          <PDPHeader product={product} />
+          {product.specifications && product.specifications.length > 0 && (
+            <div className="mt-6">
+              <SpecificationsSection specifications={product.specifications} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* SKU Tables Section */}
@@ -124,13 +131,6 @@ export default function ProductDetailPage() {
               />
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Specifications */}
-      {product.specifications && product.specifications.length > 0 && (
-        <div className="mt-8">
-          <SpecificationsSection specifications={product.specifications} />
         </div>
       )}
     </div>
