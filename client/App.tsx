@@ -8,6 +8,9 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 import BulkOrder from "./pages/BulkOrder";
 import CatalogNodePage from "./pages/CatalogNodePage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +30,9 @@ export default function App() {
               <Route path="/product/:productId" element={<ProductDetailPage />} />
               <Route path="/brands" element={<PlaceholderPage />} />
               <Route path="/bulk-order" element={<BulkOrder />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
               <Route path="/purchase-orders" element={<PlaceholderPage />} />
               <Route path="/account/credit" element={<PlaceholderPage />} />
               <Route path="/account/invoices" element={<PlaceholderPage />} />

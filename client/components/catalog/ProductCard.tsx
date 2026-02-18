@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { InputNumber, App } from "antd";
+import { InputNumber } from "antd";
 import { ShoppingCartOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
+import { useOrder } from "../../context/OrderContext";
 import QuickMatrix from "./QuickMatrix";
 
 interface ProductCardProps {
@@ -329,7 +330,7 @@ function QuantityAddBlock({
   compact?: boolean;
 }) {
   const config = activeBrandConfig;
-  const { message } = App.useApp();
+  const { addItem } = useOrder();
   const minQty = product.minOrderQty || 1;
   const step = product.casePackQty || 1;
   const [qty, setQty] = useState<number>(minQty);
@@ -344,8 +345,18 @@ function QuantityAddBlock({
   );
 
   const handleAdd = useCallback(() => {
-    message.success({ content: `${qty}× ${product.name} added to order`, duration: 2 });
-  }, [qty, product.name, message]);
+    const firstVariant = product.variants?.[0];
+    addItem({
+      id: firstVariant?.id || product.id,
+      productId: product.id,
+      productName: product.name,
+      sku: firstVariant?.sku || product.sku,
+      variantAttributes: firstVariant?.attributes || {},
+      quantity: qty,
+      unitPrice: firstVariant?.price || product.price,
+      imageUrl: product.imageUrl,
+    });
+  }, [qty, product, addItem]);
 
   const disabled = product.availabilityStatus === "out-of-stock";
 
