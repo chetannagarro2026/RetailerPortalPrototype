@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Select } from "antd";
 import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
@@ -8,6 +8,8 @@ import {
   getNodeBySlugPath,
   getChildren,
   getAncestors,
+  getAllProductsForNode,
+  type CatalogProduct,
 } from "../data/catalogData";
 import { useCatalogState, type SortKey } from "../hooks/useCatalogState";
 import CatalogBreadcrumb from "../components/catalog/CatalogBreadcrumb";
@@ -18,6 +20,11 @@ import ActiveFilterChips from "../components/catalog/ActiveFilterChips";
 import CatalogProductGrid from "../components/catalog/CatalogProductGrid";
 import SpreadsheetView from "../components/catalog/SpreadsheetView";
 
+// Level 2 collection components
+import CollectionHeader, { type CollectionViewMode } from "../components/collection/CollectionHeader";
+import SubcategoryTabs from "../components/collection/SubcategoryTabs";
+import HybridFamilyTable from "../components/collection/HybridFamilyTable";
+
 type ViewMode = "grid" | "table";
 
 export default function CatalogNodePage() {
@@ -25,12 +32,9 @@ export default function CatalogNodePage() {
   const { "*": splat } = useParams();
   const slugPath = splat ? splat.split("/").filter(Boolean) : [];
   const node = getNodeBySlugPath(slugPath);
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  // Use "root" as fallback nodeId for the catalog state hook
-  const nodeId = node?.id || "root";
-
-  const catalog = useCatalogState(nodeId, catalogConfig.pageSize, node?.filtersAvailable);
+  // Determine if this is a Level 2 collection page
+  const isLevel2 = node !== null && node.level === 2;
 
   if (!node) {
     return (
@@ -45,28 +49,16 @@ export default function CatalogNodePage() {
     );
   }
 
-  const showTree = node.level >= catalogConfig.treeVisibilityStartLevel;
   const showSubcategoryGrid =
     node.level < catalogConfig.treeVisibilityStartLevel && node.hasChildren;
-
-  const ancestors = getAncestors(node.id);
-  const treeRoot =
-    ancestors.find((a) => a.level === 1) ||
-    (node.level === 1 ? node : null);
-
-  const children = getChildren(node.id);
 
   // ── Level 0 / 1: Subcategory Card Grid ────────────────────────
   if (showSubcategoryGrid) {
     return (
       <div className="max-w-content mx-auto px-6 py-8">
         {node.level > 0 && <CatalogBreadcrumb node={node} />}
-
         <div className="mb-6">
-          <h1
-            className="text-xl font-semibold mb-1"
-            style={{ color: config.primaryColor }}
-          >
+          <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
             {node.label}
           </h1>
           {node.level === 0 && (
@@ -75,20 +67,82 @@ export default function CatalogNodePage() {
             </p>
           )}
         </div>
-
         <SubcategoryCardGrid node={node} />
       </div>
     );
   }
 
-  // ── Level 2+: Hybrid Layout (Tree + Filters + Grid/Table) ─────
+  // ── Level 2: Hybrid Collection Page ───────────────────────────
+  if (isLevel2) {
+    return <Level2CollectionPage slugPath={slugPath} />;
+  }
+
+  // ── Level 3+: Standard Layout (Tree + Filters + Grid/Table) ───
+  return <Level3PlusPage slugPath={slugPath} />;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEVEL 2 — COLLECTION PAGE (Hybrid Family Table + Quick Add Panel)
+// ═══════════════════════════════════════════════════════════════════
+
+function Level2CollectionPage({ slugPath }: { slugPath: string[] }) {
+  const config = activeBrandConfig;
+  const node = getNodeBySlugPath(slugPath)!;
+  const nodeId = node.id;
+
+  const catalog = useCatalogState(nodeId, 9999, node.filtersAvailable);
+  const children = getChildren(node.id);
+  const ancestors = getAncestors(node.id);
+  const treeRoot = ancestors.find((a) => a.level === 1) || (node.level === 1 ? node : null);
+
+  const [viewMode, setViewMode] = useState<CollectionViewMode>("table");
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [tablePage, setTablePage] = useState(1);
+
+  // When we have an active subcategory tab, gather that subcategory's products
+  const tabProducts = useMemo(() => {
+    if (!activeTab) return null;
+    return getAllProductsForNode(activeTab);
+  }, [activeTab]);
+
+  // Combine: if tab is active, merge tab products with the main filtered set via intersection
+  // If no tab, use the catalog's filtered products directly
+  const displayProducts = useMemo(() => {
+    const base = catalog.filteredProducts;
+    if (!activeTab || !tabProducts) return base;
+
+    // Filter the main set to only include products whose families match
+    // the subcategory tab. Since tab products come from a child node,
+    // we use their IDs as a set for intersection.
+    const tabIds = new Set(tabProducts.map((p) => p.id));
+    return base.filter((p) => tabIds.has(p.id));
+  }, [catalog.filteredProducts, activeTab, tabProducts]);
+
+  // Paginate for table view
+  const PAGE_SIZE = 20;
+  const paginatedProducts = useMemo(() => {
+    const start = (tablePage - 1) * PAGE_SIZE;
+    return displayProducts.slice(start, start + PAGE_SIZE);
+  }, [displayProducts, tablePage]);
+
+  // Products for grid view (use existing catalog pagination)
+  const gridProducts = useMemo(() => {
+    const start = (tablePage - 1) * catalogConfig.pageSize;
+    return displayProducts.slice(start, start + catalogConfig.pageSize);
+  }, [displayProducts, tablePage]);
+
+  const handleTabChange = useCallback((tabId: string | null) => {
+    setActiveTab(tabId);
+    setTablePage(1);
+  }, []);
+
   return (
     <div className="max-w-content mx-auto px-6 py-8">
       <CatalogBreadcrumb node={node} />
 
       <div className="flex gap-6">
         {/* Left Sidebar: Tree + Filters */}
-        {showTree && treeRoot && (
+        {treeRoot && (
           <aside
             className="shrink-0 sticky self-start overflow-y-auto pr-4"
             style={{
@@ -100,7 +154,6 @@ export default function CatalogNodePage() {
           >
             <CategoryTree activeNodeId={node.id} rootNodeId={treeRoot.id} />
 
-            {/* Dynamic Filter Panel */}
             {catalog.resolvedFilters.length > 0 && (
               <div
                 className="mt-5 pt-5"
@@ -118,15 +171,117 @@ export default function CatalogNodePage() {
           </aside>
         )}
 
-        {/* Right: Header + Chips + Grid/Table */}
+        {/* Right: Header + Tabs + Table/Grid */}
         <div className="flex-1 min-w-0">
-          {/* Node Header with View Toggle + Sort */}
+          <CollectionHeader
+            title={node.label}
+            familyCount={displayProducts.length}
+            totalFamilies={catalog.allProducts.length}
+            subcategoryCount={children.length}
+            hasActiveFilters={catalog.hasActiveFilters || activeTab !== null}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            sortBy={catalog.sortBy}
+            onSortChange={catalog.setSortBy}
+          />
+
+          {/* Active Filter Chips */}
+          <ActiveFilterChips
+            activeFilters={catalog.activeFilters}
+            priceRange={catalog.priceRange}
+            onRemoveValue={catalog.removeFilterValue}
+            onRemoveFilter={catalog.removeFilter}
+            onClearAll={catalog.clearAllFilters}
+            onClearPriceRange={() => catalog.setPriceRange(null)}
+          />
+
+          {/* Subcategory Tabs */}
+          {children.length > 0 && (
+            <SubcategoryTabs
+              children={children}
+              activeTabId={activeTab}
+              onTabChange={handleTabChange}
+            />
+          )}
+
+          {/* Content: Table (default) or Grid */}
+          {viewMode === "table" ? (
+            <HybridFamilyTable
+              products={paginatedProducts}
+              total={displayProducts.length}
+              page={tablePage}
+              onPageChange={setTablePage}
+            />
+          ) : (
+            <CatalogProductGrid
+              products={gridProducts}
+              total={displayProducts.length}
+              page={tablePage}
+              pageSize={catalogConfig.pageSize}
+              onPageChange={setTablePage}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEVEL 3+ — STANDARD LAYOUT (Tree + Filters + Grid/Spreadsheet)
+// ═══════════════════════════════════════════════════════════════════
+
+function Level3PlusPage({ slugPath }: { slugPath: string[] }) {
+  const config = activeBrandConfig;
+  const node = getNodeBySlugPath(slugPath)!;
+  const nodeId = node.id;
+
+  const catalog = useCatalogState(nodeId, catalogConfig.pageSize, node.filtersAvailable);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
+  const showTree = node.level >= catalogConfig.treeVisibilityStartLevel;
+  const ancestors = getAncestors(node.id);
+  const treeRoot = ancestors.find((a) => a.level === 1) || (node.level === 1 ? node : null);
+  const children = getChildren(node.id);
+
+  return (
+    <div className="max-w-content mx-auto px-6 py-8">
+      <CatalogBreadcrumb node={node} />
+
+      <div className="flex gap-6">
+        {showTree && treeRoot && (
+          <aside
+            className="shrink-0 sticky self-start overflow-y-auto pr-4"
+            style={{
+              width: 240,
+              top: "calc(var(--header-height) + var(--nav-height) + 24px)",
+              maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+              borderRight: `1px solid ${config.borderColor}`,
+            }}
+          >
+            <CategoryTree activeNodeId={node.id} rootNodeId={treeRoot.id} />
+
+            {catalog.resolvedFilters.length > 0 && (
+              <div
+                className="mt-5 pt-5"
+                style={{ borderTop: `1px solid ${config.borderColor}` }}
+              >
+                <FilterPanel
+                  resolvedFilters={catalog.resolvedFilters}
+                  activeFilters={catalog.activeFilters}
+                  priceRange={catalog.priceRange}
+                  onFilterChange={catalog.setFilter}
+                  onPriceRangeChange={catalog.setPriceRange}
+                />
+              </div>
+            )}
+          </aside>
+        )}
+
+        <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h1
-                className="text-lg font-semibold mb-0.5"
-                style={{ color: config.primaryColor }}
-              >
+              <h1 className="text-lg font-semibold mb-0.5" style={{ color: config.primaryColor }}>
                 {node.label}
               </h1>
               <p className="text-xs" style={{ color: config.secondaryColor }}>
@@ -137,11 +292,9 @@ export default function CatalogNodePage() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* View Mode Toggle */}
               {config.enableSpreadsheetMode && (
-                <ViewToggle mode={viewMode} onChange={setViewMode} />
+                <LegacyViewToggle mode={viewMode} onChange={setViewMode} />
               )}
-
               <Select
                 value={catalog.sortBy}
                 onChange={(val) => catalog.setSortBy(val as SortKey)}
@@ -160,7 +313,6 @@ export default function CatalogNodePage() {
             </div>
           </div>
 
-          {/* Active Filter Chips */}
           <ActiveFilterChips
             activeFilters={catalog.activeFilters}
             priceRange={catalog.priceRange}
@@ -170,7 +322,6 @@ export default function CatalogNodePage() {
             onClearPriceRange={() => catalog.setPriceRange(null)}
           />
 
-          {/* Subcategory pills */}
           {children.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-5">
               {children.map((child) => (
@@ -196,7 +347,6 @@ export default function CatalogNodePage() {
             </div>
           )}
 
-          {/* Products — Grid or Table */}
           {viewMode === "grid" ? (
             <CatalogProductGrid
               products={catalog.paginatedProducts}
@@ -220,9 +370,9 @@ export default function CatalogNodePage() {
   );
 }
 
-// ── View Toggle Button ──────────────────────────────────────────────
+// ── Legacy View Toggle for Level 3+ ─────────────────────────────────
 
-function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
+function LegacyViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
   const config = activeBrandConfig;
 
   return (
