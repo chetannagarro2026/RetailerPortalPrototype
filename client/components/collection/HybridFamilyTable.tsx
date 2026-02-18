@@ -293,21 +293,23 @@ function FamilyRow({
           className="px-3 py-2 text-center"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onQuickAdd(product);
-            }}
-            className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors"
-            style={{
-              backgroundColor: config.primaryColor,
-              color: "#fff",
-              border: "none",
-            }}
-          >
-            <ShoppingCartOutlined className="text-[9px]" />
-            Quick Add
-          </button>
+          {!isExpanded && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickAdd(product);
+              }}
+              className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors"
+              style={{
+                backgroundColor: config.primaryColor,
+                color: "#fff",
+                border: "none",
+              }}
+            >
+              <ShoppingCartOutlined className="text-[9px]" />
+              Quick Add
+            </button>
+          )}
         </td>
       </tr>
 

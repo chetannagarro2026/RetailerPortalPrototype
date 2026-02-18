@@ -99,7 +99,7 @@ export default function FamilyRowExpansion({
           }}
         >
           <ShoppingCartOutlined className="text-[10px]" />
-          Quick Add Multiple
+          Quick Add
         </button>
       </div>
     </div>
