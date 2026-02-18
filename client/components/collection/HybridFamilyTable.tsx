@@ -59,13 +59,16 @@ export default function HybridFamilyTable({
     );
   }
 
+  const panelOpen = quickAddProduct !== null;
+
   return (
-    <div className="flex gap-0 relative">
-      {/* Main table area */}
+    <div className="relative">
+      {/* Main table area — squeezes when panel is open, scrolls horizontally at min breakpoint */}
       <div
-        className="flex-1 min-w-0 transition-all duration-300"
-        style={{ marginRight: quickAddProduct ? "35%" : 0 }}
+        className="transition-all duration-300"
+        style={{ marginRight: panelOpen ? "min(35%, 560px)" : 0 }}
       >
+        <div className="overflow-x-auto">
         <div
           className="rounded-xl overflow-hidden"
           style={{ border: `1px solid ${config.borderColor}` }}
@@ -147,16 +150,18 @@ export default function HybridFamilyTable({
             />
           </div>
         )}
+        </div>{/* end overflow-x-auto */}
       </div>
 
-      {/* Quick Add Panel (right side) */}
+      {/* Quick Add Panel (right side) — fixed below header+nav */}
       {quickAddProduct && (
         <div
-          className="fixed top-0 right-0 h-full z-30 shadow-xl transition-all duration-300"
+          className="fixed right-0 z-30 shadow-xl transition-all duration-300 flex flex-col"
           style={{
-            width: "35%",
+            top: "calc(var(--header-height) + var(--nav-height))",
+            height: "calc(100vh - var(--header-height) - var(--nav-height))",
+            width: "min(35%, 560px)",
             minWidth: 380,
-            maxWidth: 560,
             borderLeft: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",
           }}
