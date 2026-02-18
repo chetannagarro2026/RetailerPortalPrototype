@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById } from "../data/catalogData";
-import ProductGallery from "../components/catalog/ProductGallery";
+import { GalleryMainImage, GalleryThumbnails } from "../components/catalog/ProductGallery";
 import PDPHeader from "../components/pdp/PDPHeader";
 import SkuFilterPanel, {
   type SkuFilters,
@@ -73,18 +73,8 @@ export default function ProductDetailPage() {
         &larr; Back to Catalog
       </Link>
 
-      {/* Top Section: Gallery + Product Family Info + Specifications */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <ProductGallery images={galleryImages} alt={product.name} />
-        <div>
-          <PDPHeader product={product} />
-          {product.specifications && product.specifications.length > 0 && (
-            <div className="mt-6">
-              <SpecificationsSection specifications={product.specifications} />
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Top Section: Gallery + Product Family Info + Specifications + Thumbnails */}
+      <ProductTopSection product={product} galleryImages={galleryImages} />
 
       {/* SKU Tables Section */}
       {hasVariants && (
@@ -137,7 +127,44 @@ export default function ProductDetailPage() {
   );
 }
 
-// ── Specifications (inline, no separate import needed) ──────────────
+// ── Product Top Section (Gallery + Info + Specs + Thumbnails) ────────
+
+function ProductTopSection({
+  product,
+  galleryImages,
+}: {
+  product: ReturnType<typeof getProductById> & {};
+  galleryImages: string[];
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      {/* Left: Main Image */}
+      <GalleryMainImage images={galleryImages} alt={product.name} activeIndex={activeIndex} />
+
+      {/* Right: Info + Specs + Thumbnails */}
+      <div>
+        <PDPHeader product={product} />
+        {product.specifications && product.specifications.length > 0 && (
+          <div className="mt-6">
+            <SpecificationsSection specifications={product.specifications} />
+          </div>
+        )}
+        <div className="mt-4">
+          <GalleryThumbnails
+            images={galleryImages}
+            alt={product.name}
+            activeIndex={activeIndex}
+            onSelect={setActiveIndex}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Specifications ──────────────────────────────────────────────────
 
 function SpecificationsSection({
   specifications,
