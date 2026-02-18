@@ -8,7 +8,8 @@ import {
   getAncestors,
   getAllProductsForNode,
 } from "../data/catalogData";
-import { useCatalogState } from "../hooks/useCatalogState";
+import { useCatalogState, type SortKey } from "../hooks/useCatalogState";
+import { filterAttributeRegistry } from "../data/catalogData";
 import CatalogBreadcrumb from "../components/catalog/CatalogBreadcrumb";
 import SubcategoryCardGrid from "../components/catalog/SubcategoryCardGrid";
 import CategoryTree from "../components/catalog/CategoryTree";
@@ -39,24 +40,44 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(1);
 
-  // When we have an active subcategory tab, gather that subcategory's products
-  const tabProducts = useMemo(() => {
-    if (!activeTab) return null;
-    return getAllProductsForNode(activeTab);
-  }, [activeTab]);
-
-  // Combine: if tab is active, merge tab products with the main filtered set via intersection
-  // If no tab, use the catalog's filtered products directly
+  // When a tab is active, load that child node's products directly
+  // and apply the same filters/sorting from the parent catalog state
   const displayProducts = useMemo(() => {
-    const base = catalog.filteredProducts;
-    if (!activeTab || !tabProducts) return base;
+    if (!activeTab) return catalog.filteredProducts;
 
-    // Filter the main set to only include products whose families match
-    // the subcategory tab. Since tab products come from a child node,
-    // we use their IDs as a set for intersection.
-    const tabIds = new Set(tabProducts.map((p) => p.id));
-    return base.filter((p) => tabIds.has(p.id));
-  }, [catalog.filteredProducts, activeTab, tabProducts]);
+    let products = getAllProductsForNode(activeTab);
+
+    // Apply active filters (same logic as useCatalogState)
+    for (const [key, values] of Object.entries(catalog.activeFilters)) {
+      if (values.length === 0) continue;
+      const def = filterAttributeRegistry.find((d) => d.key === key);
+      if (!def) continue;
+      products = products.filter((p) => {
+        const raw = def.extract(p);
+        const pv = Array.isArray(raw) ? raw : raw != null ? [String(raw)] : [];
+        return pv.some((v) => values.includes(v));
+      });
+    }
+
+    // Apply price range
+    if (catalog.priceRange) {
+      products = products.filter(
+        (p) => p.price >= catalog.priceRange!.min && p.price <= catalog.priceRange!.max,
+      );
+    }
+
+    // Apply sorting
+    const sorted = [...products];
+    switch (catalog.sortBy) {
+      case "price-asc":  sorted.sort((a, b) => a.price - b.price); break;
+      case "price-desc": sorted.sort((a, b) => b.price - a.price); break;
+      case "alpha-asc":  sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
+      case "alpha-desc": sorted.sort((a, b) => b.name.localeCompare(a.name)); break;
+      case "newest":     sorted.reverse(); break;
+      default: break;
+    }
+    return sorted;
+  }, [activeTab, catalog.filteredProducts, catalog.activeFilters, catalog.priceRange, catalog.sortBy]);
 
   // Paginate for table view
   const PAGE_SIZE = 20;
