@@ -57,7 +57,7 @@ function SectionPlaceholder({ label, icon, minHeight }: SectionPlaceholderProps)
 
 export default function Index() {
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content-wide mx-auto px-6 py-8">
       <Row gutter={[16, 24]}>
         {/* Hero Banner — Full Width */}
         <Col xs={24}>

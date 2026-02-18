@@ -30,6 +30,7 @@ export default {
       },
       maxWidth: {
         "content": "1280px",
+        "content-wide": "1600px",
       },
     },
   },

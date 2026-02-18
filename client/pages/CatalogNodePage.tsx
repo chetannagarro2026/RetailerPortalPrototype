@@ -38,7 +38,7 @@ export default function CatalogNodePage() {
 
   if (!node) {
     return (
-      <div className="max-w-content mx-auto px-6 py-12 text-center">
+      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
           Category Not Found
         </h1>
@@ -55,7 +55,7 @@ export default function CatalogNodePage() {
   // ── Level 0 / 1: Subcategory Card Grid ────────────────────────
   if (showSubcategoryGrid) {
     return (
-      <div className="max-w-content mx-auto px-6 py-8">
+      <div className="max-w-content-wide mx-auto px-6 py-8">
         {node.level > 0 && <CatalogBreadcrumb node={node} />}
         <div className="mb-6">
           <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
@@ -137,7 +137,7 @@ function Level2CollectionPage({ slugPath }: { slugPath: string[] }) {
   }, []);
 
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content-wide mx-auto px-6 py-8">
       <CatalogBreadcrumb node={node} />
 
       <div className="flex gap-6">
@@ -245,7 +245,7 @@ function Level3PlusPage({ slugPath }: { slugPath: string[] }) {
   const children = getChildren(node.id);
 
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content-wide mx-auto px-6 py-8">
       <CatalogBreadcrumb node={node} />
 
       <div className="flex gap-6">

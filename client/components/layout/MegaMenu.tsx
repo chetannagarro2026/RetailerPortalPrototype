@@ -28,7 +28,7 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
         }}
       >
         <div
-          className="max-w-[1280px] mx-auto"
+          className="max-w-content-wide mx-auto"
           style={{ padding: "32px" }}
         >
           {/* Header Row */}

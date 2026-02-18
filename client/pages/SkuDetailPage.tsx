@@ -17,7 +17,7 @@ export default function SkuDetailPage() {
 
   if (!product || !variant) {
     return (
-      <div className="max-w-content mx-auto px-6 py-12 text-center">
+      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
           SKU Not Found
         </h1>
@@ -32,7 +32,7 @@ export default function SkuDetailPage() {
   }
 
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content-wide mx-auto px-6 py-8">
       {/* Breadcrumb */}
       <SkuBreadcrumb product={product} variant={variant} />
 
