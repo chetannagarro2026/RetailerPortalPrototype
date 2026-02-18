@@ -38,7 +38,6 @@ export default function Navigation() {
     const path = location.pathname;
     if (path === "/") return null;
     if (path.startsWith("/collections")) return "collections";
-    if (path.startsWith("/brands")) return "brands";
     if (path.startsWith("/bulk-order")) return "bulk-order";
     if (path.startsWith("/purchase-orders")) return "purchase-orders";
     if (path.startsWith("/account")) return "my-account";
