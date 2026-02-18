@@ -19,6 +19,7 @@ import FilterPanel from "../components/catalog/FilterPanel";
 import ActiveFilterChips from "../components/catalog/ActiveFilterChips";
 import CatalogProductGrid from "../components/catalog/CatalogProductGrid";
 import SpreadsheetView from "../components/catalog/SpreadsheetView";
+import FamilyCardGrid from "../components/collection/FamilyCardGrid";
 
 // Level 2 collection components
 import CollectionHeader, { type CollectionViewMode } from "../components/collection/CollectionHeader";
@@ -125,12 +126,6 @@ function Level2CollectionPage({ slugPath }: { slugPath: string[] }) {
     return displayProducts.slice(start, start + PAGE_SIZE);
   }, [displayProducts, tablePage]);
 
-  // Products for grid view (use existing catalog pagination)
-  const gridProducts = useMemo(() => {
-    const start = (tablePage - 1) * catalogConfig.pageSize;
-    return displayProducts.slice(start, start + catalogConfig.pageSize);
-  }, [displayProducts, tablePage]);
-
   const handleTabChange = useCallback((tabId: string | null) => {
     setActiveTab(tabId);
     setTablePage(1);
@@ -213,11 +208,10 @@ function Level2CollectionPage({ slugPath }: { slugPath: string[] }) {
               onPageChange={setTablePage}
             />
           ) : (
-            <CatalogProductGrid
-              products={gridProducts}
+            <FamilyCardGrid
+              products={paginatedProducts}
               total={displayProducts.length}
               page={tablePage}
-              pageSize={catalogConfig.pageSize}
               onPageChange={setTablePage}
             />
           )}
