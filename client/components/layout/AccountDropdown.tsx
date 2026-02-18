@@ -8,6 +8,7 @@ import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
+  ShoppingOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -31,6 +32,12 @@ interface DropdownSection {
 }
 
 const sections: DropdownSection[] = [
+  {
+    title: "Orders",
+    items: [
+      { key: "purchase-orders", label: "Purchase Orders", icon: <ShoppingOutlined />, path: "/purchase-orders" },
+    ],
+  },
   {
     title: "Financials",
     items: [
