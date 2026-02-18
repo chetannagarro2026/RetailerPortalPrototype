@@ -59,19 +59,13 @@ export default function HybridFamilyTable({
     );
   }
 
-  const panelOpen = quickAddProduct !== null;
-
   return (
-    <div className="relative">
-      {/* Main table area — squeezes when panel is open, scrolls horizontally at min breakpoint */}
-      <div
-        className="transition-all duration-300"
-        style={{ marginRight: panelOpen ? "min(35%, 560px)" : 0 }}
-      >
-        <div className="overflow-x-auto">
+    <div className="flex gap-0">
+      {/* Main table area — shrinks via flex when panel is open */}
+      <div className="flex-1 min-w-0 overflow-x-auto">
         <div
           className="rounded-xl overflow-hidden"
-          style={{ border: `1px solid ${config.borderColor}` }}
+          style={{ border: `1px solid ${config.borderColor}`, minWidth: 580 }}
         >
           <table className="w-full border-collapse text-xs">
             <thead>
@@ -150,19 +144,17 @@ export default function HybridFamilyTable({
             />
           </div>
         )}
-        </div>{/* end overflow-x-auto */}
       </div>
 
-      {/* Quick Add Panel (right side) — fixed below header+nav */}
+      {/* Quick Add Panel — in-flow, sticky so it stays visible while scrolling */}
       {quickAddProduct && (
         <div
-          className="fixed right-0 z-30 shadow-xl transition-all duration-300 flex flex-col"
+          className="shrink-0 sticky self-start ml-4 flex flex-col shadow-lg rounded-xl overflow-hidden"
           style={{
-            top: "calc(var(--header-height) + var(--nav-height))",
-            height: "calc(100vh - var(--header-height) - var(--nav-height))",
-            width: "min(35%, 560px)",
-            minWidth: 380,
-            borderLeft: `1px solid ${config.borderColor}`,
+            top: "calc(var(--header-height) + var(--nav-height) + 24px)",
+            width: 400,
+            maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+            border: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",
           }}
         >
