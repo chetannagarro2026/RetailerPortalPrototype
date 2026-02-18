@@ -34,7 +34,7 @@ export function GalleryMainImage({
   return (
     <div
       className="w-full rounded-xl overflow-hidden"
-      style={{ aspectRatio: "4/5", border: `1px solid ${config.borderColor}` }}
+      style={{ aspectRatio: "16/15", border: `1px solid ${config.borderColor}` }}
     >
       <img src={mainImage} alt={alt} className="w-full h-full object-cover" />
     </div>
