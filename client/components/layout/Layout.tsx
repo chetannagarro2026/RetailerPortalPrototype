@@ -4,6 +4,7 @@ import { createAntdTheme } from "../../theme/antdTheme";
 import Header from "./Header";
 import Navigation from "./Navigation";
 import CreditBanner from "./CreditBanner";
+import Footer from "./Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ export default function Layout({ children }: LayoutProps) {
         <Header />
         <Navigation />
         <main>{children}</main>
+        <Footer />
       </div>
     </ConfigProvider>
   );
