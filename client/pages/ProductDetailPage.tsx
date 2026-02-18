@@ -1,67 +1,51 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById } from "../data/catalogData";
-import { useOrder } from "../context/OrderContext";
 import ProductGallery from "../components/catalog/ProductGallery";
-import VariantMatrix from "../components/catalog/VariantMatrix";
 import PDPHeader from "../components/pdp/PDPHeader";
-import PDPSubtotal from "../components/pdp/PDPSubtotal";
-import PDPSpecifications from "../components/pdp/PDPSpecifications";
+import SkuFilterPanel, {
+  type SkuFilters,
+  applySkuFilters,
+} from "../components/product-family/SkuFilterPanel";
+import SkuGroupedTables from "../components/product-family/SkuGroupedTables";
 
 export default function ProductDetailPage() {
   const config = activeBrandConfig;
   const { productId } = useParams<{ productId: string }>();
-  const { addItems } = useOrder();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-
   const product = productId ? getProductById(decodeURIComponent(productId)) : null;
 
-  const handleQuantityChange = (variantId: string, qty: number) => {
-    setQuantities((prev) => {
+  // SKU filter state
+  const [activeFilters, setActiveFilters] = useState<SkuFilters>({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const allVariants = product?.variants || [];
+  const variantAttributes = product?.variantAttributes || [];
+
+  const filteredVariants = useMemo(
+    () => applySkuFilters(allVariants, activeFilters),
+    [allVariants, activeFilters],
+  );
+
+  const handleFilterChange = useCallback((key: string, values: string[]) => {
+    setActiveFilters((prev) => ({ ...prev, [key]: values }));
+    setExpandedId(null);
+  }, []);
+
+  const handleRemoveFilter = useCallback((key: string, value: string) => {
+    setActiveFilters((prev) => {
+      const values = (prev[key] || []).filter((v) => v !== value);
       const next = { ...prev };
-      if (qty <= 0) delete next[variantId];
-      else next[variantId] = qty;
+      if (values.length === 0) delete next[key];
+      else next[key] = values;
       return next;
     });
-  };
+  }, []);
 
-  const { totalUnits, totalValue, filledCount } = useMemo(() => {
-    if (!product?.variants) return { totalUnits: 0, totalValue: 0, filledCount: 0 };
-    let units = 0;
-    let value = 0;
-    let count = 0;
-    for (const [vid, qty] of Object.entries(quantities)) {
-      if (qty <= 0) continue;
-      const variant = product.variants.find((v) => v.id === vid);
-      if (!variant) continue;
-      units += qty;
-      value += qty * variant.price;
-      count++;
-    }
-    return { totalUnits: units, totalValue: value, filledCount: count };
-  }, [quantities, product?.variants]);
-
-  const handleAddAll = () => {
-    if (!product?.variants || filledCount === 0) return;
-    const items = Object.entries(quantities)
-      .filter(([, qty]) => qty > 0)
-      .map(([vid, qty]) => {
-        const variant = product.variants!.find((v) => v.id === vid)!;
-        return {
-          id: variant.id,
-          productId: product.id,
-          productName: product.name,
-          sku: variant.sku,
-          variantAttributes: variant.attributes,
-          quantity: qty,
-          unitPrice: variant.price,
-          imageUrl: product.imageUrl,
-        };
-      });
-    addItems(items);
-    setQuantities({});
-  };
+  const handleClearAll = useCallback(() => {
+    setActiveFilters({});
+    setExpandedId(null);
+  }, []);
 
   if (!product) {
     return (
@@ -72,69 +56,114 @@ export default function ProductDetailPage() {
         <p className="text-sm mb-4" style={{ color: config.secondaryColor }}>
           The product you are looking for does not exist.
         </p>
-        <Link
-          to="/catalog"
-          className="text-sm font-medium no-underline"
-          style={{ color: config.primaryColor }}
-        >
+        <Link to="/catalog" className="text-sm font-medium no-underline" style={{ color: config.primaryColor }}>
           &larr; Back to Catalog
         </Link>
       </div>
     );
   }
 
-  const hasVariants = config.enableMatrixOnPDP && product.variantAttributes && product.variantAttributes.length > 0;
+  const hasVariants = variantAttributes.length > 0 && allVariants.length > 0;
   const galleryImages = product.galleryImages || [product.imageUrl];
 
   return (
     <div className="max-w-content mx-auto px-6 py-8">
-      {/* Breadcrumb-style back link */}
-      <Link
-        to="/catalog"
-        className="text-xs no-underline mb-4 block"
-        style={{ color: config.secondaryColor }}
-      >
+      {/* Breadcrumb */}
+      <Link to="/catalog" className="text-xs no-underline mb-4 block" style={{ color: config.secondaryColor }}>
         &larr; Back to Catalog
       </Link>
 
-      {/* Top Section: Gallery + Info */}
+      {/* Top Section: Gallery + Product Family Info */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <ProductGallery images={galleryImages} alt={product.name} />
         <PDPHeader product={product} />
       </div>
 
-      {/* Variant Matrix */}
+      {/* SKU Tables Section */}
       {hasVariants && (
-        <div
-          className="rounded-xl p-5 mb-6"
-          style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
-        >
-          <h2 className="text-sm font-semibold mb-4" style={{ color: config.primaryColor }}>
-            Select Variants & Quantities
-          </h2>
-          <VariantMatrix
-            product={product}
-            quantities={quantities}
-            onQuantityChange={handleQuantityChange}
-          />
-        </div>
-      )}
+        <div>
+          <div
+            className="mb-6 pb-2"
+            style={{ borderBottom: `2px solid ${config.borderColor}` }}
+          >
+            <h2 className="text-base font-semibold" style={{ color: config.primaryColor }}>
+              Available SKUs
+            </h2>
+          </div>
 
-      {/* Subtotal + Add All */}
-      {hasVariants && (
-        <PDPSubtotal
-          totalUnits={totalUnits}
-          totalValue={totalValue}
-          filledCount={filledCount}
-          onAddAll={handleAddAll}
-          product={product}
-        />
+          <div className="flex gap-6">
+            {/* Left: Filter Panel (sticky) */}
+            <aside
+              className="shrink-0 sticky self-start overflow-y-auto pr-4"
+              style={{
+                width: 220,
+                top: "calc(var(--header-height) + var(--nav-height) + 24px)",
+                maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+                borderRight: `1px solid ${config.borderColor}`,
+              }}
+            >
+              <SkuFilterPanel
+                variants={allVariants}
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
+                onClearAll={handleClearAll}
+              />
+            </aside>
+
+            {/* Right: Grouped SKU Tables */}
+            <div className="flex-1 min-w-0">
+              <SkuGroupedTables
+                product={product}
+                variants={filteredVariants}
+                variantAttributes={variantAttributes}
+                activeFilters={activeFilters}
+                onRemoveFilter={handleRemoveFilter}
+                onClearAll={handleClearAll}
+                expandedId={expandedId}
+                onToggleExpand={setExpandedId}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Specifications */}
       {product.specifications && product.specifications.length > 0 && (
-        <PDPSpecifications specifications={product.specifications} />
+        <div className="mt-8">
+          <SpecificationsSection specifications={product.specifications} />
+        </div>
       )}
+    </div>
+  );
+}
+
+// ── Specifications (inline, no separate import needed) ──────────────
+
+function SpecificationsSection({
+  specifications,
+}: {
+  specifications: Array<{ label: string; value: string }>;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="rounded-xl p-5"
+      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+    >
+      <h2 className="text-sm font-semibold mb-3" style={{ color: config.primaryColor }}>
+        Specifications
+      </h2>
+      <div className="divide-y" style={{ borderColor: config.borderColor }}>
+        {specifications.map((spec) => (
+          <div key={spec.label} className="flex items-center py-2.5 text-xs" style={{ borderColor: config.borderColor }}>
+            <span className="w-36 shrink-0 font-medium" style={{ color: config.secondaryColor }}>
+              {spec.label}
+            </span>
+            <span style={{ color: config.primaryColor }}>{spec.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

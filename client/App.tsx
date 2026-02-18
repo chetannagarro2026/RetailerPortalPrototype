@@ -8,6 +8,7 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 import BulkOrder from "./pages/BulkOrder";
 import CatalogNodePage from "./pages/CatalogNodePage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import SkuDetailPage from "./pages/SkuDetailPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./pages/OrderConfirmation";
@@ -28,6 +29,7 @@ export default function App() {
               <Route path="/catalog" element={<CatalogNodePage />} />
               <Route path="/catalog/*" element={<CatalogNodePage />} />
               <Route path="/product/:productId" element={<ProductDetailPage />} />
+              <Route path="/product/:productId/sku/:variantId" element={<SkuDetailPage />} />
               <Route path="/brands" element={<PlaceholderPage />} />
               <Route path="/bulk-order" element={<BulkOrder />} />
               <Route path="/cart" element={<CartPage />} />
