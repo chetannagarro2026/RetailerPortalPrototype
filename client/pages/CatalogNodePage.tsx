@@ -21,54 +21,6 @@ import CollectionHeader, { type CollectionViewMode } from "../components/collect
 import SubcategoryTabs from "../components/collection/SubcategoryTabs";
 import HybridFamilyTable from "../components/collection/HybridFamilyTable";
 
-export default function CatalogNodePage() {
-  const config = activeBrandConfig;
-  const { "*": splat } = useParams();
-  const slugPath = splat ? splat.split("/").filter(Boolean) : [];
-  const node = getNodeBySlugPath(slugPath);
-
-  if (!node) {
-    return (
-      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
-        <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
-          Category Not Found
-        </h1>
-        <p className="text-sm" style={{ color: config.secondaryColor }}>
-          The catalog path you requested does not exist.
-        </p>
-      </div>
-    );
-  }
-
-  // Routing logic — driven by node content, not hardcoded level:
-  // 1. Node has ONLY children and no products → Subcategory Card Grid
-  // 2. Node has products (with or without children) → Hybrid Collection Page
-  const hasProducts = node.productCount > 0;
-  const isSubcategoryLanding = node.hasChildren && !hasProducts;
-
-  if (isSubcategoryLanding) {
-    return (
-      <div className="max-w-content-wide mx-auto px-6 py-8">
-        {node.level > 0 && <CatalogBreadcrumb node={node} />}
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
-            {node.label}
-          </h1>
-          {node.level === 0 && (
-            <p className="text-sm" style={{ color: config.secondaryColor }}>
-              Browse the complete {config.brandName} portfolio.
-            </p>
-          )}
-        </div>
-        <SubcategoryCardGrid node={node} />
-      </div>
-    );
-  }
-
-  // ── Hybrid Collection Page (any node with products) ───────────
-  return <HybridCollectionPage slugPath={slugPath} />;
-}
-
 // ═══════════════════════════════════════════════════════════════════
 // HYBRID COLLECTION PAGE (Any node with products — N-level scalable)
 // ═══════════════════════════════════════════════════════════════════
@@ -206,4 +158,52 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
       </div>
     </div>
   );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN PAGE COMPONENT (Router entry point)
+// ═══════════════════════════════════════════════════════════════════
+
+export default function CatalogNodePage() {
+  const config = activeBrandConfig;
+  const { "*": splat } = useParams();
+  const slugPath = splat ? splat.split("/").filter(Boolean) : [];
+  const node = getNodeBySlugPath(slugPath);
+
+  if (!node) {
+    return (
+      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
+        <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
+          Category Not Found
+        </h1>
+        <p className="text-sm" style={{ color: config.secondaryColor }}>
+          The catalog path you requested does not exist.
+        </p>
+      </div>
+    );
+  }
+
+  const hasProducts = node.productCount > 0;
+  const isSubcategoryLanding = node.hasChildren && !hasProducts;
+
+  if (isSubcategoryLanding) {
+    return (
+      <div className="max-w-content-wide mx-auto px-6 py-8">
+        {node.level > 0 && <CatalogBreadcrumb node={node} />}
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
+            {node.label}
+          </h1>
+          {node.level === 0 && (
+            <p className="text-sm" style={{ color: config.secondaryColor }}>
+              Browse the complete {config.brandName} portfolio.
+            </p>
+          )}
+        </div>
+        <SubcategoryCardGrid node={node} />
+      </div>
+    );
+  }
+
+  return <HybridCollectionPage slugPath={slugPath} />;
 }
