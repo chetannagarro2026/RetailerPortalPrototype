@@ -26,11 +26,11 @@ export default function ProductCard({ data }: { data: Product }) {
       style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
     >
       {/* Image */}
-      <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4 / 5" }}>
+      <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4 / 5", backgroundColor: "#f5f5f5" }}>
         <img
           src={data.imageUrl}
           alt={data.productName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
         />
         {data.badge && badge && (
           <span

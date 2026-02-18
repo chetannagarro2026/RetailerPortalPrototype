@@ -1,6 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { fetchPurchaseOrders, mapPOToUpdate } from "../../services/poService";
 import POCard from "./cards/POCard";
 import ReturnCard from "./cards/ReturnCard";
 import CriticalActionCard from "./cards/CriticalActionCard";
@@ -29,8 +32,8 @@ export interface CriticalUpdate {
 
 export type UpdateItem = POUpdate | ReturnUpdate | CriticalUpdate;
 
-// Mock data — would come from API
-const mockUpdates: UpdateItem[] = [
+// Mock data for returns and critical updates
+const mockStaticUpdates: UpdateItem[] = [
   {
     type: "critical",
     title: "Payment Due",
@@ -38,37 +41,16 @@ const mockUpdates: UpdateItem[] = [
     severity: "warning",
   },
   {
-    type: "po",
-    poNumber: "PO-2026-08712",
-    orderDate: "Jan 15, 2026",
-    totalValue: 34250,
-    currentStep: 3,
-  },
-  {
-    type: "po",
-    poNumber: "PO-2026-08698",
-    orderDate: "Jan 10, 2026",
-    totalValue: 18900,
-    currentStep: 1,
+    type: "critical",
+    title: "Credit Near Limit",
+    description: "Utilization at 87%. Contact your account manager to request an increase.",
+    severity: "urgent",
   },
   {
     type: "return",
     returnId: "RTN-006214",
     status: "In Review",
     submissionDate: "Jan 8, 2026",
-  },
-  {
-    type: "po",
-    poNumber: "PO-2026-08655",
-    orderDate: "Dec 28, 2025",
-    totalValue: 52100,
-    currentStep: 4,
-  },
-  {
-    type: "critical",
-    title: "Credit Near Limit",
-    description: "Utilization at 87%. Contact your account manager to request an increase.",
-    severity: "urgent",
   },
 ];
 
@@ -77,6 +59,18 @@ export default function UpdatesSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Fetch POs from API
+  const { data: poRecords = [], isLoading } = useQuery({
+    queryKey: ["purchaseOrders"],
+    queryFn: () => fetchPurchaseOrders(0, 5),
+  });
+
+  // Combine PO updates with static updates
+  const updates: UpdateItem[] = useMemo(() => {
+    const poUpdates = poRecords.map(mapPOToUpdate);
+    return [...poUpdates, ...mockStaticUpdates];
+  }, [poRecords]);
 
   const updateScrollState = () => {
     const el = scrollRef.current;
@@ -154,7 +148,18 @@ export default function UpdatesSection() {
       </div>
 
       {/* Carousel */}
-      {mockUpdates.length === 0 ? (
+      {isLoading ? (
+        <div
+          className="rounded-xl flex items-center justify-center"
+          style={{
+            border: `1px dashed ${config.borderColor}`,
+            minHeight: 160,
+            backgroundColor: config.cardBg,
+          }}
+        >
+          <Spin />
+        </div>
+      ) : updates.length === 0 ? (
         <div
           className="rounded-xl flex items-center justify-center"
           style={{
@@ -174,7 +179,7 @@ export default function UpdatesSection() {
           className="flex gap-4 overflow-x-auto pb-1"
           style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none" }}
         >
-          {mockUpdates.map((item, i) => (
+          {updates.map((item, i) => (
             <div
               key={i}
               className="shrink-0"

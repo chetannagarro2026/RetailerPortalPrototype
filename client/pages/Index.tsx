@@ -7,6 +7,7 @@ import HeroBanner from "../components/home/HeroBanner";
 import UpdatesSection from "../components/home/UpdatesSection";
 import AvailableCreditSection from "../components/home/AvailableCreditSection";
 import FeaturedCollectionSection from "../components/home/FeaturedCollectionSection";
+import CategoryTree from "../components/home/CategoryTree";
 import { activeBrandConfig } from "../config/brandConfig";
 
 interface SectionPlaceholderProps {
@@ -78,6 +79,11 @@ export default function Index() {
         <Col xs={24} className="mt-2">
           <FeaturedCollectionSection />
         </Col>
+
+        {/* Categories Tree (sidebar) */}
+        {/* <Col xs={24} className="mt-4">
+          <CategoryTree />
+        </Col> */}
 
         {/* Promotions — Two Column */}
         <Col xs={24} md={12}>

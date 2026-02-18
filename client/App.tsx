@@ -5,19 +5,23 @@ import Index from "./pages/Index";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import BulkOrder from "./pages/BulkOrder";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Layout>
-          <Routes>
+      <AuthProvider>
+        <BrowserRouter>
+          <Layout>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/collections" element={<PlaceholderPage />} />
             <Route path="/brands" element={<PlaceholderPage />} />
             <Route path="/bulk-order" element={<BulkOrder />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/purchase-orders" element={<PlaceholderPage />} />
             <Route path="/account/credit" element={<PlaceholderPage />} />
             <Route path="/account/invoices" element={<PlaceholderPage />} />
@@ -29,9 +33,10 @@ export default function App() {
             <Route path="/account/settings" element={<PlaceholderPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
