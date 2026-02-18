@@ -10,6 +10,76 @@ import SkuFilterPanel, {
 } from "../components/product-family/SkuFilterPanel";
 import SkuGroupedTables from "../components/product-family/SkuGroupedTables";
 
+// ── Specifications ──────────────────────────────────────────────────
+
+function SpecificationsSection({
+  specifications,
+}: {
+  specifications: Array<{ label: string; value: string }>;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="rounded-xl p-5"
+      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+    >
+      <h2 className="text-sm font-semibold mb-3" style={{ color: config.primaryColor }}>
+        Specifications
+      </h2>
+      <div className="divide-y" style={{ borderColor: config.borderColor }}>
+        {specifications.map((spec) => (
+          <div key={spec.label} className="flex items-center py-2.5 text-xs" style={{ borderColor: config.borderColor }}>
+            <span className="w-36 shrink-0 font-medium" style={{ color: config.secondaryColor }}>
+              {spec.label}
+            </span>
+            <span style={{ color: config.primaryColor }}>{spec.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Product Top Section (Gallery + Info + Specs + Thumbnails) ────────
+
+function ProductTopSection({
+  product,
+  galleryImages,
+}: {
+  product: ReturnType<typeof getProductById> & {};
+  galleryImages: string[];
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      {/* Left: Main Image */}
+      <GalleryMainImage images={galleryImages} alt={product.name} activeIndex={activeIndex} />
+
+      {/* Right: Info + Specs + Thumbnails */}
+      <div>
+        <PDPHeader product={product} />
+        {product.specifications && product.specifications.length > 0 && (
+          <div className="mt-6">
+            <SpecificationsSection specifications={product.specifications} />
+          </div>
+        )}
+        <div className="mt-4">
+          <GalleryThumbnails
+            images={galleryImages}
+            alt={product.name}
+            activeIndex={activeIndex}
+            onSelect={setActiveIndex}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Page Component ─────────────────────────────────────────────
+
 export default function ProductDetailPage() {
   const config = activeBrandConfig;
   const { productId } = useParams<{ productId: string }>();
@@ -123,74 +193,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// ── Product Top Section (Gallery + Info + Specs + Thumbnails) ────────
-
-function ProductTopSection({
-  product,
-  galleryImages,
-}: {
-  product: ReturnType<typeof getProductById> & {};
-  galleryImages: string[];
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-      {/* Left: Main Image */}
-      <GalleryMainImage images={galleryImages} alt={product.name} activeIndex={activeIndex} />
-
-      {/* Right: Info + Specs + Thumbnails */}
-      <div>
-        <PDPHeader product={product} />
-        {product.specifications && product.specifications.length > 0 && (
-          <div className="mt-6">
-            <SpecificationsSection specifications={product.specifications} />
-          </div>
-        )}
-        <div className="mt-4">
-          <GalleryThumbnails
-            images={galleryImages}
-            alt={product.name}
-            activeIndex={activeIndex}
-            onSelect={setActiveIndex}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Specifications ──────────────────────────────────────────────────
-
-function SpecificationsSection({
-  specifications,
-}: {
-  specifications: Array<{ label: string; value: string }>;
-}) {
-  const config = activeBrandConfig;
-
-  return (
-    <div
-      className="rounded-xl p-5"
-      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
-    >
-      <h2 className="text-sm font-semibold mb-3" style={{ color: config.primaryColor }}>
-        Specifications
-      </h2>
-      <div className="divide-y" style={{ borderColor: config.borderColor }}>
-        {specifications.map((spec) => (
-          <div key={spec.label} className="flex items-center py-2.5 text-xs" style={{ borderColor: config.borderColor }}>
-            <span className="w-36 shrink-0 font-medium" style={{ color: config.secondaryColor }}>
-              {spec.label}
-            </span>
-            <span style={{ color: config.primaryColor }}>{spec.value}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
