@@ -115,18 +115,18 @@ export default function OrderConfirmation() {
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <Link
-          to="/catalog"
+          to="/purchase-orders"
           className="text-sm font-medium no-underline px-8 py-2.5 rounded-lg text-white"
           style={{ backgroundColor: config.primaryColor }}
         >
-          Continue Shopping
+          View Purchase Orders
         </Link>
         <Link
-          to="/"
+          to="/catalog"
           className="text-sm font-medium no-underline"
-          style={{ color: config.secondaryColor }}
+          style={{ color: config.primaryColor }}
         >
-          Return to Home
+          Continue Shopping
         </Link>
       </div>
     </div>

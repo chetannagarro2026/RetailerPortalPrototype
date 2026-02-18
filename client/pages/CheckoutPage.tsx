@@ -1,11 +1,19 @@
-import { useState } from "react";
-import { Button, Input, Steps } from "antd";
-import { ArrowLeftOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { useState, useCallback } from "react";
+import { Button, Input, Steps, Checkbox } from "antd";
+import {
+  ArrowLeftOutlined,
+  CheckCircleOutlined,
+  PlusOutlined,
+  EnvironmentOutlined,
+} from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
+import { useOrderHistory, type PurchaseOrder } from "../context/OrderHistoryContext";
 import { useCreditState } from "../hooks/useCreditState";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
+
+// ── Types ───────────────────────────────────────────────────────────
 
 interface ShippingForm {
   contactName: string;
@@ -29,195 +37,7 @@ const EMPTY_FORM: ShippingForm = {
   notes: "",
 };
 
-export default function CheckoutPage() {
-  const config = activeBrandConfig;
-  const navigate = useNavigate();
-  const { items, totalUnits, totalValue, clearOrder } = useOrder();
-  const credit = useCreditState();
-  const [step, setStep] = useState(0);
-  const [shipping, setShipping] = useState<ShippingForm>(EMPTY_FORM);
-
-  if (items.length === 0) {
-    return (
-      <div className="max-w-content mx-auto px-6 py-16 text-center">
-        <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
-          No items to checkout
-        </h1>
-        <p className="text-sm mb-4" style={{ color: config.secondaryColor }}>
-          Add items to your cart before checking out.
-        </p>
-        <Link
-          to="/catalog"
-          className="text-sm font-medium no-underline px-6 py-2.5 rounded-lg text-white inline-block"
-          style={{ backgroundColor: config.primaryColor }}
-        >
-          Browse Catalog
-        </Link>
-      </div>
-    );
-  }
-
-  const fmt = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
-
-  const isShippingValid =
-    shipping.contactName.trim() &&
-    shipping.address.trim() &&
-    shipping.city.trim() &&
-    shipping.state.trim() &&
-    shipping.zip.trim();
-
-  const handleSubmit = () => {
-    if (credit.isExceeded) return;
-    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-    const orderSummary = {
-      orderNumber,
-      items: [...items],
-      totalUnits,
-      totalValue,
-      shipping: { ...shipping },
-      submittedAt: new Date().toISOString(),
-    };
-    clearOrder();
-    navigate("/order-confirmation", { state: orderSummary });
-  };
-
-  return (
-    <div className="max-w-content mx-auto px-6 py-8">
-      <Link
-        to="/cart"
-        className="text-xs no-underline mb-4 flex items-center gap-1"
-        style={{ color: config.secondaryColor }}
-      >
-        <ArrowLeftOutlined className="text-[10px]" />
-        Back to Cart
-      </Link>
-
-      <h1 className="text-xl font-semibold mb-6" style={{ color: config.primaryColor }}>
-        Checkout
-      </h1>
-
-      <Steps
-        current={step}
-        size="small"
-        className="mb-8"
-        items={[
-          { title: "Shipping" },
-          { title: "Review" },
-          { title: "Confirm" },
-        ]}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          {step === 0 && (
-            <ShippingStep
-              shipping={shipping}
-              onChange={setShipping}
-              onNext={() => setStep(1)}
-              isValid={!!isShippingValid}
-            />
-          )}
-          {step === 1 && (
-            <ReviewStep
-              items={items}
-              totalUnits={totalUnits}
-              totalValue={totalValue}
-              shipping={shipping}
-              onBack={() => setStep(0)}
-              onSubmit={handleSubmit}
-              isExceeded={credit.isExceeded}
-            />
-          )}
-        </div>
-
-        <div className="space-y-5">
-          {/* Order Total */}
-          <div
-            className="rounded-xl p-5"
-            style={{ border: `1px solid ${config.borderColor}` }}
-          >
-            <h3 className="text-sm font-semibold mb-3" style={{ color: config.primaryColor }}>
-              Order Total
-            </h3>
-            <div className="flex justify-between text-sm mb-2">
-              <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
-              <span className="font-medium" style={{ color: config.primaryColor }}>{fmt(totalValue)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span style={{ color: config.secondaryColor }}>Payment Method</span>
-              <span className="font-medium" style={{ color: config.primaryColor }}>Credit Account</span>
-            </div>
-          </div>
-          <CreditSummaryBlock />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Step 1: Shipping ────────────────────────────────────────────────
-
-function ShippingStep({
-  shipping,
-  onChange,
-  onNext,
-  isValid,
-}: {
-  shipping: ShippingForm;
-  onChange: (s: ShippingForm) => void;
-  onNext: () => void;
-  isValid: boolean;
-}) {
-  const config = activeBrandConfig;
-  const update = (field: keyof ShippingForm, value: string) =>
-    onChange({ ...shipping, [field]: value });
-
-  return (
-    <div
-      className="rounded-xl p-6"
-      style={{ border: `1px solid ${config.borderColor}` }}
-    >
-      <h2 className="text-base font-semibold mb-5" style={{ color: config.primaryColor }}>
-        Shipping Details
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField label="Contact Name *" value={shipping.contactName} onChange={(v) => update("contactName", v)} />
-        <FormField label="Company Name" value={shipping.companyName} onChange={(v) => update("companyName", v)} />
-        <div className="md:col-span-2">
-          <FormField label="Street Address *" value={shipping.address} onChange={(v) => update("address", v)} />
-        </div>
-        <FormField label="City *" value={shipping.city} onChange={(v) => update("city", v)} />
-        <div className="grid grid-cols-2 gap-4">
-          <FormField label="State *" value={shipping.state} onChange={(v) => update("state", v)} />
-          <FormField label="ZIP Code *" value={shipping.zip} onChange={(v) => update("zip", v)} />
-        </div>
-        <FormField label="Phone" value={shipping.phone} onChange={(v) => update("phone", v)} />
-        <div className="md:col-span-2">
-          <FormField label="Order Notes" value={shipping.notes} onChange={(v) => update("notes", v)} textarea />
-        </div>
-      </div>
-
-      <div className="flex justify-end mt-6">
-        <Button
-          type="primary"
-          size="large"
-          disabled={!isValid}
-          onClick={onNext}
-          style={{
-            height: 44,
-            fontWeight: 600,
-            borderRadius: 8,
-            backgroundColor: isValid ? config.primaryColor : undefined,
-          }}
-        >
-          Continue to Review
-        </Button>
-      </div>
-    </div>
-  );
-}
+// ── Helpers ─────────────────────────────────────────────────────────
 
 function FormField({
   label,
@@ -254,7 +74,240 @@ function FormField({
   );
 }
 
-// ── Step 2: Review ──────────────────────────────────────────────────
+// ── Shipping Step ───────────────────────────────────────────────────
+
+function ShippingStep({
+  shipping,
+  onChange,
+  onNext,
+  isValid,
+}: {
+  shipping: ShippingForm;
+  onChange: (s: ShippingForm) => void;
+  onNext: () => void;
+  isValid: boolean;
+}) {
+  const config = activeBrandConfig;
+  const { addresses, defaultAddress, addAddress } = useOrderHistory();
+
+  const [selectedAddressId, setSelectedAddressId] = useState<string | "new">(
+    defaultAddress ? defaultAddress.id : "new",
+  );
+  const [showNewForm, setShowNewForm] = useState(!defaultAddress);
+  const [newForm, setNewForm] = useState<ShippingForm>(EMPTY_FORM);
+  const [saveToBook, setSaveToBook] = useState(false);
+  const [setAsDefault, setSetAsDefault] = useState(false);
+
+  const selectSavedAddress = useCallback(
+    (addrId: string) => {
+      const addr = addresses.find((a) => a.id === addrId);
+      if (!addr) return;
+      setSelectedAddressId(addrId);
+      setShowNewForm(false);
+      onChange({
+        contactName: addr.contactName,
+        companyName: addr.companyName,
+        address: addr.address,
+        city: addr.city,
+        state: addr.state,
+        zip: addr.zip,
+        phone: addr.phone,
+        notes: "",
+      });
+    },
+    [addresses, onChange],
+  );
+
+  // Pre-fill on mount if default exists and shipping is empty
+  useState(() => {
+    if (defaultAddress && !shipping.contactName) {
+      selectSavedAddress(defaultAddress.id);
+    }
+  });
+
+  const handleShowNewForm = () => {
+    setSelectedAddressId("new");
+    setShowNewForm(true);
+    setNewForm(EMPTY_FORM);
+    onChange(EMPTY_FORM);
+  };
+
+  const updateNew = (field: keyof ShippingForm, value: string) => {
+    const updated = { ...newForm, [field]: value };
+    setNewForm(updated);
+    onChange(updated);
+  };
+
+  const handleNext = () => {
+    if (showNewForm && saveToBook) {
+      addAddress({
+        contactName: newForm.contactName,
+        companyName: newForm.companyName,
+        address: newForm.address,
+        city: newForm.city,
+        state: newForm.state,
+        zip: newForm.zip,
+        phone: newForm.phone,
+        isDefault: setAsDefault,
+      });
+    }
+    onNext();
+  };
+
+  return (
+    <div
+      className="rounded-xl p-6"
+      style={{ border: `1px solid ${config.borderColor}` }}
+    >
+      <h2 className="text-base font-semibold mb-5" style={{ color: config.primaryColor }}>
+        Shipping Details
+      </h2>
+
+      {/* Saved Addresses */}
+      {addresses.length > 0 && (
+        <div className="mb-5">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: config.secondaryColor }}>
+            Saved Addresses
+          </p>
+          <div className="space-y-2">
+            {addresses.map((addr) => (
+              <button
+                key={addr.id}
+                onClick={() => selectSavedAddress(addr.id)}
+                className="w-full text-left rounded-lg p-3.5 cursor-pointer transition-colors"
+                style={{
+                  border: selectedAddressId === addr.id
+                    ? `2px solid ${config.primaryColor}`
+                    : `1px solid ${config.borderColor}`,
+                  backgroundColor: selectedAddressId === addr.id ? config.cardBg : "#fff",
+                }}
+              >
+                <div className="flex items-start gap-2.5">
+                  <EnvironmentOutlined
+                    className="text-sm mt-0.5"
+                    style={{ color: selectedAddressId === addr.id ? config.primaryColor : config.secondaryColor }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
+                        {addr.contactName}
+                      </span>
+                      {addr.isDefault && (
+                        <span
+                          className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded"
+                          style={{ backgroundColor: "#EEF2FF", color: "#4338CA" }}
+                        >
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    {addr.companyName && (
+                      <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
+                        {addr.companyName}
+                      </p>
+                    )}
+                    <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
+                      {addr.address}, {addr.city}, {addr.state} {addr.zip}
+                    </p>
+                    {addr.phone && (
+                      <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
+                        {addr.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add New Address toggle */}
+      {!showNewForm && (
+        <button
+          onClick={handleShowNewForm}
+          className="flex items-center gap-1.5 text-sm font-medium cursor-pointer bg-transparent border-none mb-5 px-0"
+          style={{ color: config.primaryColor }}
+        >
+          <PlusOutlined className="text-xs" />
+          Add New Address
+        </button>
+      )}
+
+      {/* New Address Form */}
+      {showNewForm && (
+        <div
+          className="rounded-lg p-5 mb-5"
+          style={{
+            border: `2px solid ${config.primaryColor}`,
+            backgroundColor: config.cardBg,
+          }}
+        >
+          <p className="text-sm font-semibold mb-4" style={{ color: config.primaryColor }}>
+            New Address
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Contact Name *" value={newForm.contactName} onChange={(v) => updateNew("contactName", v)} />
+            <FormField label="Company Name" value={newForm.companyName} onChange={(v) => updateNew("companyName", v)} />
+            <div className="md:col-span-2">
+              <FormField label="Street Address *" value={newForm.address} onChange={(v) => updateNew("address", v)} />
+            </div>
+            <FormField label="City *" value={newForm.city} onChange={(v) => updateNew("city", v)} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField label="State *" value={newForm.state} onChange={(v) => updateNew("state", v)} />
+              <FormField label="ZIP Code *" value={newForm.zip} onChange={(v) => updateNew("zip", v)} />
+            </div>
+            <FormField label="Phone" value={newForm.phone} onChange={(v) => updateNew("phone", v)} />
+          </div>
+
+          <div className="flex flex-col gap-2 mt-4">
+            <Checkbox checked={saveToBook} onChange={(e) => setSaveToBook(e.target.checked)}>
+              <span className="text-xs" style={{ color: config.secondaryColor }}>
+                Save to address book
+              </span>
+            </Checkbox>
+            {saveToBook && (
+              <Checkbox checked={setAsDefault} onChange={(e) => setSetAsDefault(e.target.checked)}>
+                <span className="text-xs" style={{ color: config.secondaryColor }}>
+                  Set as default address
+                </span>
+              </Checkbox>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Order Notes (always visible) */}
+      <div className="mb-5">
+        <FormField
+          label="Order Notes"
+          value={shipping.notes}
+          onChange={(v) => onChange({ ...shipping, notes: v })}
+          textarea
+        />
+      </div>
+
+      <div className="flex justify-end">
+        <Button
+          type="primary"
+          size="large"
+          disabled={!isValid}
+          onClick={handleNext}
+          style={{
+            height: 44,
+            fontWeight: 600,
+            borderRadius: 8,
+            backgroundColor: isValid ? config.primaryColor : undefined,
+          }}
+        >
+          Continue to Review
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Review Step ─────────────────────────────────────────────────────
 
 function ReviewStep({
   items,
@@ -366,6 +419,157 @@ function ReviewStep({
         >
           {isExceeded ? "Credit Limit Exceeded" : "Submit Order"}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Page ───────────────────────────────────────────────────────
+
+export default function CheckoutPage() {
+  const config = activeBrandConfig;
+  const navigate = useNavigate();
+  const { items, totalUnits, totalValue, clearOrder } = useOrder();
+  const { addOrder } = useOrderHistory();
+  const credit = useCreditState();
+  const [step, setStep] = useState(0);
+  const [shipping, setShipping] = useState<ShippingForm>(EMPTY_FORM);
+
+  if (items.length === 0) {
+    return (
+      <div className="max-w-content mx-auto px-6 py-16 text-center">
+        <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
+          No items to checkout
+        </h1>
+        <p className="text-sm mb-4" style={{ color: config.secondaryColor }}>
+          Add items to your cart before checking out.
+        </p>
+        <Link
+          to="/catalog"
+          className="text-sm font-medium no-underline px-6 py-2.5 rounded-lg text-white inline-block"
+          style={{ backgroundColor: config.primaryColor }}
+        >
+          Browse Catalog
+        </Link>
+      </div>
+    );
+  }
+
+  const fmt = (val: number) =>
+    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
+
+  const isShippingValid =
+    shipping.contactName.trim() &&
+    shipping.address.trim() &&
+    shipping.city.trim() &&
+    shipping.state.trim() &&
+    shipping.zip.trim();
+
+  const handleSubmit = () => {
+    if (credit.isExceeded) return;
+    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+
+    const purchaseOrder: PurchaseOrder = {
+      orderNumber,
+      items: items.map((i) => ({
+        id: i.id,
+        productId: i.productId,
+        productName: i.productName,
+        sku: i.sku,
+        variantAttributes: i.variantAttributes,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+        imageUrl: i.imageUrl,
+      })),
+      totalUnits,
+      totalValue,
+      shipping: {
+        contactName: shipping.contactName,
+        companyName: shipping.companyName,
+        address: shipping.address,
+        city: shipping.city,
+        state: shipping.state,
+        zip: shipping.zip,
+        phone: shipping.phone,
+      },
+      paymentMethod: "Credit Account",
+      status: "Pending",
+      submittedAt: new Date().toISOString(),
+    };
+
+    addOrder(purchaseOrder);
+    clearOrder();
+    navigate("/order-confirmation", { state: purchaseOrder });
+  };
+
+  return (
+    <div className="max-w-content mx-auto px-6 py-8">
+      <Link
+        to="/cart"
+        className="text-xs no-underline mb-4 flex items-center gap-1"
+        style={{ color: config.secondaryColor }}
+      >
+        <ArrowLeftOutlined className="text-[10px]" />
+        Back to Cart
+      </Link>
+
+      <h1 className="text-xl font-semibold mb-6" style={{ color: config.primaryColor }}>
+        Checkout
+      </h1>
+
+      <Steps
+        current={step}
+        size="small"
+        className="mb-8"
+        items={[
+          { title: "Shipping" },
+          { title: "Review" },
+          { title: "Confirm" },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {step === 0 && (
+            <ShippingStep
+              shipping={shipping}
+              onChange={setShipping}
+              onNext={() => setStep(1)}
+              isValid={!!isShippingValid}
+            />
+          )}
+          {step === 1 && (
+            <ReviewStep
+              items={items}
+              totalUnits={totalUnits}
+              totalValue={totalValue}
+              shipping={shipping}
+              onBack={() => setStep(0)}
+              onSubmit={handleSubmit}
+              isExceeded={credit.isExceeded}
+            />
+          )}
+        </div>
+
+        <div className="space-y-5">
+          <div
+            className="rounded-xl p-5"
+            style={{ border: `1px solid ${config.borderColor}` }}
+          >
+            <h3 className="text-sm font-semibold mb-3" style={{ color: config.primaryColor }}>
+              Order Total
+            </h3>
+            <div className="flex justify-between text-sm mb-2">
+              <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
+              <span className="font-medium" style={{ color: config.primaryColor }}>{fmt(totalValue)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span style={{ color: config.secondaryColor }}>Payment Method</span>
+              <span className="font-medium" style={{ color: config.primaryColor }}>Credit Account</span>
+            </div>
+          </div>
+          <CreditSummaryBlock />
+        </div>
       </div>
     </div>
   );

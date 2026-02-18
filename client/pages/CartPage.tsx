@@ -184,9 +184,13 @@ function CartItemList({
                 />
               )}
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: config.primaryColor }}>
+                <Link
+                  to={`/product/${encodeURIComponent(item.productId)}/sku/${encodeURIComponent(item.id)}`}
+                  className="text-sm font-medium truncate block no-underline hover:underline"
+                  style={{ color: config.primaryColor }}
+                >
                   {item.productName}
-                </p>
+                </Link>
                 <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
                   {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
                 </p>

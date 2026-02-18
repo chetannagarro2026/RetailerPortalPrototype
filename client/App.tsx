@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { App as AntApp } from "antd";
 import { OrderProvider } from "./context/OrderContext";
+import { OrderHistoryProvider } from "./context/OrderHistoryContext";
+import PurchaseOrdersPage from "./pages/PurchaseOrdersPage";
 import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import PlaceholderPage from "./pages/PlaceholderPage";
@@ -20,6 +22,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AntApp>
+        <OrderHistoryProvider>
         <OrderProvider>
           <BrowserRouter>
           <Layout>
@@ -35,7 +38,7 @@ export default function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
-              <Route path="/purchase-orders" element={<PlaceholderPage />} />
+              <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
               <Route path="/account/credit" element={<PlaceholderPage />} />
               <Route path="/account/invoices" element={<PlaceholderPage />} />
               <Route path="/account/payments" element={<PlaceholderPage />} />
@@ -50,6 +53,7 @@ export default function App() {
           </Layout>
           </BrowserRouter>
         </OrderProvider>
+        </OrderHistoryProvider>
       </AntApp>
     </QueryClientProvider>
   );
