@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import {
@@ -60,6 +60,11 @@ function useCatalogMode(slugPath: string[]): CatalogModeInfo {
 
 function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
   const config = activeBrandConfig;
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Load all products across the catalog
   const allGlobalProducts = useMemo(() => getAllCatalogProducts(), []);
