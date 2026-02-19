@@ -3,6 +3,7 @@ import { DeleteOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
+import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 
@@ -10,6 +11,7 @@ export default function CartPage() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const { items, totalUnits, totalValue, updateQuantity, removeItem, clearOrder } = useOrder();
+  const { isAuthenticated, showSignInModal } = useAuth();
   const { isExceeded } = useCreditState();
 
   const formatCurrency = (val: number) =>
@@ -101,17 +103,23 @@ export default function CartPage() {
               type="primary"
               block
               size="large"
-              disabled={isExceeded}
-              onClick={() => navigate("/checkout")}
+              disabled={isAuthenticated && isExceeded}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  showSignInModal("To complete your purchase and use your credit account, please sign in.");
+                  return;
+                }
+                navigate("/checkout");
+              }}
               className="mt-5"
               style={{
                 height: 44,
                 fontWeight: 600,
                 borderRadius: 8,
-                backgroundColor: isExceeded ? undefined : config.primaryColor,
+                backgroundColor: (isAuthenticated && isExceeded) ? undefined : config.primaryColor,
               }}
             >
-              {isExceeded ? "Credit Limit Exceeded" : "Proceed to Checkout"}
+              {isAuthenticated && isExceeded ? "Credit Limit Exceeded" : "Proceed to Checkout"}
             </Button>
 
             <Link
@@ -124,8 +132,8 @@ export default function CartPage() {
             </Link>
           </div>
 
-          {/* Credit Summary */}
-          <CreditSummaryBlock />
+          {/* Credit Summary — authenticated only */}
+          {isAuthenticated && <CreditSummaryBlock />}
         </div>
       </div>
     </div>

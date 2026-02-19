@@ -5,7 +5,6 @@ import { createAntdTheme } from "../../theme/antdTheme";
 import { fetchCategoriesByParent } from "../../services/categoryService";
 import Header from "./Header";
 import Navigation from "./Navigation";
-import CreditBanner from "./CreditBanner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -24,7 +23,6 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <ConfigProvider theme={antdTheme}>
       <div className="min-h-screen bg-white">
-        <CreditBanner />
         <Header />
         <Navigation />
         <main>{children}</main>

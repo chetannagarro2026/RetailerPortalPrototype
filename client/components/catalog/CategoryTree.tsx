@@ -37,6 +37,7 @@ export default function CategoryTree({ activeNodeId, rootNodeId, tree }: Categor
   
   const rootChildren = getChildrenFn(rootNodeId);
 
+<<<<<<< HEAD
   // Auto-expand the active branch
   const [expanded, setExpanded] = useState<Set<string>>(() => {
     const initial = new Set<string>();
@@ -46,6 +47,19 @@ export default function CategoryTree({ activeNodeId, rootNodeId, tree }: Categor
       ? tree.nodes.get(activeNodeId)
       : catalogNodes.find((n) => n.id === activeNodeId);
     if (activeNode?.hasChildren) initial.add(activeNodeId);
+=======
+  // Auto-expand the active branch (or expand level-1 nodes when no active node)
+  const [expanded, setExpanded] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    if (activeNodeId) {
+      getAncestors(activeNodeId).forEach((a) => initial.add(a.id));
+      const activeNode = catalogNodes.find((n) => n.id === activeNodeId);
+      if (activeNode?.hasChildren) initial.add(activeNodeId);
+    } else {
+      // Global/brand mode: expand level-1 nodes
+      rootChildren.forEach((c) => initial.add(c.id));
+    }
+>>>>>>> main
     return initial;
   });
 
@@ -58,8 +72,16 @@ export default function CategoryTree({ activeNodeId, rootNodeId, tree }: Categor
     
     setExpanded((prev) => {
       const next = new Set(prev);
+<<<<<<< HEAD
       ancestors.forEach((a) => next.add(a.id));
       if (activeNode?.hasChildren) next.add(activeNodeId);
+=======
+      if (activeNodeId) {
+        getAncestors(activeNodeId).forEach((a) => next.add(a.id));
+        const activeNode = catalogNodes.find((n) => n.id === activeNodeId);
+        if (activeNode?.hasChildren) next.add(activeNodeId);
+      }
+>>>>>>> main
       return next;
     });
   }, [activeNodeId, getAncestorsFn, tree]);

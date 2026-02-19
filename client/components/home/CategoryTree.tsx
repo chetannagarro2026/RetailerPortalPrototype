@@ -44,11 +44,15 @@ function buildTree(items: CategoryItem[]) {
 }
 
 export default function CategoryTree({ parentId = "08d6ff04-11c5-4e5b-a1c8-11ac167e849b" }: Props) {
+<<<<<<< HEAD
   const { data, isLoading, error } = useQuery({
     queryKey: ["categories", parentId],
     queryFn: () => fetchCategoriesByParent(parentId),
     staleTime: 5 * 60 * 1000, // Keep fresh for 5 minutes
   });
+=======
+  const { data, isLoading, error } = useQuery({ queryKey: ["categories", parentId], queryFn: () => fetchCategoriesByParent(parentId) });
+>>>>>>> main
 
   // API may return nested tree or flat array — normalize to flat array
   const items: CategoryItem[] = useMemo(() => {
