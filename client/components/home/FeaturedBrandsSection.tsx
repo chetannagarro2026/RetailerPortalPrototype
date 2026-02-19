@@ -35,7 +35,7 @@ function BrandCard({ brand }: { brand: BrandInfo }) {
     >
       <div className="flex flex-col items-center justify-center px-4 py-6" style={{ minHeight: 180 }}>
         {brand.logoUrl ? (
-          <img src={brand.logoUrl} alt={brand.name} className="h-14 object-contain mb-3" />
+          <img src={brand.logoUrl} alt={brand.name} className="w-16 h-16 object-contain mb-3 rounded-lg" />
         ) : (
           <div className="mb-3">
             <BrandInitial name={brand.name} />

@@ -897,6 +897,20 @@ export function getAllCatalogProducts(): CatalogProduct[] {
   return allProducts;
 }
 
+/** Brand logo URLs — maps brand name to a logo image */
+const brandLogoUrls: Record<string, string> = {
+  "Calvin Klein": "https://www.google.com/s2/favicons?domain=calvinklein.com&sz=128",
+  "Tommy Hilfiger": "https://www.google.com/s2/favicons?domain=tommy.com&sz=128",
+  "IZOD": "https://www.google.com/s2/favicons?domain=izod.com&sz=128",
+  "Buffalo David Bitton": "https://www.google.com/s2/favicons?domain=buffalojeans.com&sz=128",
+  "Nautica": "https://www.google.com/s2/favicons?domain=nautica.com&sz=128",
+  "Arrow": "https://www.google.com/s2/favicons?domain=arrowusa.com&sz=128",
+  "Jessica Simpson": "https://www.google.com/s2/favicons?domain=jessicasimpsoncollection.com&sz=128",
+  "Joe's Jeans": "https://www.google.com/s2/favicons?domain=joesjeans.com&sz=128",
+  "Frye": "https://www.google.com/s2/favicons?domain=thefryecompany.com&sz=128",
+  "Hervé Léger": "https://www.google.com/s2/favicons?domain=herveleger.com&sz=128",
+};
+
 /** Get all unique brands with aggregate stats */
 export function getAllBrands(): BrandInfo[] {
   const brandMap = new Map<string, { categories: Set<string>; skuCount: number }>();
@@ -920,6 +934,7 @@ export function getAllBrands(): BrandInfo[] {
     slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
     skuCount: data.skuCount,
     categoryCount: data.categories.size,
+    logoUrl: brandLogoUrls[name],
   }));
 }
 
