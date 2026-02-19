@@ -14,7 +14,7 @@ interface AuthState {
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [signInModalVisible, setSignInModalVisible] = useState(false);
   const [signInModalMessage, setSignInModalMessage] = useState("");
 
