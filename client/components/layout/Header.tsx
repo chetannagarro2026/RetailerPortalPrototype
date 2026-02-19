@@ -4,16 +4,20 @@ import {
   SearchOutlined,
   BellOutlined,
   ShoppingCartOutlined,
+  UserOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { searchCatalog, type SearchResult } from "../../data/skuIndex";
 import CartDropdown, { useCartCount } from "./CartDropdown";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Header() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const cartCount = useCartCount();
+  const { isAuthenticated, signIn, showSignInModal } = useAuth();
   const [cartOpen, setCartOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -135,11 +139,13 @@ export default function Header() {
             <SearchOutlined className="text-lg" />
           </button>
 
-          <Badge dot size="small" offset={[-2, 2]}>
-            <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50">
-              <BellOutlined className="text-lg" />
-            </button>
-          </Badge>
+          {isAuthenticated && (
+            <Badge dot size="small" offset={[-2, 2]}>
+              <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50">
+                <BellOutlined className="text-lg" />
+              </button>
+            </Badge>
+          )}
 
           {/* Cart Icon */}
           <div
@@ -157,6 +163,35 @@ export default function Header() {
             </Badge>
             <CartDropdown visible={cartOpen} onClose={() => setCartOpen(false)} />
           </div>
+
+          {/* Guest: Register + Sign In */}
+          {!isAuthenticated && (
+            <div className="flex items-center gap-2 ml-1">
+              <button
+                onClick={() => showSignInModal()}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-lg cursor-pointer transition-colors"
+                style={{
+                  border: `1px solid ${config.borderColor}`,
+                  backgroundColor: "#fff",
+                  color: config.primaryColor,
+                }}
+              >
+                <UserOutlined className="text-xs" />
+                Register
+              </button>
+              <button
+                onClick={signIn}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold rounded-lg cursor-pointer transition-colors text-white"
+                style={{
+                  border: "none",
+                  backgroundColor: config.primaryColor,
+                }}
+              >
+                <LoginOutlined className="text-xs" />
+                Sign In
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

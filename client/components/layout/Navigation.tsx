@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Avatar } from "antd";
 import { MenuOutlined, DownOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { useAuth } from "../../context/AuthContext";
 import MegaMenu from "./MegaMenu";
 import AccountDropdown from "./AccountDropdown";
 import MobileNav from "./MobileNav";
@@ -12,8 +13,16 @@ type OpenPanel = "collections" | "my-account" | null;
 export default function Navigation() {
   const config = activeBrandConfig;
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Filter nav items based on auth state
+  const visibleNavItems = useMemo(() => {
+    if (isAuthenticated) return config.navItems;
+    // Guests: hide purchase-orders, keep collections, bulk-order, my-account
+    return config.navItems.filter((item) => item.key !== "purchase-orders");
+  }, [isAuthenticated, config.navItems]);
 
   // Close panels on route change
   useEffect(() => {
@@ -64,7 +73,7 @@ export default function Navigation() {
       >
         <div className="px-2">
           <div className="flex items-center h-[56px] gap-1">
-            {config.navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               // Collections — triggers mega menu
               if (item.hasMegaMenu) {
                 return (

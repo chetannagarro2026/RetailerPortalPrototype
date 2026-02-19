@@ -5,6 +5,8 @@ import Header from "./Header";
 import Navigation from "./Navigation";
 import CreditBanner from "./CreditBanner";
 import Footer from "./Footer";
+import SignInModal from "../auth/SignInModal";
+import { useAuth } from "../../context/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,14 +15,17 @@ interface LayoutProps {
 const antdTheme = createAntdTheme(activeBrandConfig);
 
 export default function Layout({ children }: LayoutProps) {
+  const { isAuthenticated } = useAuth();
+
   return (
     <ConfigProvider theme={antdTheme}>
       <div className="min-h-screen bg-white">
-        <CreditBanner />
+        {isAuthenticated && <CreditBanner />}
         <Header />
         <Navigation />
         <main>{children}</main>
         <Footer />
+        <SignInModal />
       </div>
     </ConfigProvider>
   );
