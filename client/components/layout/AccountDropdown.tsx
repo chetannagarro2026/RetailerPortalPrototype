@@ -38,6 +38,7 @@ const authenticatedSections: DropdownSection[] = [
     title: "Account",
     items: [
       { key: "details", label: "My Account", icon: <UserOutlined />, path: "/account/details" },
+      { key: "purchase-orders", label: "Purchase Orders", icon: <ShoppingOutlined />, path: "/purchase-orders" },
       { key: "settings", label: "Settings", icon: <SettingOutlined />, path: "/account/settings" },
     ],
   },
