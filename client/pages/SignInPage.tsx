@@ -171,12 +171,9 @@ function SignInHeader({ config }: { config: typeof activeBrandConfig }) {
       >
         <LoginOutlined className="text-lg" style={{ color: config.primaryColor }} />
       </div>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
+      <h2 className="text-xl font-semibold mb-0" style={{ color: config.primaryColor }}>
         Sign In
       </h2>
-      <p className="text-sm" style={{ color: config.secondaryColor }}>
-        Access your wholesale account to place orders and manage credit.
-      </p>
     </div>
   );
 }
