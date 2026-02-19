@@ -1,5 +1,5 @@
 import { Row, Col } from "antd";
-import HeroBanner from "../components/home/HeroBanner";
+import HeroCarousel from "../components/home/HeroCarousel";
 import UpdatesSection from "../components/home/UpdatesSection";
 import AvailableCreditSection from "../components/home/AvailableCreditSection";
 import FeaturedBrandsSection from "../components/home/FeaturedBrandsSection";
@@ -10,7 +10,7 @@ export default function Index() {
       <Row gutter={[16, 24]}>
         {/* Hero Banner — Full Width */}
         <Col xs={24}>
-          <HeroBanner />
+          <HeroCarousel />
         </Col>
 
         {/* Updates — 8 cols */}
