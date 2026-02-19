@@ -6,6 +6,9 @@ export interface NavItem {
   hasDropdown?: boolean;
 }
 
+export type CategoryCardVariant = "hero" | "thumbnail";
+export type ProductCardVariant = "compact" | "standard" | "detailed";
+
 export interface BrandConfig {
   // Identity
   brandName: string;
@@ -29,6 +32,16 @@ export interface BrandConfig {
   // Search
   searchPlaceholder: string;
 
+  // Catalog display
+  categoryCardVariant: CategoryCardVariant;
+  productCardVariant: ProductCardVariant;
+
+  // Ordering modes
+  enableMatrixOnPDP: boolean;
+  enableQuickMatrixInGrid: boolean;
+  enableSpreadsheetMode: boolean;
+  quickMatrixVariantLimit: number;
+
   // Navigation items (configurable per tenant)
   navItems: NavItem[];
 }
@@ -50,11 +63,19 @@ export const centricBrandsConfig: BrandConfig = {
 
   searchPlaceholder: "Search by Style Code, Collection, Brand...",
 
+  categoryCardVariant: "hero",
+  productCardVariant: "standard",
+
+  enableMatrixOnPDP: true,
+  enableQuickMatrixInGrid: true,
+  enableSpreadsheetMode: true,
+  quickMatrixVariantLimit: 12,
+
   navItems: [
     { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },
     { key: "brands", label: "Brands", path: "/brands" },
-    { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "purchase-orders", label: "Purchase Orders", path: "/purchase-orders" },
+    { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "my-account", label: "My Account", path: "/account", hasDropdown: true },
   ],
 };

@@ -91,12 +91,6 @@ export default function Header() {
 
         {/* Right — Utility Actions */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* Sign in button when unauthenticated */}
-          {!authenticated && (
-            <Link to="/login" className="px-3 py-1 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-              Sign in
-            </Link>
-          )}
           {/* Mobile search icon */}
           <button className="md:hidden p-2 text-gray-500 hover:text-gray-700 transition-colors">
             <SearchOutlined className="text-lg" />

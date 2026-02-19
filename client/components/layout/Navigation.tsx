@@ -90,7 +90,7 @@ export default function Navigation() {
               // My Account — triggers dropdown
               if (item.hasDropdown) {
                 return (
-                  <div key={item.key} className="relative ml-auto">
+                  <div key={item.key} className="relative">
                     <button
                       onClick={() => togglePanel("my-account")}
                       className="flex items-center gap-2 h-[56px] px-4 text-sm transition-colors cursor-pointer bg-transparent"
@@ -122,7 +122,7 @@ export default function Navigation() {
                 <Link
                   key={item.key}
                   to={item.path}
-                  className="flex items-center h-[56px] px-4 text-sm transition-colors no-underline"
+                  className={`flex items-center h-[56px] px-4 text-sm transition-colors no-underline${item.key === "bulk-order" ? " ml-auto" : ""}`}
                   style={navItemStyle(item.key)}
                 >
                   {item.label}
