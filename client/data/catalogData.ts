@@ -870,6 +870,64 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
   });
 }
 
+/** Brand info for brand cards on the home page */
+export interface BrandInfo {
+  name: string;
+  slug: string;
+  skuCount: number;
+  categoryCount: number;
+  logoUrl?: string;
+}
+
+/** Get ALL products across the entire catalog (all leaf nodes) */
+export function getAllCatalogProducts(): CatalogProduct[] {
+  const leafNodes = catalogNodes.filter((n) => n.productCount > 0);
+  const allProducts: CatalogProduct[] = [];
+  for (const node of leafNodes) {
+    const products = getAllProductsForNode(node.id);
+    // Tag each product with its category for display in global/brand mode
+    for (const p of products) {
+      if (!p.attributes) p.attributes = {};
+      p.attributes.category = node.label;
+      // Store the node ID so we can resolve the category path later
+      p.attributes._nodeId = node.id;
+    }
+    allProducts.push(...products);
+  }
+  return allProducts;
+}
+
+/** Get all unique brands with aggregate stats */
+export function getAllBrands(): BrandInfo[] {
+  const brandMap = new Map<string, { categories: Set<string>; skuCount: number }>();
+
+  const leafNodes = catalogNodes.filter((n) => n.productCount > 0);
+  for (const node of leafNodes) {
+    const products = getAllProductsForNode(node.id);
+    for (const p of products) {
+      const brand = p.brand || "Unknown";
+      if (!brandMap.has(brand)) {
+        brandMap.set(brand, { categories: new Set(), skuCount: 0 });
+      }
+      const entry = brandMap.get(brand)!;
+      entry.categories.add(node.label);
+      entry.skuCount += (p.variants?.length || 1);
+    }
+  }
+
+  return Array.from(brandMap.entries()).map(([name, data]) => ({
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    skuCount: data.skuCount,
+    categoryCount: data.categories.size,
+  }));
+}
+
+/** Get the Level-1 category nodes (for global tree display) */
+export function getLevel1Nodes(): CatalogNode[] {
+  return catalogNodes.filter((n) => n.level === 1);
+}
+
 /** Get a single product by its ID */
 export function getProductById(productId: string): CatalogProduct | null {
   // Parse nodeId from productId format: "nodeId-pN"

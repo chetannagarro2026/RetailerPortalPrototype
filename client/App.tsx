@@ -28,12 +28,11 @@ export default function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/collections" element={<PlaceholderPage />} />
+              <Route path="/collections" element={<CatalogNodePage />} />
               <Route path="/catalog" element={<CatalogNodePage />} />
               <Route path="/catalog/*" element={<CatalogNodePage />} />
               <Route path="/product/:productId" element={<ProductDetailPage />} />
               <Route path="/product/:productId/sku/:variantId" element={<SkuDetailPage />} />
-              <Route path="/brands" element={<PlaceholderPage />} />
               <Route path="/bulk-order" element={<BulkOrder />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />

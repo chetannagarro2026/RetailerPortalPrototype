@@ -2,7 +2,7 @@ import { Row, Col } from "antd";
 import HeroBanner from "../components/home/HeroBanner";
 import UpdatesSection from "../components/home/UpdatesSection";
 import AvailableCreditSection from "../components/home/AvailableCreditSection";
-import FeaturedCollectionSection from "../components/home/FeaturedCollectionSection";
+import FeaturedBrandsSection from "../components/home/FeaturedBrandsSection";
 
 export default function Index() {
   return (
@@ -25,7 +25,7 @@ export default function Index() {
 
         {/* Featured Collection — Full Width */}
         <Col xs={24} className="mt-2">
-          <FeaturedCollectionSection />
+          <FeaturedBrandsSection />
         </Col>
 
       </Row>
