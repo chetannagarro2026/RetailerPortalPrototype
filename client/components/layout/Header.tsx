@@ -17,7 +17,7 @@ export default function Header() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const cartCount = useCartCount();
-  const { isAuthenticated, signIn, showSignInModal } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [cartOpen, setCartOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -168,7 +168,7 @@ export default function Header() {
           {!isAuthenticated && (
             <div className="flex items-center gap-2 ml-1">
               <button
-                onClick={() => showSignInModal()}
+                onClick={() => navigate("/sign-in")}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-lg cursor-pointer transition-colors"
                 style={{
                   border: `1px solid ${config.borderColor}`,
@@ -180,7 +180,7 @@ export default function Header() {
                 Register
               </button>
               <button
-                onClick={signIn}
+                onClick={() => navigate("/sign-in")}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold rounded-lg cursor-pointer transition-colors text-white"
                 style={{
                   border: "none",

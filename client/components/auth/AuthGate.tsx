@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 interface AuthGateProps {
@@ -8,18 +9,17 @@ interface AuthGateProps {
 
 /**
  * Wraps a route element. If the user is not authenticated,
- * triggers the sign-in modal instead of rendering the page.
+ * redirects to the sign-in page.
  */
-export default function AuthGate({ children, message }: AuthGateProps) {
-  const { isAuthenticated, showSignInModal } = useAuth();
+export default function AuthGate({ children }: AuthGateProps) {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      showSignInModal(
-        message || "Sign in to access this section of your account.",
-      );
+      navigate("/sign-in", { replace: true });
     }
-  }, [isAuthenticated, showSignInModal, message]);
+  }, [isAuthenticated, navigate]);
 
   if (!isAuthenticated) return null;
 

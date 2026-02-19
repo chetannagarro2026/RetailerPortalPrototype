@@ -18,6 +18,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
+import SignInPage from "./pages/SignInPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="/product/:productId/sku/:variantId" element={<SkuDetailPage />} />
               <Route path="/bulk-order" element={<BulkOrder />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/sign-in" element={<SignInPage />} />
 
               {/* Gated routes — require authentication */}
               <Route path="/checkout" element={<AuthGate message="To complete your purchase and use your credit account, please sign in."><CheckoutPage /></AuthGate>} />

@@ -1,4 +1,5 @@
 import { LoginOutlined, UserOutlined, CloseOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useAuth } from "../../context/AuthContext";
 
@@ -7,15 +8,16 @@ const DEFAULT_MESSAGE =
 
 export default function SignInModal() {
   const config = activeBrandConfig;
-  const { signInModalVisible, signInModalMessage, hideSignInModal, signIn } = useAuth();
+  const navigate = useNavigate();
+  const { signInModalVisible, signInModalMessage, hideSignInModal } = useAuth();
 
   if (!signInModalVisible) return null;
 
   const message = signInModalMessage || DEFAULT_MESSAGE;
 
   const handleSignIn = () => {
-    signIn();
     hideSignInModal();
+    navigate("/sign-in");
   };
 
   return (
@@ -58,7 +60,7 @@ export default function SignInModal() {
           className="text-lg font-semibold text-center mb-2"
           style={{ color: config.primaryColor }}
         >
-          Sign in to Place Your Order
+          Sign in to Continue
         </h2>
 
         {/* Message */}
@@ -80,7 +82,7 @@ export default function SignInModal() {
             Sign In
           </button>
           <button
-            onClick={hideSignInModal}
+            onClick={handleSignIn}
             className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium rounded-lg cursor-pointer transition-colors"
             style={{
               border: `1px solid ${config.borderColor}`,

@@ -6,6 +6,7 @@ import Navigation from "./Navigation";
 import CreditBanner from "./CreditBanner";
 import Footer from "./Footer";
 import SignInModal from "../auth/SignInModal";
+import GuestBanner from "./GuestBanner";
 import { useAuth } from "../../context/AuthContext";
 
 interface LayoutProps {
@@ -20,7 +21,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <ConfigProvider theme={antdTheme}>
       <div className="min-h-screen bg-white">
-        {isAuthenticated && <CreditBanner />}
+        {isAuthenticated ? <CreditBanner /> : <GuestBanner />}
         <Header />
         <Navigation />
         <main>{children}</main>

@@ -16,7 +16,7 @@ export default function Index() {
           <HeroCarousel />
         </Col>
 
-        {isAuthenticated ? (
+        {isAuthenticated && (
           <>
             {/* Updates — 8 cols */}
             <Col xs={24} lg={16}>
@@ -28,11 +28,6 @@ export default function Index() {
               <AvailableCreditSection />
             </Col>
           </>
-        ) : (
-          /* Guest: Updates full width, no credit */
-          <Col xs={24}>
-            <UpdatesSection />
-          </Col>
         )}
 
         {/* Featured Collection — Full Width */}

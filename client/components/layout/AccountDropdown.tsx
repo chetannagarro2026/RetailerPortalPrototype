@@ -12,7 +12,7 @@ import {
   CheckCircleOutlined,
   LoginOutlined,
 } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useAuth } from "../../context/AuthContext";
 
@@ -61,7 +61,8 @@ const authenticatedSections: DropdownSection[] = [
 
 export default function AccountDropdown({ visible, onClose }: AccountDropdownProps) {
   const config = activeBrandConfig;
-  const { isAuthenticated, signIn, signOut, showSignInModal } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
+  const navigate = useNavigate();
 
   if (!visible) return null;
 
@@ -86,7 +87,7 @@ export default function AccountDropdown({ visible, onClose }: AccountDropdownPro
         {isAuthenticated ? (
           <AuthenticatedContent config={config} onClose={onClose} onSignOut={() => { signOut(); onClose(); }} />
         ) : (
-          <GuestContent config={config} onClose={onClose} onSignIn={() => { signIn(); onClose(); }} onRegister={() => { showSignInModal(); onClose(); }} />
+          <GuestContent config={config} onClose={onClose} onNavigateSignIn={() => { onClose(); navigate("/sign-in"); }} />
         )}
       </div>
     </>
@@ -166,13 +167,11 @@ const guestFeatures = [
 function GuestContent({
   config,
   onClose,
-  onSignIn,
-  onRegister,
+  onNavigateSignIn,
 }: {
   config: typeof activeBrandConfig;
   onClose: () => void;
-  onSignIn: () => void;
-  onRegister: () => void;
+  onNavigateSignIn: () => void;
 }) {
   return (
     <div className="px-5 py-4">
@@ -187,7 +186,7 @@ function GuestContent({
       {/* Buttons */}
       <div className="flex flex-col gap-2.5 mb-5">
         <button
-          onClick={onSignIn}
+          onClick={onNavigateSignIn}
           className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-lg cursor-pointer transition-colors text-white"
           style={{ backgroundColor: config.primaryColor, border: "none" }}
         >
@@ -195,7 +194,7 @@ function GuestContent({
           Sign In
         </button>
         <button
-          onClick={onRegister}
+          onClick={onNavigateSignIn}
           className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg cursor-pointer transition-colors"
           style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff", color: config.primaryColor }}
         >
