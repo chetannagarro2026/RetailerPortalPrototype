@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <ConfigProvider theme={antdTheme}>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex flex-col">
         {isMinimalPage ? (
           <MinimalHeader />
         ) : (
@@ -59,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
             <Navigation />
           </>
         )}
-        <main>{children}</main>
+        <main className="flex-1">{children}</main>
         {isMinimalPage ? <LegalStrip /> : <Footer />}
         <SignInModal />
       </div>
