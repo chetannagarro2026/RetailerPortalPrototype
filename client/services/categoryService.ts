@@ -41,13 +41,16 @@ export function buildCategoryTree(categories: CategoryItem[], rootParentId: stri
     // Map categories with parentCategoryId === rootParentId to have parentId "root"
     const parentId = category.parentCategoryId === rootParentId ? "root" : category.parentCategoryId;
     
+    // Use API's leafNode flag if available, otherwise calculate from child count
+    const isLeafNode = category.leafNode === true || childCount === 0;
+    
     const node: CatalogNode = {
       id: category.id,
       parentId: parentId,
       slug: category.code.toLowerCase(),
       label: category.name,
       level: 0, // Will be calculated below
-      hasChildren: childCount > 0,
+      hasChildren: !isLeafNode,
       productCount: category.productIds?.length || 0,
       heroImage: imageBaseUrl + category.imageUrl || undefined,
       description: category.labels?.en || undefined,

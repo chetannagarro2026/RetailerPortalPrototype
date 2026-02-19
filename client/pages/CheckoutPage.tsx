@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button, Input, Steps, Checkbox } from "antd";
 import {
   ArrowLeftOutlined,
@@ -7,10 +7,12 @@ import {
   EnvironmentOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
-import { useOrderHistory, type PurchaseOrder } from "../context/OrderHistoryContext";
+import { useOrderHistory, type PurchaseOrder, type SavedAddress } from "../context/OrderHistoryContext";
 import { useCreditState } from "../hooks/useCreditState";
+import { fetchBusinessAccountsByIdList } from "../services/businessAccountService";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 
 // ── Types ───────────────────────────────────────────────────────────
@@ -88,7 +90,37 @@ function ShippingStep({
   isValid: boolean;
 }) {
   const config = activeBrandConfig;
-  const { addresses, defaultAddress, addAddress } = useOrderHistory();
+  const { addAddress } = useOrderHistory();
+  
+  // Fetch business account data - replace "9038" with actual account ID from auth context
+  const accountId = "9038"; // TODO: Get from auth context
+  const { data: businessAccounts, isLoading: isLoadingAddresses } = useQuery({
+    queryKey: ["businessAccounts", accountId],
+    queryFn: () => fetchBusinessAccountsByIdList(accountId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Transform API addresses to SavedAddress format
+  const addresses = useMemo<SavedAddress[]>(() => {
+    if (!businessAccounts || businessAccounts.length === 0) return [];
+    
+    const account = businessAccounts[0];
+    return account.addresses.map((addr, index) => ({
+      id: `addr-${addr.id}`,
+      contactName: account.contactPerson || "",
+      companyName: account.tradeName || account.legalName || "",
+      address: [addr.addrLine1, addr.addrLine2, addr.addrLine3]
+        .filter(Boolean)
+        .join(", "),
+      city: addr.city,
+      state: addr.state,
+      zip: addr.zipCode,
+      phone: account.phoneNumber || "",
+      isDefault: index === 0, // First address is default
+    }));
+  }, [businessAccounts]);
+
+  const defaultAddress = addresses.find(a => a.isDefault) || addresses[0] || null;
 
   const [selectedAddressId, setSelectedAddressId] = useState<string | "new">(
     defaultAddress ? defaultAddress.id : "new",
@@ -163,8 +195,15 @@ function ShippingStep({
         Shipping Details
       </h2>
 
+      {/* Loading State */}
+      {isLoadingAddresses && (
+        <div className="text-sm text-center py-4" style={{ color: config.secondaryColor }}>
+          Loading addresses...
+        </div>
+      )}
+
       {/* Saved Addresses */}
-      {addresses.length > 0 && (
+      {!isLoadingAddresses && addresses.length > 0 && (
         <div className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: config.secondaryColor }}>
             Saved Addresses
@@ -223,7 +262,7 @@ function ShippingStep({
       )}
 
       {/* Add New Address toggle */}
-      {!showNewForm && (
+      {!isLoadingAddresses && !showNewForm && (
         <button
           onClick={handleShowNewForm}
           className="flex items-center gap-1.5 text-sm font-medium cursor-pointer bg-transparent border-none mb-5 px-0"
@@ -235,7 +274,7 @@ function ShippingStep({
       )}
 
       {/* New Address Form */}
-      {showNewForm && (
+      {!isLoadingAddresses && showNewForm && (
         <div
           className="rounded-lg p-5 mb-5"
           style={{

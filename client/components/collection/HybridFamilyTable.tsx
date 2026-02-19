@@ -6,18 +6,30 @@ import {
   DownOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig } from "../../config/brandConfig";
-import type { CatalogProduct } from "../../data/catalogData";
+import type { CatalogProduct, CatalogNode, ProductVariant } from "../../data/catalogData";
+import type { CategoryTree } from "../../services/categoryService";
+import { getSlugPath } from "../../services/categoryService";
+import { fetchProductsByCategory } from "../../services/productService";
 import FamilyRowExpansion from "./FamilyRowExpansion";
 import QuickAddPanel from "./QuickAddPanel";
 
 const TABLE_PAGE_SIZE = 20;
 
+// Extended type to handle categories shown as products
+type ProductOrCategory = CatalogProduct & {
+  _isCategory?: boolean;
+  _categoryNode?: CatalogNode;
+};
+
 interface HybridFamilyTableProps {
-  products: CatalogProduct[];
+  products: ProductOrCategory[];
   total: number;
   page: number;
   onPageChange: (page: number) => void;
+  showCategoriesAsProducts?: boolean;
+  tree?: CategoryTree;
 }
 
 export default function HybridFamilyTable({
@@ -25,10 +37,40 @@ export default function HybridFamilyTable({
   total,
   page,
   onPageChange,
+  showCategoriesAsProducts = false,
+  tree,
 }: HybridFamilyTableProps) {
   const config = activeBrandConfig;
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [quickAddProduct, setQuickAddProduct] = useState<CatalogProduct | null>(null);
+  const [quickAddCategoryId, setQuickAddCategoryId] = useState<string | null>(null);
+
+  // Image base URL for category products
+  const IMAGE_BASE_URL = import.meta.env.VITE_PIM_IMAGE_BASE_URL || "https://ndomsdevstorageacc.blob.core.windows.net";
+
+  // Fetch products for the selected category when showing quick add for a category
+  const { data: categoryProductsResponse } = useQuery({
+    queryKey: ["category-products", quickAddCategoryId],
+    queryFn: () => fetchProductsByCategory(quickAddCategoryId!, 0, 9999),
+    enabled: !!quickAddCategoryId && showCategoriesAsProducts,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Convert API products to variants for quick add
+  const categoryProductVariants = useMemo<ProductVariant[]>(() => {
+    if (!categoryProductsResponse?.content || !quickAddCategoryId) return [];
+    
+    return categoryProductsResponse.content.map((item): ProductVariant => ({
+      id: item.id,
+      sku: item.upcId,
+      attributes: {
+        Product: item.productName || item.familyLabels?.en || "Unknown Product",
+      },
+      price: 99.99,
+      availabilityStatus: "in-stock",
+      stockQty: 100,
+    }));
+  }, [categoryProductsResponse, quickAddCategoryId]);
 
   const handleRowClick = useCallback(
     (productId: string) => {
@@ -38,14 +80,23 @@ export default function HybridFamilyTable({
   );
 
   const handleQuickAdd = useCallback(
-    (product: CatalogProduct) => {
-      setQuickAddProduct(product);
+    (product: ProductOrCategory) => {
+      if (product._isCategory && product._categoryNode) {
+        // Handle category quick add - fetch products for this category
+        setQuickAddCategoryId(product._categoryNode.id);
+        setQuickAddProduct(null);
+      } else {
+        // Handle regular product quick add
+        setQuickAddProduct(product);
+        setQuickAddCategoryId(null);
+      }
     },
     [],
   );
 
   const handleClosePanel = useCallback(() => {
     setQuickAddProduct(null);
+    setQuickAddCategoryId(null);
   }, []);
 
   if (products.length === 0) {
@@ -54,12 +105,39 @@ export default function HybridFamilyTable({
         className="text-center py-16 text-sm rounded-xl"
         style={{ color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
       >
-        No product families match the current filters.
+        {showCategoriesAsProducts 
+          ? "No subcategories found." 
+          : "No product families match the current filters."}
       </div>
     );
   }
 
-  const panelOpen = !!quickAddProduct;
+  const panelOpen = !!quickAddProduct || !!quickAddCategoryId;
+  
+  // Determine which product to show in quick add panel
+  const quickAddDisplayProduct = useMemo(() => {
+    if (quickAddProduct) return quickAddProduct;
+    if (quickAddCategoryId && categoryProductVariants.length > 0) {
+      // Create a virtual "family" product from category products
+      const categoryNode = products.find(p => p._isCategory && p._categoryNode?.id === quickAddCategoryId)?._categoryNode;
+      return {
+        id: quickAddCategoryId,
+        name: categoryNode?.label || "Category Products",
+        sku: quickAddCategoryId,
+        imageUrl: categoryNode?.heroImage || "https://via.placeholder.com/300x300?text=Category",
+        price: 0,
+        availabilityStatus: "in-stock" as const,
+        variants: categoryProductVariants,
+        variantAttributes: [
+          {
+            name: "Product",
+            values: categoryProductVariants.map(v => v.attributes.Product),
+          }
+        ],
+      } as CatalogProduct;
+    }
+    return null;
+  }, [quickAddProduct, quickAddCategoryId, categoryProductVariants, products]);
 
   return (
     <div
@@ -91,31 +169,31 @@ export default function HybridFamilyTable({
                   className="text-left px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  Family Name
+                  {showCategoriesAsProducts ? "Category Name" : "Family Name"}
                 </th>
                 <th
                   className="text-left px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  Brand
+                  {showCategoriesAsProducts ? "Description" : "Brand"}
                 </th>
                 <th
                   className="text-left px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  Key Attributes
+                  {showCategoriesAsProducts ? "Product Count" : "Key Attributes"}
                 </th>
                 <th
                   className="text-right px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  Price Range
+                  {showCategoriesAsProducts ? "" : "Price Range"}
                 </th>
                 <th
                   className="text-center px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  SKUs
+                  {showCategoriesAsProducts ? "" : "SKUs"}
                 </th>
                 <th
                   className="text-center px-3 py-2.5 font-semibold"
@@ -128,7 +206,16 @@ export default function HybridFamilyTable({
             <tbody>
               {products.map((product) => {
                 const isExpanded = expandedId === product.id;
-                return (
+                const isCategory = product._isCategory;
+                
+                return isCategory ? (
+                  <CategoryRow
+                    key={product.id}
+                    category={product}
+                    onQuickAdd={handleQuickAdd}
+                    tree={tree}
+                  />
+                ) : (
                   <FamilyRow
                     key={product.id}
                     product={product}
@@ -157,7 +244,7 @@ export default function HybridFamilyTable({
       </div>
 
       {/* Quick Add Panel — in-flow, scrolls independently */}
-      {quickAddProduct && (
+      {quickAddDisplayProduct && (
         <div
           className="shrink-0 ml-4 flex flex-col shadow-lg rounded-xl overflow-hidden"
           style={{
@@ -168,9 +255,9 @@ export default function HybridFamilyTable({
           }}
         >
           <QuickAddPanel
-            key={quickAddProduct.id}
-            product={quickAddProduct}
-            familyLink={`/product/${quickAddProduct.id}`}
+            key={quickAddDisplayProduct.id}
+            product={quickAddDisplayProduct}
+            familyLink={`/product/${quickAddDisplayProduct.id}`}
             onClose={handleClosePanel}
           />
         </div>
@@ -373,4 +460,93 @@ function computeFamilyMeta(product: CatalogProduct) {
   const attrSummary = parts.length > 0 ? parts.join(" · ") : "—";
 
   return { priceRange, skuCount, attrSummary };
+}
+
+// ── Category Row ────────────────────────────────────────────────────
+
+function CategoryRow({
+  category,
+  onQuickAdd,
+  tree,
+}: {
+  category: ProductOrCategory;
+  onQuickAdd: (category: ProductOrCategory) => void;
+  tree?: CategoryTree;
+}) {
+  const config = activeBrandConfig;
+  const categoryNode = category._categoryNode!;
+  
+  // Build proper slug path using the tree
+  const slugPath = tree ? getSlugPath(tree, categoryNode.id) : [categoryNode.slug];
+  const categoryLink = `/catalog/${slugPath.join("/")}`;
+
+  return (
+    <>
+      <tr
+        className="cursor-pointer transition-colors hover:bg-opacity-50"
+        style={{
+          borderBottom: `1px solid ${config.borderColor}`,
+          backgroundColor: "transparent",
+        }}
+      >
+        {/* Expand toggle - empty for categories */}
+        <td className="px-3 py-3" />
+
+        {/* Image */}
+        <td className="px-3 py-3">
+          <img
+            src={category.imageUrl}
+            alt={category.name}
+            className="w-12 h-12 object-cover rounded"
+            onError={(e) => {
+              e.currentTarget.src = "https://via.placeholder.com/48x48?text=Cat";
+            }}
+          />
+        </td>
+
+        {/* Category Name */}
+        <td className="px-3 py-3">
+          <Link
+            to={categoryLink}
+            className="font-medium hover:underline"
+            style={{ color: config.primaryColor }}
+          >
+            {category.name}
+          </Link>
+        </td>
+
+        {/* Description */}
+        <td className="px-3 py-3" style={{ color: config.secondaryColor }}>
+          {categoryNode.description || "—"}
+        </td>
+
+        {/* Product Count */}
+        <td className="px-3 py-3 text-center" style={{ color: config.secondaryColor }}>
+          {categoryNode.productCount || 0} products
+        </td>
+
+        {/* Empty columns for alignment */}
+        <td className="px-3 py-3" />
+        <td className="px-3 py-3" />
+
+        {/* Actions */}
+        <td className="px-3 py-3 text-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickAdd(category);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+            style={{
+              color: "#fff",
+              backgroundColor: config.primaryColor,
+            }}
+          >
+            <ShoppingCartOutlined className="text-sm" />
+            Quick Add
+          </button>
+        </td>
+      </tr>
+    </>
+  );
 }

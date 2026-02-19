@@ -16,6 +16,7 @@ const AZURE_APIM_BASE = import.meta.env.VITE_AZURE_APIM_BASE_URL || "https://ndo
 const EXTERNAL_API_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PIM_API_PATH || "/pim/dev/v1/api"}`;
 const EXTERNAL_PRICE_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PRICE_API_PATH || "/price-management/dev/api/v1"}`;
 const EXTERNAL_PO_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PO_API_PATH || "/purchase-order/dev/api/v1"}`;
+const EXTERNAL_CONFIG_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_CONFIG_API_PATH || "/configuration/dev/api/v1"}`;
 
 export const apiConfig = {
   base: BASE_URL,
@@ -43,6 +44,10 @@ export const apiConfig = {
 
     // Purchase Orders
     poSearch: `${EXTERNAL_PO_BASE}/purchase-order/search`,
+
+    // Business Accounts (Configuration API)
+    businessAccountsByIdList: (ids: string) => 
+      `${EXTERNAL_CONFIG_BASE}/configuration/business-accounts/byIdList?ids=${ids}`,
 
     // Add your API endpoints below
     // products: `${BASE_URL}/products`,
