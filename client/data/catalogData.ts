@@ -904,7 +904,7 @@ const brandLogoUrls: Record<string, string> = {
   "IZOD": "https://www.google.com/s2/favicons?domain=izod.com&sz=128",
   "Buffalo David Bitton": "https://www.google.com/s2/favicons?domain=buffalojeans.com&sz=128",
   "Nautica": "https://www.google.com/s2/favicons?domain=nautica.com&sz=128",
-  "Arrow": "https://www.google.com/s2/favicons?domain=arrowusa.com&sz=128",
+  "Arrow": "https://cdn.builder.io/api/v1/image/assets%2F0f4e56209ef24b2d922b97ec1205a84f%2F4839d9c7498b4ed7ad34a5f2c068ad0e",
   "Jessica Simpson": "https://www.google.com/s2/favicons?domain=jessicasimpsoncollection.com&sz=128",
   "Joe's Jeans": "https://www.google.com/s2/favicons?domain=joesjeans.com&sz=128",
   "Frye": "https://www.google.com/s2/favicons?domain=thefryecompany.com&sz=128",
