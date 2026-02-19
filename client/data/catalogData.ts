@@ -870,6 +870,79 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
   });
 }
 
+/** Brand info for brand cards on the home page */
+export interface BrandInfo {
+  name: string;
+  slug: string;
+  skuCount: number;
+  categoryCount: number;
+  logoUrl?: string;
+}
+
+/** Get ALL products across the entire catalog (all leaf nodes) */
+export function getAllCatalogProducts(): CatalogProduct[] {
+  const leafNodes = catalogNodes.filter((n) => n.productCount > 0);
+  const allProducts: CatalogProduct[] = [];
+  for (const node of leafNodes) {
+    const products = getAllProductsForNode(node.id);
+    // Tag each product with its category for display in global/brand mode
+    for (const p of products) {
+      if (!p.attributes) p.attributes = {};
+      p.attributes.category = node.label;
+      // Store the node ID so we can resolve the category path later
+      p.attributes._nodeId = node.id;
+    }
+    allProducts.push(...products);
+  }
+  return allProducts;
+}
+
+/** Brand logo URLs — maps brand name to a logo image */
+const brandLogoUrls: Record<string, string> = {
+  "Calvin Klein": "https://www.google.com/s2/favicons?domain=calvinklein.com&sz=128",
+  "Tommy Hilfiger": "https://www.google.com/s2/favicons?domain=tommy.com&sz=128",
+  "IZOD": "https://www.google.com/s2/favicons?domain=izod.com&sz=128",
+  "Buffalo David Bitton": "https://www.google.com/s2/favicons?domain=buffalojeans.com&sz=128",
+  "Nautica": "https://www.google.com/s2/favicons?domain=nautica.com&sz=128",
+  "Arrow": "https://cdn.builder.io/api/v1/image/assets%2F0f4e56209ef24b2d922b97ec1205a84f%2F4839d9c7498b4ed7ad34a5f2c068ad0e",
+  "Jessica Simpson": "https://cdn.builder.io/api/v1/file/assets%2F0f4e56209ef24b2d922b97ec1205a84f%2F39ce543361e24b3d9cfbd7f29d831e6b",
+  "Joe's Jeans": "https://www.google.com/s2/favicons?domain=joesjeans.com&sz=128",
+  "Frye": "https://www.google.com/s2/favicons?domain=thefryecompany.com&sz=128",
+  "Hervé Léger": "https://www.google.com/s2/favicons?domain=herveleger.com&sz=128",
+};
+
+/** Get all unique brands with aggregate stats */
+export function getAllBrands(): BrandInfo[] {
+  const brandMap = new Map<string, { categories: Set<string>; skuCount: number }>();
+
+  const leafNodes = catalogNodes.filter((n) => n.productCount > 0);
+  for (const node of leafNodes) {
+    const products = getAllProductsForNode(node.id);
+    for (const p of products) {
+      const brand = p.brand || "Unknown";
+      if (!brandMap.has(brand)) {
+        brandMap.set(brand, { categories: new Set(), skuCount: 0 });
+      }
+      const entry = brandMap.get(brand)!;
+      entry.categories.add(node.label);
+      entry.skuCount += (p.variants?.length || 1);
+    }
+  }
+
+  return Array.from(brandMap.entries()).map(([name, data]) => ({
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    skuCount: data.skuCount,
+    categoryCount: data.categories.size,
+    logoUrl: brandLogoUrls[name],
+  }));
+}
+
+/** Get the Level-1 category nodes (for global tree display) */
+export function getLevel1Nodes(): CatalogNode[] {
+  return catalogNodes.filter((n) => n.level === 1);
+}
+
 /** Get a single product by its ID */
 export function getProductById(productId: string): CatalogProduct | null {
   // Parse nodeId from productId format: "nodeId-pN"

@@ -66,14 +66,25 @@ export interface CatalogState {
 
 // ── Hook ────────────────────────────────────────────────────────────
 
-export function useCatalogState(nodeId: string, pageSize: number, filtersAvailable?: string[]): CatalogState {
-  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
+export function useCatalogState(
+  nodeId: string,
+  pageSize: number,
+  filtersAvailable?: string[],
+  /** When provided, use these products directly instead of loading from nodeId */
+  injectedProducts?: CatalogProduct[],
+  /** Initial filters to apply on mount (e.g. brand pre-selection) */
+  initialFilters?: ActiveFilters,
+): CatalogState {
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>(initialFilters ?? {});
   const [priceRange, setPriceRangeState] = useState<PriceRange | null>(null);
   const [sortBy, setSortByState] = useState<SortKey>("relevance");
   const [page, setPageState] = useState(1);
 
-  // Generate all products for this node (memoized by nodeId)
-  const allProducts = useMemo(() => getAllProductsForNode(nodeId), [nodeId]);
+  // Generate all products for this node (memoized by nodeId), or use injected products
+  const allProducts = useMemo(
+    () => injectedProducts ?? getAllProductsForNode(nodeId),
+    [nodeId, injectedProducts],
+  );
 
   // Resolve available filters from the full product set
   const resolvedFilters = useMemo<ResolvedFilter[]>(() => {

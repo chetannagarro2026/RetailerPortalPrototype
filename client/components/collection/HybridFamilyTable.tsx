@@ -18,6 +18,8 @@ interface HybridFamilyTableProps {
   total: number;
   page: number;
   onPageChange: (page: number) => void;
+  /** Show a Category column (used in global/brand mode) */
+  showCategory?: boolean;
 }
 
 export default function HybridFamilyTable({
@@ -25,6 +27,7 @@ export default function HybridFamilyTable({
   total,
   page,
   onPageChange,
+  showCategory = false,
 }: HybridFamilyTableProps) {
   const config = activeBrandConfig;
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -99,6 +102,14 @@ export default function HybridFamilyTable({
                 >
                   Brand
                 </th>
+                {showCategory && (
+                  <th
+                    className="text-left px-3 py-2.5 font-semibold"
+                    style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  >
+                    Category
+                  </th>
+                )}
                 <th
                   className="text-left px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
@@ -135,6 +146,7 @@ export default function HybridFamilyTable({
                     isExpanded={isExpanded}
                     onRowClick={handleRowClick}
                     onQuickAdd={handleQuickAdd}
+                    showCategory={showCategory}
                   />
                 );
               })}
@@ -186,11 +198,13 @@ function FamilyRow({
   isExpanded,
   onRowClick,
   onQuickAdd,
+  showCategory = false,
 }: {
   product: CatalogProduct;
   isExpanded: boolean;
   onRowClick: (id: string) => void;
   onQuickAdd: (product: CatalogProduct) => void;
+  showCategory?: boolean;
 }) {
   const config = activeBrandConfig;
   const familyLink = `/product/${product.id}`;
@@ -265,6 +279,16 @@ function FamilyRow({
           {product.brand || "—"}
         </td>
 
+        {/* Category (global/brand mode) */}
+        {showCategory && (
+          <td
+            className="px-3 py-2 text-[11px]"
+            style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
+          >
+            {product.attributes?.category || "—"}
+          </td>
+        )}
+
         {/* Key Attributes */}
         <td
           className="px-3 py-2 text-[11px]"
@@ -323,7 +347,7 @@ function FamilyRow({
       {isExpanded && (
         <tr>
           <td
-            colSpan={8}
+            colSpan={showCategory ? 9 : 8}
             className="p-0"
             style={{ borderBottom: `1px solid ${config.borderColor}` }}
           >
