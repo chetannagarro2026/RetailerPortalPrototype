@@ -1,15 +1,20 @@
 import { activeBrandConfig } from "../../config/brandConfig";
-import { type CatalogNode, getChildren } from "../../data/catalogData";
+import { type CatalogNode } from "../../data/catalogData";
+import { type CategoryTree } from "../../services/categoryService";
 import CategoryCard from "./CategoryCard";
 import NodeCard from "./NodeCard";
 
 interface SubcategoryCardGridProps {
   node: CatalogNode;
+  children?: CatalogNode[];
+  tree: CategoryTree;
 }
 
-export default function SubcategoryCardGrid({ node }: SubcategoryCardGridProps) {
+export default function SubcategoryCardGrid({ node, children: childrenProp, tree }: SubcategoryCardGridProps) {
   const config = activeBrandConfig;
-  const children = getChildren(node.id);
+  
+  // Use provided children if available (from API), otherwise fall back to empty array
+  const children = childrenProp || [];
 
   if (children.length === 0) return null;
 
@@ -26,7 +31,7 @@ export default function SubcategoryCardGrid({ node }: SubcategoryCardGridProps) 
     return (
       <div className={`grid ${gridCols} ${gap}`}>
         {children.map((child) => (
-          <CategoryCard key={child.id} node={child} variant={variant} />
+          <CategoryCard key={child.id} node={child} variant={variant} tree={tree} />
         ))}
       </div>
     );
@@ -36,7 +41,7 @@ export default function SubcategoryCardGrid({ node }: SubcategoryCardGridProps) 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {children.map((child) => (
-        <NodeCard key={child.id} node={child} />
+        <NodeCard key={child.id} node={child} tree={tree} />
       ))}
     </div>
   );

@@ -1,17 +1,19 @@
 import { Link } from "react-router-dom";
 import { RightOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import { type CatalogNode, getChildren, getSlugPath } from "../../data/catalogData";
+import { type CatalogNode } from "../../data/catalogData";
+import { getChildren, getSlugPath, type CategoryTree } from "../../services/categoryService";
 
 interface NodeCardProps {
   node: CatalogNode;
+  tree: CategoryTree;
 }
 
-export default function NodeCard({ node }: NodeCardProps) {
+export default function NodeCard({ node, tree }: NodeCardProps) {
   const config = activeBrandConfig;
-  const slugPath = getSlugPath(node.id);
+  const slugPath = getSlugPath(tree, node.id);
   const href = `/catalog/${slugPath.join("/")}`;
-  const childCount = getChildren(node.id).length;
+  const childCount = getChildren(tree, node.id).length;
 
   return (
     <Link

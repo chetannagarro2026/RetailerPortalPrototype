@@ -1,18 +1,26 @@
 import { useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { Spin } from "antd";
 import { activeBrandConfig } from "../config/brandConfig";
 import {
   catalogConfig,
+  getAllProductsForNode,
+} from "../data/catalogData";
+import { 
+  fetchCategoriesByParent, 
+  buildCategoryTree,
   getNodeBySlugPath,
   getChildren,
   getAncestors,
-  getAllProductsForNode,
-} from "../data/catalogData";
-import { useCatalogState, type SortKey } from "../hooks/useCatalogState";
+  type CategoryTree as CategoryTreeType,
+} from "../services/categoryService";
+import { fetchProductsByCategory } from "../services/productService";
+import { useCatalogState } from "../hooks/useCatalogState";
 import { filterAttributeRegistry } from "../data/catalogData";
 import CatalogBreadcrumb from "../components/catalog/CatalogBreadcrumb";
 import SubcategoryCardGrid from "../components/catalog/SubcategoryCardGrid";
-import CategoryTree from "../components/catalog/CategoryTree";
+import CategoryTreeComponent from "../components/catalog/CategoryTree";
 import FilterPanel from "../components/catalog/FilterPanel";
 import ActiveFilterChips from "../components/catalog/ActiveFilterChips";
 import FamilyCardGrid from "../components/collection/FamilyCardGrid";
@@ -26,33 +34,77 @@ import HybridFamilyTable from "../components/collection/HybridFamilyTable";
 // HYBRID COLLECTION PAGE (Any node with products — N-level scalable)
 // ═══════════════════════════════════════════════════════════════════
 
-function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
+// Image base URL configuration
+const IMAGE_BASE_URL = import.meta.env.VITE_PIM_IMAGE_BASE_URL || "https://ndomsdevstorageacc.blob.core.windows.net";
+
+function HybridCollectionPage({ 
+  slugPath, 
+  tree,
+  categoryId,
+}: { 
+  slugPath: string[];
+  tree: CategoryTreeType;
+  categoryId: string;
+}) {
   const config = activeBrandConfig;
-  const node = getNodeBySlugPath(slugPath)!;
+  const node = getNodeBySlugPath(tree, slugPath)!;
   const nodeId = node.id;
 
+  // Fetch products from API for this category
+  const { data: productsResponse, isLoading: productsLoading } = useQuery({
+    queryKey: ["products", categoryId],
+    queryFn: () => fetchProductsByCategory(categoryId, 0, 9999),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Convert API products to CatalogProduct format
+  const apiProducts = useMemo(() => {
+    if (!productsResponse?.content) return [];
+    
+    return productsResponse.content.map((item) => ({
+      id: item.id,
+      name: item.productName || item.familyLabels?.en || "Unknown Product",
+      sku: item.upcId,
+      imageUrl: item.imageIconPath 
+        ? `${IMAGE_BASE_URL}${item.imageIconPath}`
+        : "https://via.placeholder.com/300x300?text=No+Image",
+      price: 99.99, // Default price - would come from price API in real scenario
+      availabilityStatus: "in-stock" as const,
+      brand: undefined,
+    }));
+  }, [productsResponse]);
+
   const catalog = useCatalogState(nodeId, 9999, node.filtersAvailable);
-  const children = getChildren(node.id);
-  const ancestors = getAncestors(node.id);
+  const children = getChildren(tree, node.id);
+  const ancestors = getAncestors(tree, node.id);
+  
+  // Always show tree from the level 1 ancestor when viewing products
+  // This allows navigation to sibling categories at the same level
   const treeRoot = ancestors.find((a) => a.level === 1) || (node.level === 1 ? node : null);
+  
+  // Show tree sidebar when at level 2 or deeper (per catalogConfig.treeVisibilityStartLevel)
+  const shouldShowTree = node.level >= catalogConfig.treeVisibilityStartLevel && treeRoot;
 
   const [viewMode, setViewMode] = useState<CollectionViewMode>("table");
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(1);
 
+  // Use API products if available, fallback to mock data
+  const products = apiProducts.length > 0 ? apiProducts : catalog.filteredProducts;
+
   // When a tab is active, load that child node's products directly
   // and apply the same filters/sorting from the parent catalog state
   const displayProducts = useMemo(() => {
-    if (!activeTab) return catalog.filteredProducts;
+    if (!activeTab) return products;
 
-    let products = getAllProductsForNode(activeTab);
+    let tabProducts = getAllProductsForNode(activeTab);
 
     // Apply active filters (same logic as useCatalogState)
     for (const [key, values] of Object.entries(catalog.activeFilters)) {
       if (values.length === 0) continue;
       const def = filterAttributeRegistry.find((d) => d.key === key);
       if (!def) continue;
-      products = products.filter((p) => {
+      tabProducts = tabProducts.filter((p) => {
         const raw = def.extract(p);
         const pv = Array.isArray(raw) ? raw : raw != null ? [String(raw)] : [];
         return pv.some((v) => values.includes(v));
@@ -61,13 +113,13 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
 
     // Apply price range
     if (catalog.priceRange) {
-      products = products.filter(
+      tabProducts = tabProducts.filter(
         (p) => p.price >= catalog.priceRange!.min && p.price <= catalog.priceRange!.max,
       );
     }
 
     // Apply sorting
-    const sorted = [...products];
+    const sorted = [...tabProducts];
     switch (catalog.sortBy) {
       case "price-asc":  sorted.sort((a, b) => a.price - b.price); break;
       case "price-desc": sorted.sort((a, b) => b.price - a.price); break;
@@ -77,7 +129,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
       default: break;
     }
     return sorted;
-  }, [activeTab, catalog.filteredProducts, catalog.activeFilters, catalog.priceRange, catalog.sortBy]);
+  }, [activeTab, products, catalog.activeFilters, catalog.priceRange, catalog.sortBy]);
 
   // Paginate for table view
   const PAGE_SIZE = 20;
@@ -91,13 +143,21 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
     setTablePage(1);
   }, []);
 
+  if (productsLoading) {
+    return (
+      <div className="max-w-content-wide mx-auto px-6 py-12 flex justify-center items-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-content-wide mx-auto px-6 py-8">
-      <CatalogBreadcrumb node={node} />
+      <CatalogBreadcrumb node={node} tree={tree} />
 
       <div className="flex gap-6">
         {/* Left Sidebar: Tree + Filters */}
-        {treeRoot && (
+        {shouldShowTree && (
           <aside
             className="shrink-0 sticky self-start overflow-y-auto pr-4"
             style={{
@@ -107,7 +167,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
               borderRight: `1px solid ${config.borderColor}`,
             }}
           >
-            <CategoryTree activeNodeId={activeTab || node.id} rootNodeId={treeRoot.id} />
+            <CategoryTreeComponent activeNodeId={activeTab || node.id} rootNodeId={treeRoot!.id} tree={tree} />
 
             {catalog.resolvedFilters.length > 0 && (
               <div
@@ -189,9 +249,48 @@ export default function CatalogNodePage() {
   const config = activeBrandConfig;
   const { "*": splat } = useParams();
   const slugPath = splat ? splat.split("/").filter(Boolean) : [];
-  const node = getNodeBySlugPath(slugPath);
+  
+  // Fetch categories from API (includes imageUrl and assetId fields)
+  const parentId = "08d6ff04-11c5-4e5b-a1c8-11ac167e849b";
+  const { data: categories, isLoading, error } = useQuery({
+    queryKey: ["categories", parentId],
+    queryFn: () => fetchCategoriesByParent(parentId),
+    staleTime: 5 * 60 * 1000,
+  });
+  
+  // Build tree from API data
+  const tree = useMemo(() => {
+    if (!categories || categories.length === 0) return null;
+    return buildCategoryTree(categories, parentId);
+  }, [categories, parentId]);
+  
+  // Find the current node from the tree
+  const node = tree ? getNodeBySlugPath(tree, slugPath) : null;
 
-  if (!node) {
+  // Show loading state while fetching categories
+  if (isLoading) {
+    return (
+      <div className="max-w-content-wide mx-auto px-6 py-12 flex justify-center items-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+  
+  // Show error state if API fails
+  if (error) {
+    return (
+      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
+        <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
+          Error Loading Categories
+        </h1>
+        <p className="text-sm" style={{ color: config.secondaryColor }}>
+          {error instanceof Error ? error.message : 'Failed to load categories. Please try again.'}
+        </p>
+      </div>
+    );
+  }
+  
+  if (!node || !tree) {
     return (
       <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
@@ -208,9 +307,11 @@ export default function CatalogNodePage() {
   const isSubcategoryLanding = node.hasChildren && !hasProducts;
 
   if (isSubcategoryLanding) {
+    const children = getChildren(tree, node.id);
+    
     return (
       <div className="max-w-content-wide mx-auto px-6 py-8">
-        {node.level > 0 && <CatalogBreadcrumb node={node} />}
+        {node.level > 0 && <CatalogBreadcrumb node={node} tree={tree} />}
         <div className="mb-6">
           <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
             {node.label}
@@ -221,10 +322,18 @@ export default function CatalogNodePage() {
             </p>
           )}
         </div>
-        <SubcategoryCardGrid node={node} />
+        {children.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-sm" style={{ color: config.secondaryColor }}>
+              No subcategories found.
+            </p>
+          </div>
+        ) : (
+          <SubcategoryCardGrid node={node} children={children} tree={tree} />
+        )}
       </div>
     );
   }
 
-  return <HybridCollectionPage slugPath={slugPath} />;
+  return <HybridCollectionPage slugPath={slugPath} tree={tree} categoryId={node.id} />;
 }

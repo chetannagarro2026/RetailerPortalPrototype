@@ -1,15 +1,17 @@
 import { Link } from "react-router-dom";
 import { RightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import { type CatalogNode, getAncestors, getSlugPath } from "../../data/catalogData";
+import { type CatalogNode } from "../../data/catalogData";
+import { getAncestors, getSlugPath, type CategoryTree } from "../../services/categoryService";
 
 interface CatalogBreadcrumbProps {
   node: CatalogNode;
+  tree: CategoryTree;
 }
 
-export default function CatalogBreadcrumb({ node }: CatalogBreadcrumbProps) {
+export default function CatalogBreadcrumb({ node, tree }: CatalogBreadcrumbProps) {
   const config = activeBrandConfig;
-  const ancestors = getAncestors(node.id).filter((a) => a.level >= 0);
+  const ancestors = getAncestors(tree, node.id).filter((a) => a.level >= 0);
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -18,7 +20,7 @@ export default function CatalogBreadcrumb({ node }: CatalogBreadcrumbProps) {
       .filter((a) => a.level >= 1)
       .map((a) => ({
         label: a.label,
-        href: `/catalog/${getSlugPath(a.id).join("/")}`,
+        href: `/catalog/${getSlugPath(tree, a.id).join("/")}`,
       })),
     { label: node.label, href: "" },
   ];

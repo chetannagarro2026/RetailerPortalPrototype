@@ -15,12 +15,15 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <AntApp>
         <OrderHistoryProvider>
         <OrderProvider>
@@ -55,6 +58,7 @@ export default function App() {
         </OrderProvider>
         </OrderHistoryProvider>
       </AntApp>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

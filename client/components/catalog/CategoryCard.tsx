@@ -1,26 +1,28 @@
 import { Link } from "react-router-dom";
 import { RightOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type CategoryCardVariant } from "../../config/brandConfig";
-import { type CatalogNode, getChildren, getSlugPath } from "../../data/catalogData";
+import { type CatalogNode } from "../../data/catalogData";
+import { getChildren, getSlugPath, type CategoryTree } from "../../services/categoryService";
 
 interface CategoryCardProps {
   node: CatalogNode;
   variant: CategoryCardVariant;
+  tree: CategoryTree;
 }
 
-export default function CategoryCard({ node, variant }: CategoryCardProps) {
+export default function CategoryCard({ node, variant, tree }: CategoryCardProps) {
   return variant === "hero"
-    ? <HeroCard node={node} />
-    : <ThumbnailCard node={node} />;
+    ? <HeroCard node={node} tree={tree} />
+    : <ThumbnailCard node={node} tree={tree} />;
 }
 
 // ── Variant A: Hero Card ────────────────────────────────────────────
 
-function HeroCard({ node }: { node: CatalogNode }) {
+function HeroCard({ node, tree }: { node: CatalogNode; tree: CategoryTree }) {
   const config = activeBrandConfig;
-  const slugPath = getSlugPath(node.id);
+  const slugPath = getSlugPath(tree, node.id);
   const href = `/catalog/${slugPath.join("/")}`;
-  const childCount = getChildren(node.id).length;
+  const childCount = getChildren(tree, node.id).length;
 
   return (
     <Link
@@ -79,11 +81,11 @@ function HeroCard({ node }: { node: CatalogNode }) {
 
 // ── Variant B: Thumbnail Card ───────────────────────────────────────
 
-function ThumbnailCard({ node }: { node: CatalogNode }) {
+function ThumbnailCard({ node, tree }: { node: CatalogNode; tree: CategoryTree }) {
   const config = activeBrandConfig;
-  const slugPath = getSlugPath(node.id);
+  const slugPath = getSlugPath(tree, node.id);
   const href = `/catalog/${slugPath.join("/")}`;
-  const childCount = getChildren(node.id).length;
+  const childCount = getChildren(tree, node.id).length;
 
   return (
     <Link

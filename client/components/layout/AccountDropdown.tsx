@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface AccountDropdownProps {
   visible: boolean;
@@ -58,6 +59,7 @@ const sections: DropdownSection[] = [
 
 export default function AccountDropdown({ visible, onClose }: AccountDropdownProps) {
   const config = activeBrandConfig;
+  const { logout } = useAuth();
 
   if (!visible) return null;
 
@@ -126,7 +128,10 @@ export default function AccountDropdown({ visible, onClose }: AccountDropdownPro
           style={{ borderBottom: `1px solid ${config.borderColor}` }}
         />
         <button
-          onClick={onClose}
+          onClick={() => {
+            logout();
+            onClose();
+          }}
           className="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors cursor-pointer text-left"
           style={{ color: "#DC2626" }}
           onMouseEnter={(e) => {

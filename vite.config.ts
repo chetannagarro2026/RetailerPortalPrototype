@@ -7,9 +7,13 @@ import { createServer } from "./server";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 4200,
     fs: {
-      allow: ["./client", "./shared"],
+      allow: [
+      path.resolve(__dirname),
+      path.resolve(__dirname, "client"),
+      path.resolve(__dirname, "shared")
+    ],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
   },

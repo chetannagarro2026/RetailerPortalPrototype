@@ -9,11 +9,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { searchCatalog, type SearchResult } from "../../data/skuIndex";
 import CartDropdown, { useCartCount } from "./CartDropdown";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Header() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const cartCount = useCartCount();
+  const { authenticated } = useAuth();
   const [cartOpen, setCartOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -131,6 +133,13 @@ export default function Header() {
 
         {/* Right — Utility Actions */}
         <div className="flex items-center gap-3 shrink-0">
+          {/* Sign in button when unauthenticated */}
+          {!authenticated && (
+            <Link to="/login" className="px-3 py-1 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+              Sign in
+            </Link>
+          )}
+          {/* Mobile search icon */}
           <button className="md:hidden p-2 text-gray-500 hover:text-gray-700 transition-colors">
             <SearchOutlined className="text-lg" />
           </button>

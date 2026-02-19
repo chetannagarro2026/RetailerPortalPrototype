@@ -1,44 +1,68 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { RightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import {
   type CatalogNode,
   catalogNodes,
+  getChildren as getMockChildren,
+  getSlugPath as getMockSlugPath,
+  getAncestors as getMockAncestors,
+} from "../../data/catalogData";
+import {
+  type CategoryTree as CategoryTreeType,
   getChildren,
   getSlugPath,
   getAncestors,
-} from "../../data/catalogData";
+} from "../../services/categoryService";
 
 interface CategoryTreeProps {
   activeNodeId: string;
   rootNodeId: string;
+  tree?: CategoryTreeType; // Optional tree from API, falls back to mock data
 }
 
-export default function CategoryTree({ activeNodeId, rootNodeId }: CategoryTreeProps) {
+export default function CategoryTree({ activeNodeId, rootNodeId, tree }: CategoryTreeProps) {
   const config = activeBrandConfig;
-  const rootChildren = getChildren(rootNodeId);
+  
+  // Use tree-based functions if tree is provided, otherwise use mock functions
+  const getChildrenFn = useMemo(
+    () => (tree ? (nodeId: string) => getChildren(tree, nodeId) : getMockChildren),
+    [tree]
+  );
+  const getAncestorsFn = useMemo(
+    () => (tree ? (nodeId: string) => getAncestors(tree, nodeId) : getMockAncestors),
+    [tree]
+  );
+  
+  const rootChildren = getChildrenFn(rootNodeId);
 
   // Auto-expand the active branch
-  const ancestorIds = new Set(getAncestors(activeNodeId).map((a) => a.id));
   const [expanded, setExpanded] = useState<Set<string>>(() => {
     const initial = new Set<string>();
-    ancestorIds.forEach((id) => initial.add(id));
-    const activeNode = catalogNodes.find((n) => n.id === activeNodeId);
+    const ancestors = getAncestorsFn(activeNodeId);
+    ancestors.forEach((a) => initial.add(a.id));
+    const activeNode = tree 
+      ? tree.nodes.get(activeNodeId)
+      : catalogNodes.find((n) => n.id === activeNodeId);
     if (activeNode?.hasChildren) initial.add(activeNodeId);
     return initial;
   });
 
   // Re-expand when active node changes
   useEffect(() => {
+    const ancestors = getAncestorsFn(activeNodeId);
+    const activeNode = tree 
+      ? tree.nodes.get(activeNodeId)
+      : catalogNodes.find((n) => n.id === activeNodeId);
+    
     setExpanded((prev) => {
       const next = new Set(prev);
-      getAncestors(activeNodeId).forEach((a) => next.add(a.id));
-      const activeNode = catalogNodes.find((n) => n.id === activeNodeId);
+      ancestors.forEach((a) => next.add(a.id));
       if (activeNode?.hasChildren) next.add(activeNodeId);
       return next;
     });
-  }, [activeNodeId]);
+  }, [activeNodeId, getAncestorsFn, tree]);
 
   const toggle = (nodeId: string) => {
     setExpanded((prev) => {
@@ -60,6 +84,7 @@ export default function CategoryTree({ activeNodeId, rootNodeId }: CategoryTreeP
           onToggle={toggle}
           config={config}
           depth={0}
+          tree={tree}
         />
       ))}
     </nav>
@@ -73,13 +98,24 @@ interface TreeNodeProps {
   onToggle: (id: string) => void;
   config: typeof activeBrandConfig;
   depth: number;
+  tree?: CategoryTreeType;
 }
 
-function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth }: TreeNodeProps) {
-  const children = getChildren(node.id);
+function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth, tree }: TreeNodeProps) {
+  // Use tree-based functions if tree is provided, otherwise use mock functions
+  const getChildrenFn = useMemo(
+    () => (tree ? (nodeId: string) => getChildren(tree, nodeId) : getMockChildren),
+    [tree]
+  );
+  const getSlugPathFn = useMemo(
+    () => (tree ? (nodeId: string) => getSlugPath(tree, nodeId) : getMockSlugPath),
+    [tree]
+  );
+  
+  const children = getChildrenFn(node.id);
   const isExpanded = expanded.has(node.id);
   const isActive = node.id === activeNodeId;
-  const slugPath = getSlugPath(node.id);
+  const slugPath = getSlugPathFn(node.id);
   const href = `/catalog/${slugPath.join("/")}`;
 
   return (
@@ -134,6 +170,7 @@ function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth }: Tre
               onToggle={onToggle}
               config={config}
               depth={depth + 1}
+              tree={tree}
             />
           ))}
         </div>
