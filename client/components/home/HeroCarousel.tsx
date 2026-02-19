@@ -23,7 +23,7 @@ const slides: Slide[] = [
     ctaLabel: "View Fall Outerwear",
     ctaRoute: "/catalog/women/outerwear?season=fall-2026&view=table",
     backgroundImage:
-      "https://images.pexels.com/photos/6045285/pexels-photo-6045285.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/1488470/pexels-photo-1488470.jpeg?auto=compress&cs=tinysrgb&w=1600",
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ const slides: Slide[] = [
     ctaLabel: "Reorder Best Sellers",
     ctaRoute: "/catalog?purchased=true&availability=in-stock&view=table",
     backgroundImage:
-      "https://images.pexels.com/photos/5775099/pexels-photo-5775099.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://images.pexels.com/photos/1884581/pexels-photo-1884581.jpeg?auto=compress&cs=tinysrgb&w=1600",
   },
 ];
 
