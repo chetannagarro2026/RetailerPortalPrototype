@@ -12,7 +12,7 @@ export default function MinimalHeader() {
         borderBottom: `1px solid ${config.borderColor}`,
       }}
     >
-      <div className="h-full flex items-center justify-center px-6">
+      <div className="h-full flex items-center justify-start px-6">
         <Link to="/" className="flex items-center gap-3 shrink-0 no-underline">
           {config.logoUrl ? (
             <img src={config.logoUrl} alt={config.brandName} className="h-8 w-auto" />

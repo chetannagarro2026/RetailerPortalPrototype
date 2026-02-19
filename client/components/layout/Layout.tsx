@@ -17,6 +17,31 @@ interface LayoutProps {
 
 const antdTheme = createAntdTheme(activeBrandConfig);
 
+const legalLinks = ["Terms of Service", "Privacy Policy"];
+
+function LegalStrip() {
+  const config = activeBrandConfig;
+  return (
+    <div style={{ backgroundColor: config.primaryColor }}>
+      <div className="max-w-content-wide mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <span className="text-xs text-gray-400">
+          &copy; 2026 Retailer Portal
+        </span>
+        <div className="flex items-center gap-4">
+          {legalLinks.map((link) => (
+            <span
+              key={link}
+              className="text-xs text-gray-400 cursor-default hover:text-gray-300 transition-colors"
+            >
+              {link}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Layout({ children }: LayoutProps) {
   const { isAuthenticated } = useAuth();
   const { pathname } = useLocation();
@@ -35,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
           </>
         )}
         <main>{children}</main>
-        {!isMinimalPage && <Footer />}
+        {isMinimalPage ? <LegalStrip /> : <Footer />}
         <SignInModal />
       </div>
     </ConfigProvider>
