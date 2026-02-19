@@ -905,7 +905,7 @@ const brandLogoUrls: Record<string, string> = {
   "Buffalo David Bitton": "https://www.google.com/s2/favicons?domain=buffalojeans.com&sz=128",
   "Nautica": "https://www.google.com/s2/favicons?domain=nautica.com&sz=128",
   "Arrow": "https://cdn.builder.io/api/v1/image/assets%2F0f4e56209ef24b2d922b97ec1205a84f%2F4839d9c7498b4ed7ad34a5f2c068ad0e",
-  "Jessica Simpson": "https://www.google.com/s2/favicons?domain=jessicasimpsoncollection.com&sz=128",
+  "Jessica Simpson": "https://cdn.builder.io/api/v1/file/assets%2F0f4e56209ef24b2d922b97ec1205a84f%2F39ce543361e24b3d9cfbd7f29d831e6b",
   "Joe's Jeans": "https://www.google.com/s2/favicons?domain=joesjeans.com&sz=128",
   "Frye": "https://www.google.com/s2/favicons?domain=thefryecompany.com&sz=128",
   "Hervé Léger": "https://www.google.com/s2/favicons?domain=herveleger.com&sz=128",
