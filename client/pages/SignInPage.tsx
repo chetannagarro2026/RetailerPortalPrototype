@@ -53,8 +53,8 @@ export default function SignInPage() {
 
   return (
     <div
-      className="flex items-center justify-center px-4"
-      style={{ minHeight: "calc(100vh - var(--header-height) - 56px - 40px)", backgroundColor: "#F8F9FB" }}
+      className="flex items-center justify-center px-4 flex-1 h-full"
+      style={{ backgroundColor: "#F8F9FB" }}
     >
       <div
         className="w-full bg-white"

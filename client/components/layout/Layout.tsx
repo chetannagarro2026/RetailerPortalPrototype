@@ -59,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
             <Navigation />
           </>
         )}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 flex flex-col">{children}</main>
         {isMinimalPage ? <LegalStrip /> : <Footer />}
         <SignInModal />
       </div>
