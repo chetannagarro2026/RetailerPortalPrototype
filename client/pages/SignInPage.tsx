@@ -61,7 +61,7 @@ export default function SignInPage() {
         style={{
           maxWidth: 420,
           borderRadius: 8,
-          padding: 32,
+          padding: 16,
           boxShadow: "0 4px 24px rgba(0, 0, 0, 0.06)",
           border: `1px solid ${config.borderColor}`,
         }}
