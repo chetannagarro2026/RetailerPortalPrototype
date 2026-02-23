@@ -7,7 +7,6 @@ import { OrderHistoryProvider } from "./context/OrderHistoryContext";
 import AuthGate from "./components/auth/AuthGate";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import PurchaseOrdersPage from "./pages/PurchaseOrdersPage";
-import Layout from "./components/layout/Layout";
 import Index from "./pages/Index";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import BulkOrder from "./pages/BulkOrder";
@@ -19,20 +18,21 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 import SignInPage from "./pages/SignInPage";
+import Layout from "./components/layout/Layout";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AntApp>
-        <AuthProvider>
-        <OrderHistoryProvider>
-        <OrderProvider>
-          <BrowserRouter>
-          <ScrollToTop />
-          <Layout>
-            <Routes>
+      <AuthProvider>
+        <AntApp>
+          <OrderProvider>
+            <OrderHistoryProvider>
+              <BrowserRouter>
+                <ScrollToTop />
+                <Layout>
+                  <Routes>
               {/* Public routes — accessible by guests */}
               <Route path="/" element={<Index />} />
               <Route path="/collections" element={<CatalogNodePage />} />
@@ -58,13 +58,13 @@ export default function App() {
               <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><PlaceholderPage /></AuthGate>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-          </BrowserRouter>
-        </OrderProvider>
-        </OrderHistoryProvider>
-        </AuthProvider>
-      </AntApp>
+                  </Routes>
+                </Layout>
+              </BrowserRouter>
+            </OrderHistoryProvider>
+          </OrderProvider>
+        </AntApp>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

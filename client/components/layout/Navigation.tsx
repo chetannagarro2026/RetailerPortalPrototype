@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Avatar } from "antd";
 import { MenuOutlined, DownOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useAuth } from "../../context/AuthContext";
 import MegaMenu from "./MegaMenu";
 import AccountDropdown from "./AccountDropdown";
 import MobileNav from "./MobileNav";
+import { fetchCategoriesByParent, type CategoryItem } from "../../services/categoryService";
 
 type OpenPanel = "collections" | "my-account" | null;
 
@@ -16,6 +18,14 @@ export default function Navigation() {
   const { isAuthenticated } = useAuth();
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Fetch categories on page load
+  const parentId = "08d6ff04-11c5-4e5b-a1c8-11ac167e849b";
+  const { data: categoriesData } = useQuery({
+    queryKey: ["categories", parentId],
+    queryFn: () => fetchCategoriesByParent(parentId),
+    staleTime: 5 * 60 * 1000, // Keep fresh for 5 minutes
+  });
 
   // Filter nav items based on auth state
   const visibleNavItems = useMemo(() => {
@@ -144,6 +154,7 @@ export default function Navigation() {
         <MegaMenu
           visible={openPanel === "collections"}
           onClose={() => setOpenPanel(null)}
+          categoriesData={categoriesData}
         />
       </nav>
 

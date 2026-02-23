@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
-import { fetchPurchaseOrders, mapPOToUpdate } from "../../services/poService";
+import { useAuth } from "../../context/AuthContext";
+import { fetchSalesOrders, mapSalesOrderToUpdate } from "../../services/salesOrderSearchService";
 import POCard from "./cards/POCard";
 import ReturnCard from "./cards/ReturnCard";
 import CriticalActionCard from "./cards/CriticalActionCard";
@@ -56,21 +57,23 @@ const mockStaticUpdates: UpdateItem[] = [
 
 export default function UpdatesSection() {
   const config = activeBrandConfig;
+  const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Fetch POs from API
-  const { data: poRecords = [], isLoading } = useQuery({
-    queryKey: ["purchaseOrders"],
-    queryFn: () => fetchPurchaseOrders(0, 5),
+  // Fetch sales orders from API
+  const { data: salesOrders = [], isLoading } = useQuery({
+    queryKey: ["salesOrders", user?.accountId],
+    queryFn: () => fetchSalesOrders(0, 5, user?.accountId || null),
+    enabled: !!user?.accountId,
   });
 
-  // Combine PO updates with static updates
+  // Combine sales order updates with static updates
   const updates: UpdateItem[] = useMemo(() => {
-    const poUpdates = poRecords.map(mapPOToUpdate);
-    return [...poUpdates, ...mockStaticUpdates];
-  }, [poRecords]);
+    const orderUpdates = salesOrders.map(mapSalesOrderToUpdate);
+    return [...orderUpdates, ...mockStaticUpdates];
+  }, [salesOrders]);
 
   const updateScrollState = () => {
     const el = scrollRef.current;

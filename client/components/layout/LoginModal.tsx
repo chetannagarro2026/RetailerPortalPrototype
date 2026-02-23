@@ -1,6 +1,6 @@
 import { Modal, Form, Input, Button, message } from 'antd';
 import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const [loading, setLoading] = useState(false);

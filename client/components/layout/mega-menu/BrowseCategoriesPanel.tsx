@@ -2,9 +2,8 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { RightOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
-import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig } from "../../../config/brandConfig";
-import { fetchCategoriesByParent, type CategoryItem } from "../../../services/categoryService";
+import type { CategoryItem } from "../../../services/categoryService";
 
 type CategoryWithChildren = {
   id: string;
@@ -60,43 +59,34 @@ function buildTwoLevelStructure(items: CategoryItem[]): CategoryWithChildren[] {
   return roots;
 }
 
-export default function BrowseCategoriesPanel({ onClose }: { onClose: () => void }) {
+export default function BrowseCategoriesPanel({ 
+  onClose, 
+  categoriesData,
+  isLoading = false,
+}: { 
+  onClose: () => void;
+  categoriesData?: any;
+  isLoading?: boolean;
+}) {
   const config = activeBrandConfig;
-  
-  // Use the same parent ID as CategoryTree component
-  const parentId = "08d6ff04-11c5-4e5b-a1c8-11ac167e849b";
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["categories", parentId],
-    queryFn: () => fetchCategoriesByParent(parentId),
-    staleTime: 5 * 60 * 1000, // Keep fresh for 5 minutes
-  });
 
   // Normalize API response to flat array
   const items: CategoryItem[] = useMemo(() => {
-    if (!data) return [];
-    if (Array.isArray(data)) return data as CategoryItem[];
-    if ((data as any).content && Array.isArray((data as any).content)) {
-      return (data as any).content;
+    if (!categoriesData) return [];
+    if (Array.isArray(categoriesData)) return categoriesData as CategoryItem[];
+    if ((categoriesData as any).content && Array.isArray((categoriesData as any).content)) {
+      return (categoriesData as any).content;
     }
     return [];
-  }, [data]);
+  }, [categoriesData]);
 
   // Build 2-level structure
   const level1Categories = useMemo(() => buildTwoLevelStructure(items), [items]);
 
-  if (isLoading) {
+  if (isLoading || !categoriesData) {
     return (
       <div className="flex items-center justify-center py-8">
         <Spin />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-sm text-red-600 py-4">
-        Failed to load categories. Please try again.
       </div>
     );
   }

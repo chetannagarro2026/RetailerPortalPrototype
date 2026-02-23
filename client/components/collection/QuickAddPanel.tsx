@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { InputNumber, Pagination } from "antd";
-import { CloseOutlined, WarningOutlined } from "@ant-design/icons";
+import { InputNumber, Pagination, Spin } from "antd";
+import { CloseOutlined, WarningOutlined, LoadingOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
 import { useCreditState } from "../../hooks/useCreditState";
@@ -13,12 +13,14 @@ interface QuickAddPanelProps {
   product: CatalogProduct;
   familyLink: string;
   onClose: () => void;
+  isLoading?: boolean;
 }
 
 export default function QuickAddPanel({
   product,
   familyLink,
   onClose,
+  isLoading = false,
 }: QuickAddPanelProps) {
   const config = activeBrandConfig;
   const { addItems } = useOrder();
@@ -34,12 +36,14 @@ export default function QuickAddPanel({
     return variants.slice(start, start + PAGE_SIZE);
   }, [variants, page]);
 
-  // Collect dynamic attribute column names
+  // Collect dynamic attribute column names (excluding Product which has its own column)
   const attrColumns = useMemo(() => {
     const cols = new Set<string>();
     for (const v of variants) {
       for (const key of Object.keys(v.attributes)) {
-        cols.add(key);
+        if (key !== 'Product') {
+          cols.add(key);
+        }
       }
     }
     return Array.from(cols);
@@ -86,12 +90,12 @@ export default function QuickAddPanel({
         return {
           id: v.id,
           productId: product.id,
-          productName: product.name,
+          productName: v.attributes.Product || product.name,
           sku: v.sku,
           variantAttributes: v.attributes,
           quantity: qty,
           unitPrice: v.price,
-          imageUrl: product.imageUrl,
+          imageUrl: v.imageUrl || product.imageUrl,
         };
       })
       .filter(Boolean) as Parameters<typeof addItems>[0];
@@ -138,6 +142,16 @@ export default function QuickAddPanel({
 
       {/* SKU Table */}
       <div className="flex-1 overflow-auto">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 32, color: config.primaryColor }} spin />} />
+          </div>
+        ) : variants.length === 0 ? (
+          <div className="flex items-center justify-center py-20 text-sm" style={{ color: config.secondaryColor }}>
+            No products available
+          </div>
+        ) : (
+          <>
         <table className="w-full border-collapse text-xs">
           <thead>
             <tr style={{ backgroundColor: config.cardBg }}>
@@ -146,6 +160,18 @@ export default function QuickAddPanel({
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
                 SKU
+              </th>
+              <th
+                className="text-left px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
+              >
+                Image
+              </th>
+              <th
+                className="text-left px-3 py-2.5 font-semibold sticky top-0"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1, minWidth: '120px' }}
+              >
+                Product
               </th>
               {attrColumns.map((col) => (
                 <th
@@ -202,6 +228,8 @@ export default function QuickAddPanel({
               size="small"
             />
           </div>
+        )}
+          </>
         )}
       </div>
 
@@ -289,6 +317,34 @@ function SkuRow({
         style={{ color: config.secondaryColor, borderBottom: `1px solid ${config.borderColor}` }}
       >
         {variant.sku}
+      </td>
+      <td
+        className="px-3 py-2"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        {variant.imageUrl && (
+          <img
+            src={variant.imageUrl}
+            alt={variant.attributes.Product || variant.sku}
+            className="w-10 h-10 object-cover rounded"
+            onError={(e) => {
+              e.currentTarget.src = "https://via.placeholder.com/40x40?text=No+Img";
+            }}
+          />
+        )}
+      </td>
+      <td
+        className="px-3 py-2 text-[11px]"
+        style={{ 
+          color: config.primaryColor, 
+          borderBottom: `1px solid ${config.borderColor}`,
+          maxWidth: '120px',
+          wordWrap: 'break-word',
+          whiteSpace: 'normal',
+          lineHeight: '1.3'
+        }}
+      >
+        {variant.attributes.Product || '—'}
       </td>
       {attrColumns.map((col) => (
         <td

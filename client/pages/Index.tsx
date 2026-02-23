@@ -1,113 +1,40 @@
-import { Row, Col, Card } from "antd";
-import {
-  GiftOutlined,
-  FileTextOutlined,
-} from "@ant-design/icons";
-import HeroBanner from "../components/home/HeroBanner";
+import { Row, Col } from "antd";
+import HeroCarousel from "../components/home/HeroCarousel";
 import UpdatesSection from "../components/home/UpdatesSection";
 import AvailableCreditSection from "../components/home/AvailableCreditSection";
-import FeaturedCollectionSection from "../components/home/FeaturedCollectionSection";
-import { activeBrandConfig } from "../config/brandConfig";
-
-interface SectionPlaceholderProps {
-  label: string;
-  icon: React.ReactNode;
-  minHeight: number;
-}
-
-function SectionPlaceholder({ label, icon, minHeight }: SectionPlaceholderProps) {
-  const config = activeBrandConfig;
-
-  return (
-    <Card
-      style={{
-        minHeight,
-        borderColor: config.borderColor,
-        borderStyle: "dashed",
-        borderWidth: 2,
-        backgroundColor: config.cardBg,
-        borderRadius: 10,
-      }}
-      styles={{
-        body: {
-          height: "100%",
-          minHeight,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-      }}
-    >
-      <div
-        className="text-2xl mb-3 opacity-20"
-        style={{ color: config.primaryColor }}
-      >
-        {icon}
-      </div>
-      <span
-        className="text-sm font-medium tracking-wide uppercase opacity-40"
-        style={{ color: config.primaryColor }}
-      >
-        {label}
-      </span>
-    </Card>
-  );
-}
+import FeaturedBrandsSection from "../components/home/FeaturedBrandsSection";
+import { useAuth } from "../context/AuthContext";
 
 export default function Index() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="max-w-content mx-auto px-6 py-8">
       <Row gutter={[16, 24]}>
         {/* Hero Banner — Full Width */}
         <Col xs={24}>
-          <HeroBanner />
+          <HeroCarousel />
         </Col>
 
-        {/* Updates — 8 cols */}
-        <Col xs={24} lg={16}>
-          <UpdatesSection />
-        </Col>
+        {isAuthenticated && (
+          <>
+            {/* Updates — 8 cols */}
+            <Col xs={24} lg={16}>
+              <UpdatesSection />
+            </Col>
 
-        {/* Available Credit — 4 cols */}
-        <Col xs={24} lg={8} className="py-2 h-auto grow-0">
-          <AvailableCreditSection />
-        </Col>
+            {/* Available Credit — 4 cols */}
+            <Col xs={24} lg={8} className="py-2 h-auto grow-0">
+              <AvailableCreditSection />
+            </Col>
+          </>
+        )}
 
         {/* Featured Collection — Full Width */}
         <Col xs={24} className="mt-2">
-          <FeaturedCollectionSection />
+          <FeaturedBrandsSection />
         </Col>
 
-        {/* Categories Tree (sidebar) */}
-        {/* <Col xs={24} className="mt-4">
-          <CategoryTree />
-        </Col> */}
-
-        {/* Promotions — Two Column */}
-        <Col xs={24} md={12}>
-          <SectionPlaceholder
-            label="Promotions"
-            icon={<GiftOutlined />}
-            minHeight={200}
-          />
-        </Col>
-        <Col xs={24} md={12}>
-          <SectionPlaceholder
-            label="Promotions"
-            icon={<GiftOutlined />}
-            minHeight={200}
-          />
-        </Col>
-
-        {/* Recent Purchase Orders — Full Width */}
-        <Col xs={24}>
-          <SectionPlaceholder
-            label="Recent Purchase Orders"
-            icon={<FileTextOutlined />}
-            minHeight={240}
-          />
-        </Col>
       </Row>
     </div>
   );

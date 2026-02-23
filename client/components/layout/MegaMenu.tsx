@@ -6,9 +6,10 @@ import BrowseCategoriesPanel from "./mega-menu/BrowseCategoriesPanel";
 interface MegaMenuProps {
   visible: boolean;
   onClose: () => void;
+  categoriesData?: any;
 }
 
-export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
+export default function MegaMenu({ visible, onClose, categoriesData }: MegaMenuProps) {
   const config = activeBrandConfig;
 
   if (!visible) return null;
@@ -60,7 +61,7 @@ export default function MegaMenu({ visible, onClose }: MegaMenuProps) {
 
           {/* Categories Content */}
           <div className="overflow-y-auto" style={{ maxHeight: 380 }}>
-            <BrowseCategoriesPanel onClose={onClose} />
+            <BrowseCategoriesPanel onClose={onClose} categoriesData={categoriesData} />
           </div>
         </div>
       </div>

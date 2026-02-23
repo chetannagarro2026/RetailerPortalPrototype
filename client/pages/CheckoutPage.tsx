@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Button, Input, Steps, Checkbox } from "antd";
+import { Button, Input, Steps, Checkbox, App } from "antd";
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
@@ -11,8 +11,10 @@ import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
 import { useOrderHistory, type PurchaseOrder, type SavedAddress } from "../context/OrderHistoryContext";
+import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
 import { fetchBusinessAccountsByIdList } from "../services/businessAccountService";
+import { createSalesOrder, type SalesOrderResponse } from "../services/salesOrderService";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 
 // ── Types ───────────────────────────────────────────────────────────
@@ -91,12 +93,14 @@ function ShippingStep({
 }) {
   const config = activeBrandConfig;
   const { addAddress } = useOrderHistory();
+  const { user } = useAuth();
   
-  // Fetch business account data - replace "9038" with actual account ID from auth context
-  const accountId = "9038"; // TODO: Get from auth context
+  // Get account ID from authenticated user
+  const accountId = user?.accountId || "";
   const { data: businessAccounts, isLoading: isLoadingAddresses } = useQuery({
     queryKey: ["businessAccounts", accountId],
     queryFn: () => fetchBusinessAccountsByIdList(accountId),
+    enabled: !!accountId, // Only fetch when accountId exists
     staleTime: 5 * 60 * 1000,
   });
 
@@ -356,6 +360,7 @@ function ReviewStep({
   onBack,
   onSubmit,
   isExceeded,
+  isSubmitting,
 }: {
   items: ReturnType<typeof useOrder>["items"];
   totalUnits: number;
@@ -364,6 +369,7 @@ function ReviewStep({
   onBack: () => void;
   onSubmit: () => void;
   isExceeded: boolean;
+  isSubmitting: boolean;
 }) {
   const config = activeBrandConfig;
   const fmt = (val: number) =>
@@ -440,15 +446,16 @@ function ReviewStep({
 
       {/* Actions */}
       <div className="flex items-center justify-between">
-        <Button onClick={onBack} style={{ borderRadius: 8 }}>
+        <Button onClick={onBack} style={{ borderRadius: 8 }} disabled={isSubmitting}>
           <ArrowLeftOutlined className="text-xs" /> Back
         </Button>
         <Button
           type="primary"
           size="large"
-          disabled={isExceeded}
+          disabled={isExceeded || isSubmitting}
+          loading={isSubmitting}
           onClick={onSubmit}
-          icon={<CheckCircleOutlined />}
+          icon={!isSubmitting && <CheckCircleOutlined />}
           style={{
             height: 44,
             fontWeight: 600,
@@ -456,7 +463,7 @@ function ReviewStep({
             backgroundColor: isExceeded ? undefined : config.primaryColor,
           }}
         >
-          {isExceeded ? "Credit Limit Exceeded" : "Submit Order"}
+          {isSubmitting ? "Submitting Order..." : isExceeded ? "Credit Limit Exceeded" : "Submit Order"}
         </Button>
       </div>
     </div>
@@ -468,11 +475,14 @@ function ReviewStep({
 export default function CheckoutPage() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
+  const { message } = App.useApp();
   const { items, totalUnits, totalValue, clearOrder } = useOrder();
   const { addOrder } = useOrderHistory();
+  const { user } = useAuth();
   const credit = useCreditState();
   const [step, setStep] = useState(0);
   const [shipping, setShipping] = useState<ShippingForm>(EMPTY_FORM);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (items.length === 0) {
     return (
@@ -504,41 +514,80 @@ export default function CheckoutPage() {
     shipping.state.trim() &&
     shipping.zip.trim();
 
-  const handleSubmit = () => {
-    if (credit.isExceeded) return;
+  const handleSubmit = async () => {
+    if (credit.isExceeded || isSubmitting) return;
+    
+    setIsSubmitting(true);
     const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
-    const purchaseOrder: PurchaseOrder = {
-      orderNumber,
-      items: items.map((i) => ({
-        id: i.id,
-        productId: i.productId,
-        productName: i.productName,
-        sku: i.sku,
-        variantAttributes: i.variantAttributes,
-        quantity: i.quantity,
-        unitPrice: i.unitPrice,
-        imageUrl: i.imageUrl,
-      })),
-      totalUnits,
-      totalValue,
-      shipping: {
-        contactName: shipping.contactName,
-        companyName: shipping.companyName,
-        address: shipping.address,
-        city: shipping.city,
-        state: shipping.state,
-        zip: shipping.zip,
-        phone: shipping.phone,
-      },
-      paymentMethod: "Credit Account",
-      status: "Pending",
-      submittedAt: new Date().toISOString(),
-    };
+    try {
+      // Create the sales order via API
+      const apiResponse: SalesOrderResponse = await createSalesOrder({
+        items,
+        totalValue,
+        totalUnits,
+        shipping: {
+          contactName: shipping.contactName,
+          companyName: shipping.companyName,
+          address: shipping.address,
+          city: shipping.city,
+          state: shipping.state,
+          zip: shipping.zip,
+          phone: shipping.phone,
+        },
+        accountId: user?.accountId || "",
+        retailerAccountId: user?.accountId || "",
+        orderNumber,
+      });
 
-    addOrder(purchaseOrder);
-    clearOrder();
-    navigate("/order-confirmation", { state: purchaseOrder });
+      // Store order locally for order history
+      const purchaseOrder: PurchaseOrder = {
+        orderNumber: apiResponse.alternateOrderID || orderNumber,
+        items: items.map((i) => ({
+          id: i.id,
+          productId: i.productId,
+          productName: i.productName,
+          sku: i.sku,
+          variantAttributes: i.variantAttributes,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          imageUrl: i.imageUrl,
+        })),
+        totalUnits,
+        totalValue,
+        shipping: {
+          contactName: shipping.contactName,
+          companyName: shipping.companyName,
+          address: shipping.address,
+          city: shipping.city,
+          state: shipping.state,
+          zip: shipping.zip,
+          phone: shipping.phone,
+        },
+        paymentMethod: "Credit Account",
+        status: (apiResponse.orderStatus === "Confirmed" || 
+                 apiResponse.orderStatus === "Shipped" || 
+                 apiResponse.orderStatus === "Delivered" 
+                   ? apiResponse.orderStatus 
+                   : "Pending") as PurchaseOrder["status"],
+        submittedAt: new Date().toISOString(),
+      };
+
+      addOrder(purchaseOrder);
+      clearOrder();
+      
+      message.success(`Order #${apiResponse.omsOrderId} submitted successfully!`);
+      navigate("/order-confirmation", { state: { ...purchaseOrder, apiResponse } });
+    } catch (error) {
+      console.error("Failed to submit order:", error);
+      message.error(
+        error instanceof Error 
+          ? `Failed to submit order: ${error.message}` 
+          : "Failed to submit order. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -586,6 +635,7 @@ export default function CheckoutPage() {
               onBack={() => setStep(0)}
               onSubmit={handleSubmit}
               isExceeded={credit.isExceeded}
+              isSubmitting={isSubmitting}
             />
           )}
         </div>

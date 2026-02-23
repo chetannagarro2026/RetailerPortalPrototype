@@ -47,11 +47,14 @@ export interface VariantAttribute {
 export interface ProductVariant {
   id: string;
   sku: string;
+  name?: string;
   /** Map of attribute name → value for this variant */
   attributes: Record<string, string>;
   price: number;
   availabilityStatus: "in-stock" | "low-stock" | "out-of-stock" | "pre-order";
   stockQty: number;
+  /** Optional image URL for the variant/product */
+  imageUrl?: string;
 }
 
 export interface CatalogProduct {

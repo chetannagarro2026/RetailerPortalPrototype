@@ -28,13 +28,8 @@ interface HybridFamilyTableProps {
   total: number;
   page: number;
   onPageChange: (page: number) => void;
-<<<<<<< HEAD
   showCategoriesAsProducts?: boolean;
   tree?: CategoryTree;
-=======
-  /** Show a Category column (used in global/brand mode) */
-  showCategory?: boolean;
->>>>>>> main
 }
 
 export default function HybridFamilyTable({
@@ -42,12 +37,8 @@ export default function HybridFamilyTable({
   total,
   page,
   onPageChange,
-<<<<<<< HEAD
   showCategoriesAsProducts = false,
   tree,
-=======
-  showCategory = false,
->>>>>>> main
 }: HybridFamilyTableProps) {
   const config = activeBrandConfig;
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -58,7 +49,7 @@ export default function HybridFamilyTable({
   const IMAGE_BASE_URL = import.meta.env.VITE_PIM_IMAGE_BASE_URL || "https://ndomsdevstorageacc.blob.core.windows.net";
 
   // Fetch products for the selected category when showing quick add for a category
-  const { data: categoryProductsResponse } = useQuery({
+  const { data: categoryProductsResponse, isLoading: isLoadingCategoryProducts } = useQuery({
     queryKey: ["category-products", quickAddCategoryId],
     queryFn: () => fetchProductsByCategory(quickAddCategoryId!, 0, 9999),
     enabled: !!quickAddCategoryId && showCategoriesAsProducts,
@@ -73,13 +64,16 @@ export default function HybridFamilyTable({
       id: item.id,
       sku: item.upcId,
       attributes: {
-        Product: item.productName || item.familyLabels?.en || "Unknown Product",
+        Product: item?.name,
       },
+      imageUrl: item.imageIconPath 
+        ? `${IMAGE_BASE_URL}${item.imageIconPath}`
+        : "https://via.placeholder.com/48x48?text=No+Image",
       price: 99.99,
       availabilityStatus: "in-stock",
       stockQty: 100,
     }));
-  }, [categoryProductsResponse, quickAddCategoryId]);
+  }, [categoryProductsResponse, quickAddCategoryId, IMAGE_BASE_URL]);
 
   const handleRowClick = useCallback(
     (productId: string) => {
@@ -126,8 +120,8 @@ export default function HybridFamilyTable({
   // Determine which product to show in quick add panel
   const quickAddDisplayProduct = useMemo(() => {
     if (quickAddProduct) return quickAddProduct;
-    if (quickAddCategoryId && categoryProductVariants.length > 0) {
-      // Create a virtual "family" product from category products
+    if (quickAddCategoryId) {
+      // Create a virtual "family" product from category - show immediately even while loading
       const categoryNode = products.find(p => p._isCategory && p._categoryNode?.id === quickAddCategoryId)?._categoryNode;
       return {
         id: quickAddCategoryId,
@@ -137,12 +131,12 @@ export default function HybridFamilyTable({
         price: 0,
         availabilityStatus: "in-stock" as const,
         variants: categoryProductVariants,
-        variantAttributes: [
+        variantAttributes: categoryProductVariants.length > 0 ? [
           {
             name: "Product",
             values: categoryProductVariants.map(v => v.attributes.Product),
           }
-        ],
+        ] : [],
       } as CatalogProduct;
     }
     return null;
@@ -186,14 +180,6 @@ export default function HybridFamilyTable({
                 >
                   {showCategoriesAsProducts ? "Description" : "Brand"}
                 </th>
-                {showCategory && (
-                  <th
-                    className="text-left px-3 py-2.5 font-semibold"
-                    style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
-                  >
-                    Category
-                  </th>
-                )}
                 <th
                   className="text-left px-3 py-2.5 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
@@ -239,7 +225,6 @@ export default function HybridFamilyTable({
                     isExpanded={isExpanded}
                     onRowClick={handleRowClick}
                     onQuickAdd={handleQuickAdd}
-                    showCategory={showCategory}
                   />
                 );
               })}
@@ -277,6 +262,7 @@ export default function HybridFamilyTable({
             product={quickAddDisplayProduct}
             familyLink={`/product/${quickAddDisplayProduct.id}`}
             onClose={handleClosePanel}
+            isLoading={!!quickAddCategoryId && isLoadingCategoryProducts}
           />
         </div>
       )}
@@ -291,13 +277,11 @@ function FamilyRow({
   isExpanded,
   onRowClick,
   onQuickAdd,
-  showCategory = false,
 }: {
   product: CatalogProduct;
   isExpanded: boolean;
   onRowClick: (id: string) => void;
   onQuickAdd: (product: CatalogProduct) => void;
-  showCategory?: boolean;
 }) {
   const config = activeBrandConfig;
   const familyLink = `/product/${product.id}`;
@@ -372,16 +356,6 @@ function FamilyRow({
           {product.brand || "—"}
         </td>
 
-        {/* Category (global/brand mode) */}
-        {showCategory && (
-          <td
-            className="px-3 py-2 text-[11px]"
-            style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-          >
-            {product.attributes?.category || "—"}
-          </td>
-        )}
-
         {/* Key Attributes */}
         <td
           className="px-3 py-2 text-[11px]"
@@ -440,7 +414,7 @@ function FamilyRow({
       {isExpanded && (
         <tr>
           <td
-            colSpan={showCategory ? 9 : 8}
+            colSpan={8}
             className="p-0"
             style={{ borderBottom: `1px solid ${config.borderColor}` }}
           >

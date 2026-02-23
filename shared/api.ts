@@ -19,6 +19,7 @@ export interface ProductApiItem {
   productName: string | null;
   labels: Record<string, string>;
   upcId: string;
+  name?: string;
   approvalStatus: string;
   completenessPercent: number;
   familyLabels: Record<string, string>;

@@ -9,15 +9,15 @@ export default function SignInPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string; general?: string }>({});
+  const [touched, setTouched] = useState<{ username?: boolean; password?: boolean }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateEmail = (val: string) => {
-    if (!val.trim()) return "Email address is required";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return "Please enter a valid email address";
+  const validateUsername = (val: string) => {
+    if (!val.trim()) return "Username is required";
     return undefined;
   };
 
@@ -26,30 +26,39 @@ export default function SignInPage() {
     return undefined;
   };
 
-  const handleBlur = (field: "email" | "password") => {
+  const handleBlur = (field: "username" | "password") => {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    if (field === "email") setErrors((prev) => ({ ...prev, email: validateEmail(email) }));
+    if (field === "username") setErrors((prev) => ({ ...prev, username: validateUsername(username) }));
     if (field === "password") setErrors((prev) => ({ ...prev, password: validatePassword(password) }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const emailErr = validateEmail(email);
+    const usernameErr = validateUsername(username);
     const passwordErr = validatePassword(password);
-    setErrors({ email: emailErr, password: passwordErr });
-    setTouched({ email: true, password: true });
+    setErrors({ username: usernameErr, password: passwordErr });
+    setTouched({ username: true, password: true });
 
-    if (emailErr || passwordErr) return;
+    if (usernameErr || passwordErr) return;
 
-    signIn();
-    navigate("/");
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      await signIn(username, password);
+      navigate("/");
+    } catch (error: any) {
+      setErrors({ general: error.message || "Authentication failed. Please check your credentials." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleContinueAsGuest = () => {
     navigate("/");
   };
 
-  const isFormValid = !validateEmail(email) && !validatePassword(password);
+  const isFormValid = !validateUsername(username) && !validatePassword(password);
 
   return (
     <div
@@ -71,11 +80,25 @@ export default function SignInPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate>
-          <EmailField
-            value={email}
-            onChange={setEmail}
-            onBlur={() => handleBlur("email")}
-            error={touched.email ? errors.email : undefined}
+          {/* Error Message */}
+          {errors.general && (
+            <div
+              className="mb-4 p-3 rounded-lg text-sm"
+              style={{
+                backgroundColor: "#FEE2E2",
+                color: "#991B1B",
+                border: "1px solid #FCA5A5",
+              }}
+            >
+              {errors.general}
+            </div>
+          )}
+
+          <UsernameField
+            value={username}
+            onChange={setUsername}
+            onBlur={() => handleBlur("username")}
+            error={touched.username ? errors.username : undefined}
             config={config}
           />
 
@@ -103,17 +126,17 @@ export default function SignInPage() {
           {/* Sign In Button */}
           <button
             type="submit"
-            disabled={!isFormValid}
+            disabled={!isFormValid || isSubmitting}
             className="w-full flex items-center justify-center gap-2 text-sm font-semibold rounded-lg cursor-pointer transition-opacity text-white"
             style={{
               height: 44,
-              backgroundColor: isFormValid ? config.primaryColor : "#A0AEC0",
+              backgroundColor: isFormValid && !isSubmitting ? config.primaryColor : "#A0AEC0",
               border: "none",
-              opacity: isFormValid ? 1 : 0.7,
+              opacity: isFormValid && !isSubmitting ? 1 : 0.7,
             }}
           >
             <LoginOutlined className="text-xs" />
-            Sign In
+            {isSubmitting ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
@@ -178,7 +201,7 @@ function SignInHeader({ config }: { config: typeof activeBrandConfig }) {
   );
 }
 
-function EmailField({
+function UsernameField({
   value,
   onChange,
   onBlur,
@@ -194,14 +217,14 @@ function EmailField({
   return (
     <div className="mb-4">
       <label className="text-xs font-medium mb-1.5 block" style={{ color: config.secondaryColor }}>
-        Email Address
+        Username
       </label>
       <input
-        type="email"
+        type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        placeholder="Enter your registered email"
+        placeholder="Enter your username"
         className="w-full text-sm rounded-lg px-3 outline-none transition-colors"
         style={{
           height: 40,

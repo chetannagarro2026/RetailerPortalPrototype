@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface AccountDropdownProps {
   visible: boolean;
@@ -59,7 +59,7 @@ const sections: DropdownSection[] = [
 
 export default function AccountDropdown({ visible, onClose }: AccountDropdownProps) {
   const config = activeBrandConfig;
-  const { logout } = useAuth();
+  const { signOut, user } = useAuth();
 
   if (!visible) return null;
 
@@ -81,6 +81,42 @@ export default function AccountDropdown({ visible, onClose }: AccountDropdownPro
           marginTop: 4,
         }}
       >
+        {/* User Greeting Section */}
+        {user && (
+          <>
+            <div className="px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium"
+                  style={{ backgroundColor: config.primaryColor }}
+                >
+                  {user.firstName?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div
+                    className="text-sm font-semibold truncate"
+                    style={{ color: config.primaryColor }}
+                  >
+                    {user.firstName && user.lastName 
+                      ? `${user.firstName} ${user.lastName}` 
+                      : user.username}
+                  </div>
+                  <div
+                    className="text-xs truncate"
+                    style={{ color: config.secondaryColor }}
+                  >
+                    {user.businessEmail || user.username}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="mx-4 mb-2"
+              style={{ borderBottom: `1px solid ${config.borderColor}` }}
+            />
+          </>
+        )}
+
         {sections.map((section, sectionIdx) => (
           <div key={section.title}>
             <div
@@ -129,7 +165,7 @@ export default function AccountDropdown({ visible, onClose }: AccountDropdownPro
         />
         <button
           onClick={() => {
-            logout();
+            signOut();
             onClose();
           }}
           className="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors cursor-pointer text-left"
