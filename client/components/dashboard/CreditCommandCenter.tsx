@@ -37,7 +37,7 @@ export default function CreditCommandCenter({ onCardClick }: CreditCommandCenter
           </span>
         </div>
 
-        <p className="font-bold m-0 mb-0.5 leading-tight" style={{ fontSize: 28, color: config.primaryColor }}>
+        <p className="font-bold m-0 mb-0.5 leading-tight" style={{ fontSize: 20, color: config.primaryColor }}>
           {fmt(d.availableCredit)}
         </p>
         <p className="text-[11px] m-0 mb-3" style={{ color: config.secondaryColor }}>
@@ -71,7 +71,7 @@ export default function CreditCommandCenter({ onCardClick }: CreditCommandCenter
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
           Total Outstanding
         </span>
-        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 28, color: config.primaryColor }}>
+        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 20, color: config.primaryColor }}>
           {fmt(d.totalOutstanding)}
         </p>
       </KpiShell>
@@ -81,7 +81,7 @@ export default function CreditCommandCenter({ onCardClick }: CreditCommandCenter
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#DC2626" }}>
           Overdue Amount
         </span>
-        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 28, color: "#DC2626" }}>
+        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 20, color: "#DC2626" }}>
           {fmt(d.overdueAmount)}
         </p>
         <span className="text-[10px] mt-1" style={{ color: "#DC2626" }}>
@@ -94,7 +94,7 @@ export default function CreditCommandCenter({ onCardClick }: CreditCommandCenter
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#D97706" }}>
           Pending Approval
         </span>
-        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 28, color: "#D97706" }}>
+        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 20, color: "#D97706" }}>
           {fmt(d.pendingApproval)}
         </p>
         <span className="text-[10px] mt-1" style={{ color: "#D97706" }}>
@@ -107,7 +107,7 @@ export default function CreditCommandCenter({ onCardClick }: CreditCommandCenter
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
           This Month Payments
         </span>
-        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 28, color: "#16A34A" }}>
+        <p className="font-bold m-0 mt-auto leading-tight" style={{ fontSize: 20, color: "#16A34A" }}>
           {fmt(d.thisMonthPayments)}
         </p>
         <span className="text-[10px] mt-1" style={{ color: config.secondaryColor }}>
