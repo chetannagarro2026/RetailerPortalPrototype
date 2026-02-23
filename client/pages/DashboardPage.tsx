@@ -8,7 +8,7 @@ import SupportSnapshot from "../components/dashboard/SupportSnapshot";
 import AccountInfo from "../components/dashboard/AccountInfo";
 import DetailDrawer from "../components/dashboard/DetailDrawer";
 
-type DrawerType = "overdue" | "partial" | "pending-credit" | "high-util" | "support" | null;
+type DrawerType = string | null;
 
 const drawerConfig: Record<
   string,
@@ -19,6 +19,28 @@ const drawerConfig: Record<
     columns: { key: string; label: string; render?: (v: any, row: any) => React.ReactNode }[];
   }
 > = {
+  credit: {
+    title: "Credit History",
+    footerLabel: "View Credit History",
+    footerPath: "/account/credit",
+    columns: [
+      { key: "reference", label: "Reference" },
+      { key: "date", label: "Date", render: (v: string) => fmtDate(v) },
+      { key: "amount", label: "Amount", render: (v: number) => fmtCurrency(v) },
+      { key: "status", label: "Status" },
+    ],
+  },
+  outstanding: {
+    title: "Outstanding Balance",
+    footerLabel: "View Invoices",
+    footerPath: "/account/invoices",
+    columns: [
+      { key: "reference", label: "Reference" },
+      { key: "date", label: "Date", render: (v: string) => fmtDate(v) },
+      { key: "amount", label: "Amount", render: (v: number) => fmtCurrency(v) },
+      { key: "status", label: "Status" },
+    ],
+  },
   overdue: {
     title: "Overdue Invoices",
     footerLabel: "Go to Invoices",
@@ -47,6 +69,17 @@ const drawerConfig: Record<
     footerPath: "/purchase-orders",
     columns: [
       { key: "reference", label: "PO #" },
+      { key: "date", label: "Date", render: (v: string) => fmtDate(v) },
+      { key: "amount", label: "Amount", render: (v: number) => fmtCurrency(v) },
+      { key: "status", label: "Status" },
+    ],
+  },
+  payments: {
+    title: "Payment History",
+    footerLabel: "View Payment History",
+    footerPath: "/account/payment-history",
+    columns: [
+      { key: "reference", label: "Reference" },
       { key: "date", label: "Date", render: (v: string) => fmtDate(v) },
       { key: "amount", label: "Amount", render: (v: number) => fmtCurrency(v) },
       { key: "status", label: "Status" },
@@ -87,12 +120,8 @@ export default function DashboardPage() {
   const config = activeBrandConfig;
   const [activeDrawer, setActiveDrawer] = useState<DrawerType>(null);
 
-  const handleRiskClick = useCallback((key: string) => {
-    setActiveDrawer(key as DrawerType);
-  }, []);
-
-  const handleSupportDrawer = useCallback(() => {
-    setActiveDrawer("support");
+  const handleDrawerOpen = useCallback((key: string) => {
+    setActiveDrawer(key);
   }, []);
 
   const closeDrawer = useCallback(() => {
@@ -121,17 +150,17 @@ export default function DashboardPage() {
 
       {/* Section spacing: 32px gap */}
       <div className="flex flex-col gap-8">
-        {/* Section 1: Credit Command Center */}
-        <CreditCommandCenter />
+        {/* Section 1: Credit KPI Row */}
+        <CreditCommandCenter onCardClick={handleDrawerOpen} />
 
         {/* Section 2: Financial Risk Cards */}
-        <FinancialRiskCards cards={riskCards} onCardClick={handleRiskClick} />
+        <FinancialRiskCards cards={riskCards} onCardClick={handleDrawerOpen} />
 
         {/* Section 3: Orders Overview */}
         <OrdersOverview />
 
         {/* Section 4: Support Snapshot */}
-        <SupportSnapshot onOpenDrawer={handleSupportDrawer} />
+        <SupportSnapshot onOpenDrawer={() => handleDrawerOpen("support")} />
 
         {/* Section 5: Account Info */}
         <AccountInfo />
