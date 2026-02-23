@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { activeBrandConfig } from "../config/brandConfig";
-import { riskCards, riskDetailData, supportData } from "../data/dashboardData";
+import { riskDetailData, supportData } from "../data/dashboardData";
 import CreditCommandCenter from "../components/dashboard/CreditCommandCenter";
-import FinancialRiskCards from "../components/dashboard/FinancialRiskCards";
+import CreditAlerts from "../components/dashboard/CreditAlerts";
 import OrdersOverview from "../components/dashboard/OrdersOverview";
 import SupportSnapshot from "../components/dashboard/SupportSnapshot";
 import AccountInfo from "../components/dashboard/AccountInfo";
@@ -85,16 +85,6 @@ const drawerConfig: Record<
       { key: "status", label: "Status" },
     ],
   },
-  "high-util": {
-    title: "Credit Utilization",
-    footerLabel: "View Credit History",
-    footerPath: "/account/credit",
-    columns: [
-      { key: "reference", label: "Reference" },
-      { key: "amount", label: "Amount", render: (v: number) => fmtCurrency(v) },
-      { key: "status", label: "Status" },
-    ],
-  },
   support: {
     title: "Support Tickets",
     footerLabel: "Go to Support",
@@ -148,21 +138,20 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Section spacing: 32px gap */}
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
         {/* Section 1: Credit KPI Row */}
         <CreditCommandCenter onCardClick={handleDrawerOpen} />
 
-        {/* Section 2: Financial Risk Cards */}
-        <FinancialRiskCards cards={riskCards} onCardClick={handleDrawerOpen} />
+        {/* Contextual Alerts (conditional) */}
+        <CreditAlerts onViewClick={handleDrawerOpen} />
 
-        {/* Section 3: Orders Overview */}
-        <OrdersOverview />
+        {/* Section 2: Orders Overview */}
+        <OrdersOverview onStatusClick={handleDrawerOpen} />
 
-        {/* Section 4: Support Snapshot */}
+        {/* Section 3: Support Snapshot */}
         <SupportSnapshot onOpenDrawer={() => handleDrawerOpen("support")} />
 
-        {/* Section 5: Account Info */}
+        {/* Section 4: Account Info */}
         <AccountInfo />
       </div>
 

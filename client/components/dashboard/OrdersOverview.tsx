@@ -1,4 +1,4 @@
-import { ShoppingOutlined, RightOutlined } from "@ant-design/icons";
+import { ShoppingOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { orderStatuses, recentOrders } from "../../data/dashboardData";
@@ -6,7 +6,6 @@ import { orderStatuses, recentOrders } from "../../data/dashboardData";
 const fmt = (v: number) =>
   "$" + v.toLocaleString("en-US", { minimumFractionDigits: 0 });
 
-// Amounts per status for display
 const statusAmounts: Record<string, number> = {
   "Pending Approval": 13500,
   "Approved": 24800,
@@ -14,9 +13,14 @@ const statusAmounts: Record<string, number> = {
   "Rejected": 2100,
 };
 
-export default function OrdersOverview() {
+interface OrdersOverviewProps {
+  onStatusClick?: (status: string) => void;
+}
+
+export default function OrdersOverview({ onStatusClick }: OrdersOverviewProps) {
   const config = activeBrandConfig;
   const totalActive = orderStatuses.reduce((a, s) => a + s.count, 0);
+  const pendingCount = orderStatuses.find((s) => s.label === "Pending Approval")?.count || 0;
 
   return (
     <div
@@ -33,28 +37,30 @@ export default function OrdersOverview() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left — Status Summary */}
-          <div className="flex-1 min-w-0">
+          {/* Left 35% — Status Summary */}
+          <div className="lg:w-[35%] min-w-0 shrink-0">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] font-bold uppercase tracking-widest m-0" style={{ color: config.secondaryColor }}>
                 Order Status Summary
               </h3>
               <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>
-                Total Active: {totalActive}
+                {totalActive} active
               </span>
             </div>
 
             <div className="space-y-0">
               {orderStatuses.map((s) => (
-                <div
+                <button
                   key={s.label}
-                  className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded transition-colors cursor-default"
+                  onClick={() => onStatusClick?.(s.label)}
+                  className="flex items-center justify-between w-full py-3 px-3 -mx-1 rounded transition-colors cursor-pointer bg-transparent border-none text-left"
+                  style={{ outline: "none" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#F9FAFB"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
                 >
                   <div className="flex items-center gap-2.5">
                     <span
-                      className="w-2 h-2 rounded-full shrink-0"
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: s.color }}
                     />
                     <span className="text-sm" style={{ color: "#374151" }}>
@@ -69,7 +75,7 @@ export default function OrdersOverview() {
                       {s.count}
                     </span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -77,8 +83,21 @@ export default function OrdersOverview() {
           {/* Divider */}
           <div className="hidden lg:block w-px" style={{ backgroundColor: config.borderColor }} />
 
-          {/* Right — Recent Orders Table */}
-          <div className="flex-[2] min-w-0">
+          {/* Right 65% — Recent Orders Table */}
+          <div className="flex-1 min-w-0">
+            {/* Attention signal */}
+            {pendingCount > 0 && (
+              <div
+                className="flex items-center gap-2 rounded-md px-3 mb-4"
+                style={{ height: 36, backgroundColor: "#FFFBEB", borderLeft: "3px solid #D97706" }}
+              >
+                <WarningOutlined className="text-xs" style={{ color: "#D97706" }} />
+                <span className="text-xs font-medium" style={{ color: "#92400E" }}>
+                  {pendingCount} Orders Awaiting Credit Approval
+                </span>
+              </div>
+            )}
+
             <h3 className="text-[11px] font-bold uppercase tracking-widest mb-4 m-0" style={{ color: config.secondaryColor }}>
               Recent Orders
             </h3>
@@ -106,24 +125,24 @@ export default function OrdersOverview() {
                         (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
                       }}
                     >
-                      <td className="py-3 text-xs font-semibold" style={{ color: config.primaryColor }}>
+                      <td className="py-3.5 text-xs font-bold" style={{ color: config.primaryColor }}>
                         {o.poNumber}
                       </td>
-                      <td className="py-3 text-xs" style={{ color: "#6B7280" }}>
+                      <td className="py-3.5 text-xs" style={{ color: "#6B7280" }}>
                         {new Date(o.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </td>
-                      <td className="py-3 text-xs" style={{ color: "#374151" }}>
+                      <td className="py-3.5 text-xs" style={{ color: "#374151" }}>
                         {o.brand}
                       </td>
-                      <td className="py-3 text-xs text-right font-medium" style={{ color: "#374151" }}>
+                      <td className="py-3.5 text-xs text-right font-medium" style={{ color: "#374151" }}>
                         {fmt(o.amount)}
                       </td>
-                      <td className="py-3 text-right">
+                      <td className="py-3.5 text-right">
                         <span
-                          className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                          className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full"
                           style={{
                             color: o.statusColor,
-                            backgroundColor: o.statusColor + "15",
+                            backgroundColor: o.statusColor + "18",
                           }}
                         >
                           {o.status}
@@ -137,7 +156,7 @@ export default function OrdersOverview() {
           </div>
         </div>
 
-        {/* Footer link */}
+        {/* Footer */}
         <div
           className="mt-6 pt-4 flex justify-end"
           style={{ borderTop: `1px solid ${config.borderColor}` }}
@@ -159,7 +178,7 @@ function Th({ children, align = "left" }: { children: React.ReactNode; align?: s
   const config = activeBrandConfig;
   return (
     <th
-      className="text-[11px] font-semibold uppercase tracking-wider pb-2"
+      className="text-[11px] font-semibold uppercase tracking-wider pb-2.5"
       style={{ color: config.secondaryColor, textAlign: align as any }}
     >
       {children}
