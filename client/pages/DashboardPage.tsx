@@ -146,7 +146,7 @@ export default function DashboardPage() {
         <CreditAlerts onViewClick={handleDrawerOpen} />
 
         {/* Section 2: Orders Overview */}
-        <OrdersOverview onStatusClick={handleDrawerOpen} />
+        <OrdersOverview />
 
         {/* Section 3: Support Snapshot */}
         <SupportSnapshot onOpenDrawer={() => handleDrawerOpen("support")} />
