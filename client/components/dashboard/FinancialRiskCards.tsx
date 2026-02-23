@@ -8,10 +8,10 @@ import {
 import { activeBrandConfig } from "../../config/brandConfig";
 import { type RiskCard } from "../../data/dashboardData";
 
-const severityStyles: Record<string, { bg: string; iconColor: string; border: string }> = {
-  critical: { bg: "#FEF2F2", iconColor: "#DC2626", border: "#FECACA" },
-  warning: { bg: "#FFFBEB", iconColor: "#D97706", border: "#FDE68A" },
-  info: { bg: "#F9FAFB", iconColor: "#6B7280", border: "#E5E7EB" },
+const accentColors: Record<string, string> = {
+  critical: "#DC2626",
+  warning: "#D97706",
+  info: "#6B7280",
 };
 
 const icons: Record<string, React.ReactNode> = {
@@ -19,6 +19,13 @@ const icons: Record<string, React.ReactNode> = {
   partial: <WarningOutlined />,
   "pending-credit": <ClockCircleOutlined />,
   "high-util": <ThunderboltOutlined />,
+};
+
+const subtexts: Record<string, string> = {
+  overdue: "Oldest: 7 days",
+  partial: "outstanding",
+  "pending-credit": "awaiting decision",
+  "high-util": "Credit utilization above 90%",
 };
 
 const fmt = (v: number) =>
@@ -35,7 +42,7 @@ export default function FinancialRiskCards({ cards, onCardClick }: FinancialRisk
   return (
     <div>
       <h2
-        className="text-sm font-semibold m-0 mb-4 uppercase tracking-wider"
+        className="text-xs font-bold m-0 mb-4 uppercase tracking-widest"
         style={{ color: config.primaryColor }}
       >
         Financial Risk Indicators
@@ -43,10 +50,10 @@ export default function FinancialRiskCards({ cards, onCardClick }: FinancialRisk
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => {
-          const style = severityStyles[card.severity];
+          const accent = accentColors[card.severity];
           const isHighUtil = card.key === "high-util";
           const utilPct = isHighUtil ? Math.round((92000 / 150000) * 100) : 0;
-          const showCard = !isHighUtil || utilPct >= 75;
+          const showCard = !isHighUtil || utilPct >= 90;
 
           if (!showCard) return null;
 
@@ -54,14 +61,14 @@ export default function FinancialRiskCards({ cards, onCardClick }: FinancialRisk
             <button
               key={card.key}
               onClick={() => onCardClick(card.key)}
-              className="rounded-xl p-4 text-left cursor-pointer transition-all group"
+              className="rounded-lg p-5 text-left cursor-pointer transition-all group bg-white"
               style={{
-                border: `1px solid ${style.border}`,
-                backgroundColor: style.bg,
+                border: `1px solid ${config.borderColor}`,
+                borderLeft: `4px solid ${accent}`,
                 outline: "none",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
@@ -70,31 +77,29 @@ export default function FinancialRiskCards({ cards, onCardClick }: FinancialRisk
               }}
             >
               <div className="flex items-start justify-between mb-3">
-                <span className="text-lg" style={{ color: style.iconColor }}>
+                <span className="text-base" style={{ color: accent }}>
                   {icons[card.key]}
                 </span>
-                <RightOutlined className="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <RightOutlined className="text-[10px] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
 
-              <p className="text-2xl font-bold m-0 mb-1" style={{ color: "#111827" }}>
+              <p className="font-bold m-0 mb-0.5" style={{ fontSize: 28, lineHeight: 1.1, color: "#111827" }}>
                 {isHighUtil ? `${utilPct}%` : card.count}
               </p>
 
-              <p className="text-xs font-medium m-0 mb-2" style={{ color: "#374151" }}>
+              <p className="text-xs font-semibold m-0 mb-2" style={{ color: "#374151" }}>
                 {card.label}
               </p>
 
               {!isHighUtil && card.amount > 0 && (
-                <p className="text-[11px] m-0" style={{ color: style.iconColor }}>
-                  {fmt(card.amount)} total
+                <p className="text-[11px] m-0 mb-0.5" style={{ color: accent }}>
+                  {fmt(card.amount)} {card.key === "partial" ? subtexts.partial : "total"}
                 </p>
               )}
 
-              {isHighUtil && (
-                <p className="text-[11px] m-0" style={{ color: style.iconColor }}>
-                  Credit utilization above 75%
-                </p>
-              )}
+              <p className="text-[11px] m-0" style={{ color: "#9CA3AF" }}>
+                {isHighUtil ? subtexts["high-util"] : subtexts[card.key]}
+              </p>
             </button>
           );
         })}

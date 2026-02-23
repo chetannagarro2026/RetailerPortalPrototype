@@ -110,17 +110,17 @@ export default function DashboardPage() {
   return (
     <div className="max-w-[1440px] mx-auto px-6 py-6">
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold m-0 mb-1" style={{ color: config.primaryColor }}>
-          Dashboard
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold m-0 mb-1" style={{ color: config.primaryColor }}>
+          My Account
         </h1>
         <p className="text-sm m-0" style={{ color: config.secondaryColor }}>
           Financial control center &bull; {config.partnerName}
         </p>
       </div>
 
-      {/* Section spacing: 24px gap */}
-      <div className="flex flex-col gap-6">
+      {/* Section spacing: 32px gap */}
+      <div className="flex flex-col gap-8">
         {/* Section 1: Credit Command Center */}
         <CreditCommandCenter />
 

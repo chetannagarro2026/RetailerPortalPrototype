@@ -17,28 +17,34 @@ export default function AccountInfo() {
 
   return (
     <div
-      className="rounded-xl bg-white"
-      style={{ border: `1px solid ${config.borderColor}` }}
+      className="rounded-lg"
+      style={{ border: `1px dashed #E5E7EB` }}
     >
-      <div className="p-6">
+      <div className="px-6 py-5">
         {/* Title + Edit */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <UserOutlined className="text-lg" style={{ color: config.primaryColor }} />
-            <h2 className="text-sm font-semibold m-0 uppercase tracking-wider" style={{ color: config.primaryColor }}>
+            <UserOutlined className="text-sm" style={{ color: config.secondaryColor }} />
+            <h2 className="text-[11px] font-semibold m-0 uppercase tracking-widest" style={{ color: config.secondaryColor }}>
               Account Information
             </h2>
           </div>
           <Link
             to="/account/settings"
-            className="flex items-center gap-1.5 text-xs font-medium no-underline px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-xs font-medium no-underline px-3 py-1.5 rounded-md transition-colors"
             style={{
-              color: config.primaryColor,
-              border: `1px solid ${config.borderColor}`,
+              color: config.secondaryColor,
+              border: `1px solid #E5E7EB`,
               backgroundColor: "#fff",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = config.cardBg; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#fff"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#F9FAFB";
+              e.currentTarget.style.color = config.primaryColor;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#fff";
+              e.currentTarget.style.color = config.secondaryColor;
+            }}
           >
             <EditOutlined className="text-[11px]" />
             Edit Profile
@@ -46,42 +52,12 @@ export default function AccountInfo() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
-          <InfoField
-            icon={<IdcardOutlined />}
-            label="Business Name"
-            value={info.businessName}
-            config={config}
-          />
-          <InfoField
-            icon={<EnvironmentOutlined />}
-            label="Billing Address"
-            value={info.billingAddress}
-            config={config}
-          />
-          <InfoField
-            icon={<IdcardOutlined />}
-            label="Tax ID"
-            value={info.taxId}
-            config={config}
-          />
-          <InfoField
-            icon={<MailOutlined />}
-            label="Contact Email"
-            value={info.contactEmail}
-            config={config}
-          />
-          <InfoField
-            icon={<PhoneOutlined />}
-            label="Phone"
-            value={info.contactPhone}
-            config={config}
-          />
-          <InfoField
-            icon={<TeamOutlined />}
-            label="Account Representative"
-            value={info.accountRep}
-            config={config}
-          />
+          <InfoField icon={<IdcardOutlined />} label="Business Name" value={info.businessName} />
+          <InfoField icon={<EnvironmentOutlined />} label="Billing Address" value={info.billingAddress} />
+          <InfoField icon={<IdcardOutlined />} label="Tax ID" value={info.taxId} />
+          <InfoField icon={<MailOutlined />} label="Contact Email" value={info.contactEmail} />
+          <InfoField icon={<PhoneOutlined />} label="Phone" value={info.contactPhone} />
+          <InfoField icon={<TeamOutlined />} label="Account Rep" value={info.accountRep} />
         </div>
       </div>
     </div>
@@ -92,22 +68,20 @@ function InfoField({
   icon,
   label,
   value,
-  config,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  config: typeof activeBrandConfig;
 }) {
   return (
     <div>
       <div className="flex items-center gap-1.5 mb-1">
-        <span className="text-xs" style={{ color: config.secondaryColor }}>{icon}</span>
-        <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: config.secondaryColor }}>
+        <span className="text-[11px]" style={{ color: "#9CA3AF" }}>{icon}</span>
+        <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
           {label}
         </span>
       </div>
-      <p className="text-sm font-medium m-0" style={{ color: config.primaryColor }}>
+      <p className="text-sm m-0" style={{ color: "#374151" }}>
         {value}
       </p>
     </div>

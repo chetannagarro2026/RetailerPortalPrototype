@@ -6,8 +6,17 @@ import { orderStatuses, recentOrders } from "../../data/dashboardData";
 const fmt = (v: number) =>
   "$" + v.toLocaleString("en-US", { minimumFractionDigits: 0 });
 
+// Amounts per status for display
+const statusAmounts: Record<string, number> = {
+  "Pending Approval": 13500,
+  "Approved": 24800,
+  "Shipped": 42600,
+  "Rejected": 2100,
+};
+
 export default function OrdersOverview() {
   const config = activeBrandConfig;
+  const totalActive = orderStatuses.reduce((a, s) => a + s.count, 0);
 
   return (
     <div
@@ -17,8 +26,8 @@ export default function OrdersOverview() {
       <div className="p-6">
         {/* Title */}
         <div className="flex items-center gap-2 mb-6">
-          <ShoppingOutlined className="text-lg" style={{ color: config.primaryColor }} />
-          <h2 className="text-sm font-semibold m-0 uppercase tracking-wider" style={{ color: config.primaryColor }}>
+          <ShoppingOutlined className="text-base" style={{ color: config.primaryColor }} />
+          <h2 className="text-xs font-bold m-0 uppercase tracking-widest" style={{ color: config.primaryColor }}>
             Orders Overview
           </h2>
         </div>
@@ -26,12 +35,23 @@ export default function OrdersOverview() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left — Status Summary */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: config.secondaryColor }}>
-              Order Status Summary
-            </h3>
-            <div className="space-y-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest m-0" style={{ color: config.secondaryColor }}>
+                Order Status Summary
+              </h3>
+              <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>
+                Total Active: {totalActive}
+              </span>
+            </div>
+
+            <div className="space-y-0">
               {orderStatuses.map((s) => (
-                <div key={s.label} className="flex items-center justify-between">
+                <div
+                  key={s.label}
+                  className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded transition-colors cursor-default"
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#F9FAFB"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                >
                   <div className="flex items-center gap-2.5">
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
@@ -41,24 +61,16 @@ export default function OrdersOverview() {
                       {s.label}
                     </span>
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-                    {s.count}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs" style={{ color: config.secondaryColor }}>
+                      {fmt(statusAmounts[s.label] || 0)}
+                    </span>
+                    <span className="text-sm font-bold min-w-[24px] text-right" style={{ color: config.primaryColor }}>
+                      {s.count}
+                    </span>
+                  </div>
                 </div>
               ))}
-            </div>
-
-            {/* Total */}
-            <div
-              className="flex items-center justify-between mt-4 pt-4"
-              style={{ borderTop: `1px solid ${config.borderColor}` }}
-            >
-              <span className="text-sm font-medium" style={{ color: config.secondaryColor }}>
-                Total Active
-              </span>
-              <span className="text-sm font-bold" style={{ color: config.primaryColor }}>
-                {orderStatuses.reduce((a, s) => a + s.count, 0)}
-              </span>
             </div>
           </div>
 
@@ -67,7 +79,7 @@ export default function OrdersOverview() {
 
           {/* Right — Recent Orders Table */}
           <div className="flex-[2] min-w-0">
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: config.secondaryColor }}>
+            <h3 className="text-[11px] font-bold uppercase tracking-widest mb-4 m-0" style={{ color: config.secondaryColor }}>
               Recent Orders
             </h3>
             <div className="overflow-x-auto">
@@ -83,22 +95,32 @@ export default function OrdersOverview() {
                 </thead>
                 <tbody>
                   {recentOrders.map((o) => (
-                    <tr key={o.id} style={{ borderTop: `1px solid ${config.borderColor}` }}>
-                      <td className="py-2.5 text-xs font-medium" style={{ color: config.primaryColor }}>
+                    <tr
+                      key={o.id}
+                      className="cursor-pointer transition-colors"
+                      style={{ borderTop: `1px solid ${config.borderColor}` }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = "#F9FAFB";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                      }}
+                    >
+                      <td className="py-3 text-xs font-semibold" style={{ color: config.primaryColor }}>
                         {o.poNumber}
                       </td>
-                      <td className="py-2.5 text-xs" style={{ color: "#6B7280" }}>
+                      <td className="py-3 text-xs" style={{ color: "#6B7280" }}>
                         {new Date(o.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </td>
-                      <td className="py-2.5 text-xs" style={{ color: "#374151" }}>
+                      <td className="py-3 text-xs" style={{ color: "#374151" }}>
                         {o.brand}
                       </td>
-                      <td className="py-2.5 text-xs text-right font-medium" style={{ color: "#374151" }}>
+                      <td className="py-3 text-xs text-right font-medium" style={{ color: "#374151" }}>
                         {fmt(o.amount)}
                       </td>
-                      <td className="py-2.5 text-right">
+                      <td className="py-3 text-right">
                         <span
-                          className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full"
+                          className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full"
                           style={{
                             color: o.statusColor,
                             backgroundColor: o.statusColor + "15",
