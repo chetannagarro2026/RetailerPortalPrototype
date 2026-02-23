@@ -19,6 +19,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 import SignInPage from "./pages/SignInPage";
+import DashboardPage from "./pages/DashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/account/payment-history" element={<AuthGate message="Sign in to view your payment history."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/support" element={<AuthGate message="Sign in to access customer service."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/dashboard" element={<AuthGate message="Sign in to access your dashboard."><DashboardPage /></AuthGate>} />
               <Route path="/account/details" element={<AuthGate message="Sign in to view your account details."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><PlaceholderPage /></AuthGate>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

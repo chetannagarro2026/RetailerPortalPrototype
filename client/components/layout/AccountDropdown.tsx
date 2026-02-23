@@ -11,6 +11,7 @@ import {
   ShoppingOutlined,
   CheckCircleOutlined,
   LoginOutlined,
+  DashboardOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -37,6 +38,7 @@ const authenticatedSections: DropdownSection[] = [
   {
     title: "Account",
     items: [
+      { key: "dashboard", label: "Dashboard", icon: <DashboardOutlined />, path: "/account/dashboard" },
       { key: "details", label: "My Account", icon: <UserOutlined />, path: "/account/details" },
       { key: "purchase-orders", label: "Purchase Orders", icon: <ShoppingOutlined />, path: "/purchase-orders" },
       { key: "settings", label: "Settings", icon: <SettingOutlined />, path: "/account/settings" },
