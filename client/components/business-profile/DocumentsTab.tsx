@@ -1,7 +1,6 @@
 import {
   UploadOutlined,
   EyeOutlined,
-  SwapOutlined,
 } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { complianceDocuments } from "../../data/businessProfileData";
@@ -83,7 +82,6 @@ export default function DocumentsTab() {
                   <td className="py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <ActionBtn icon={<EyeOutlined />} label="View" config={config} />
-                      <ActionBtn icon={<SwapOutlined />} label="Replace" config={config} />
                     </div>
                   </td>
                 </tr>
