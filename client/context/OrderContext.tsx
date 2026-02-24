@@ -8,7 +8,7 @@ export interface OrderLineItem {
   id: string;
   productId: string;
   productName: string;
-  sku: string;
+  upc: string;
   /** Variant attribute values, e.g. { Size: "M", Color: "Red" } */
   variantAttributes: Record<string, string>;
   quantity: number;

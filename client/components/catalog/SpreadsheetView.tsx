@@ -63,7 +63,7 @@ export default function SpreadsheetView({
           product: p,
           variant: {
             id: p.id,
-            sku: p.sku,
+            upc: p.upc,
             attributes: {},
             price: p.price,
             availabilityStatus: p.availabilityStatus || "in-stock",
@@ -85,9 +85,9 @@ export default function SpreadsheetView({
       let aVal: string | number;
       let bVal: string | number;
       switch (sort.column) {
-        case "sku":
-          aVal = a.variant.sku;
-          bVal = b.variant.sku;
+        case "upc":
+          aVal = a.variant.upc;
+          bVal = b.variant.upc;
           break;
         case "product":
           aVal = a.product.name;
@@ -145,7 +145,7 @@ export default function SpreadsheetView({
         id: row.variant.id,
         productId: row.product.id,
         productName: row.product.name,
-        sku: row.variant.sku,
+        upc: row.variant.upc,
         variantAttributes: row.variant.attributes,
         quantity: qty,
         unitPrice: row.variant.price,
@@ -213,7 +213,7 @@ export default function SpreadsheetView({
         <table className="w-full border-collapse text-xs">
           <thead>
             <tr style={{ backgroundColor: config.cardBg }}>
-              <SortableHeader label="SKU" col="sku" sort={sort} onSort={toggleSort} icon={<SortIcon col="sku" />} />
+              <SortableHeader label="UPC" col="upc" sort={sort} onSort={toggleSort} icon={<SortIcon col="upc" />} />
               <SortableHeader label="Product" col="product" sort={sort} onSort={toggleSort} icon={<SortIcon col="product" />} />
               {attrColumns.map((col) => (
                 <SortableHeader key={col} label={col} col={col} sort={sort} onSort={toggleSort} icon={<SortIcon col={col} />} />
@@ -243,7 +243,7 @@ export default function SpreadsheetView({
                     className="px-3 py-2 font-mono text-[11px] whitespace-nowrap"
                     style={{ color: config.secondaryColor, borderBottom: `1px solid ${config.borderColor}` }}
                   >
-                    {row.variant.sku}
+                    {row.variant.upc}
                   </td>
                   <td
                     className="px-3 py-2 font-medium max-w-[200px] truncate"

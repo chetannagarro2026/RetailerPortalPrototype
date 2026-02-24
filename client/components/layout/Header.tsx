@@ -201,8 +201,8 @@ export default function Header() {
 // ── Search Dropdown ─────────────────────────────────────────────────
 
 const matchLabels: Record<string, string> = {
-  "exact-sku": "SKU Match",
-  "partial-sku": "SKU",
+  "exact-upc": "UPC Match",
+  "partial-upc": "UPC",
   name: "Name",
   brand: "Brand",
   attribute: "Attribute",
@@ -250,14 +250,14 @@ function SearchDropdown({
                 {r.product.name}
               </p>
               <p className="text-[11px]" style={{ color: config.secondaryColor }}>
-                {r.product.sku} · ${r.product.price.toFixed(2)}
+                {r.product.upc} · ${r.product.price.toFixed(2)}
               </p>
             </div>
             <span
               className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded shrink-0"
               style={{
-                backgroundColor: r.matchType === "exact-sku" ? "#EEF2FF" : config.cardBg,
-                color: r.matchType === "exact-sku" ? "#4338CA" : config.secondaryColor,
+                backgroundColor: r.matchType === "exact-upc" ? "#EEF2FF" : config.cardBg,
+                color: r.matchType === "exact-upc" ? "#4338CA" : config.secondaryColor,
               }}
             >
               {matchLabels[r.matchType] || r.matchType}

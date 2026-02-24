@@ -8,7 +8,7 @@ interface OrderSummaryState {
   totalValue: number;
   items: Array<{
     productName: string;
-    sku: string;
+    upc: string;
     quantity: number;
     unitPrice: number;
   }>;

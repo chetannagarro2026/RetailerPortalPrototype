@@ -12,6 +12,9 @@ const BASE_URL =
 // Azure APIM base configuration
 const AZURE_APIM_BASE = import.meta.env.VITE_AZURE_APIM_BASE_URL || "https://ndoms-dev-apim.azure-api.net";
 
+// Image base URL (Azure Blob Storage)
+const IMAGE_BASE_URL = import.meta.env.VITE_PIM_IMAGE_BASE_URL || "https://ndomsdevstorageacc.blob.core.windows.net";
+
 // External API base URLs (Azure APIM + path)
 const EXTERNAL_API_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PIM_API_PATH || "/pim/dev/v1/api"}`;
 const EXTERNAL_PRICE_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PRICE_API_PATH || "/price-management/dev/api/v1"}`;
@@ -22,6 +25,7 @@ const EXTERNAL_SALES_ORDER_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_SALE
 export const apiConfig = {
   base: BASE_URL,
   externalBase: EXTERNAL_API_BASE,
+  imageBase: IMAGE_BASE_URL,
 
   // Endpoint paths
   endpoints: {
@@ -53,6 +57,9 @@ export const apiConfig = {
     // Sales Order
     salesOrderCreate: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/`,
     salesOrderSearch: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/search/`,
+
+    // Product by UPC
+    productByUpc: (upcId: string) => `${EXTERNAL_API_BASE}/products/upc/${upcId}`,
 
     // Add your API endpoints below
     // products: `${BASE_URL}/products`,

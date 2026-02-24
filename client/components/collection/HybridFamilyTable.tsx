@@ -1,34 +1,19 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Pagination } from "antd";
-import {
-  RightOutlined,
-  DownOutlined,
-  ShoppingCartOutlined,
-} from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { ShoppingCartOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import type { CatalogProduct, CatalogNode, ProductVariant } from "../../data/catalogData";
+import type { CatalogProduct } from "../../data/catalogData";
 import type { CategoryTree } from "../../services/categoryService";
-import { getSlugPath } from "../../services/categoryService";
-import { fetchProductsByCategory } from "../../services/productService";
-import FamilyRowExpansion from "./FamilyRowExpansion";
 import QuickAddPanel from "./QuickAddPanel";
 
 const TABLE_PAGE_SIZE = 20;
 
-// Extended type to handle categories shown as products
-type ProductOrCategory = CatalogProduct & {
-  _isCategory?: boolean;
-  _categoryNode?: CatalogNode;
-};
-
 interface HybridFamilyTableProps {
-  products: ProductOrCategory[];
+  products: CatalogProduct[];
   total: number;
   page: number;
   onPageChange: (page: number) => void;
-  showCategoriesAsProducts?: boolean;
   tree?: CategoryTree;
 }
 
@@ -37,69 +22,16 @@ export default function HybridFamilyTable({
   total,
   page,
   onPageChange,
-  showCategoriesAsProducts = false,
-  tree,
 }: HybridFamilyTableProps) {
   const config = activeBrandConfig;
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [quickAddProduct, setQuickAddProduct] = useState<CatalogProduct | null>(null);
-  const [quickAddCategoryId, setQuickAddCategoryId] = useState<string | null>(null);
 
-  // Image base URL for category products
-  const IMAGE_BASE_URL = import.meta.env.VITE_PIM_IMAGE_BASE_URL || "https://ndomsdevstorageacc.blob.core.windows.net";
-
-  // Fetch products for the selected category when showing quick add for a category
-  const { data: categoryProductsResponse, isLoading: isLoadingCategoryProducts } = useQuery({
-    queryKey: ["category-products", quickAddCategoryId],
-    queryFn: () => fetchProductsByCategory(quickAddCategoryId!, 0, 9999),
-    enabled: !!quickAddCategoryId && showCategoriesAsProducts,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Convert API products to variants for quick add
-  const categoryProductVariants = useMemo<ProductVariant[]>(() => {
-    if (!categoryProductsResponse?.content || !quickAddCategoryId) return [];
-    
-    return categoryProductsResponse.content.map((item): ProductVariant => ({
-      id: item.id,
-      sku: item.upcId,
-      attributes: {
-        Product: item?.name,
-      },
-      imageUrl: item.imageIconPath 
-        ? `${IMAGE_BASE_URL}${item.imageIconPath}`
-        : "https://via.placeholder.com/48x48?text=No+Image",
-      price: 99.99,
-      availabilityStatus: "in-stock",
-      stockQty: 100,
-    }));
-  }, [categoryProductsResponse, quickAddCategoryId, IMAGE_BASE_URL]);
-
-  const handleRowClick = useCallback(
-    (productId: string) => {
-      setExpandedId((prev) => (prev === productId ? null : productId));
-    },
-    [],
-  );
-
-  const handleQuickAdd = useCallback(
-    (product: ProductOrCategory) => {
-      if (product._isCategory && product._categoryNode) {
-        // Handle category quick add - fetch products for this category
-        setQuickAddCategoryId(product._categoryNode.id);
-        setQuickAddProduct(null);
-      } else {
-        // Handle regular product quick add
-        setQuickAddProduct(product);
-        setQuickAddCategoryId(null);
-      }
-    },
-    [],
-  );
+  const handleQuickAdd = useCallback((product: CatalogProduct) => {
+    setQuickAddProduct(product);
+  }, []);
 
   const handleClosePanel = useCallback(() => {
     setQuickAddProduct(null);
-    setQuickAddCategoryId(null);
   }, []);
 
   if (products.length === 0) {
@@ -108,45 +40,18 @@ export default function HybridFamilyTable({
         className="text-center py-16 text-sm rounded-xl"
         style={{ color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
       >
-        {showCategoriesAsProducts 
-          ? "No subcategories found." 
-          : "No product families match the current filters."}
+        No products match the current filters.
       </div>
     );
   }
 
-  const panelOpen = !!quickAddProduct || !!quickAddCategoryId;
-  
-  // Determine which product to show in quick add panel
-  const quickAddDisplayProduct = useMemo(() => {
-    if (quickAddProduct) return quickAddProduct;
-    if (quickAddCategoryId) {
-      // Create a virtual "family" product from category - show immediately even while loading
-      const categoryNode = products.find(p => p._isCategory && p._categoryNode?.id === quickAddCategoryId)?._categoryNode;
-      return {
-        id: quickAddCategoryId,
-        name: categoryNode?.label || "Category Products",
-        sku: quickAddCategoryId,
-        imageUrl: categoryNode?.heroImage || "https://via.placeholder.com/300x300?text=Category",
-        price: 0,
-        availabilityStatus: "in-stock" as const,
-        variants: categoryProductVariants,
-        variantAttributes: categoryProductVariants.length > 0 ? [
-          {
-            name: "Product",
-            values: categoryProductVariants.map(v => v.attributes.Product),
-          }
-        ] : [],
-      } as CatalogProduct;
-    }
-    return null;
-  }, [quickAddProduct, quickAddCategoryId, categoryProductVariants, products]);
+  const panelOpen = !!quickAddProduct;
 
   return (
     <div
       className="flex gap-0"
       style={panelOpen ? {
-        height: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+        height: "calc(100vh - var(--header-height) - var(--nav-height) - 200px)",
       } : undefined}
     >
       {/* Main table area */}
@@ -156,50 +61,43 @@ export default function HybridFamilyTable({
       >
         <div
           className="rounded-xl overflow-hidden"
-          style={{ border: `1px solid ${config.borderColor}`, minWidth: 580 }}
+          style={{ border: `1px solid ${config.borderColor}`, minWidth: 500 }}
         >
           <table className="w-full border-collapse text-xs">
             <thead>
               <tr style={{ backgroundColor: config.cardBg }}>
-                <th className="w-8 px-3 py-2.5" style={{ borderBottom: `2px solid ${config.borderColor}` }} />
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Image
                 </th>
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  {showCategoriesAsProducts ? "Category Name" : "Family Name"}
+                  Product Name
                 </th>
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  {showCategoriesAsProducts ? "Description" : "Brand"}
+                  UPC
                 </th>
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-right px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  {showCategoriesAsProducts ? "Product Count" : "Key Attributes"}
+                  Price
                 </th>
                 <th
-                  className="text-right px-3 py-2.5 font-semibold"
+                  className="text-center px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
-                  {showCategoriesAsProducts ? "" : "Price Range"}
+                  Stock
                 </th>
                 <th
-                  className="text-center px-3 py-2.5 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
-                >
-                  {showCategoriesAsProducts ? "" : "SKUs"}
-                </th>
-                <th
-                  className="text-center px-3 py-2.5 font-semibold"
+                  className="text-center px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Actions
@@ -207,27 +105,14 @@ export default function HybridFamilyTable({
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => {
-                const isExpanded = expandedId === product.id;
-                const isCategory = product._isCategory;
-                
-                return isCategory ? (
-                  <CategoryRow
-                    key={product.id}
-                    category={product}
-                    onQuickAdd={handleQuickAdd}
-                    tree={tree}
-                  />
-                ) : (
-                  <FamilyRow
-                    key={product.id}
-                    product={product}
-                    isExpanded={isExpanded}
-                    onRowClick={handleRowClick}
-                    onQuickAdd={handleQuickAdd}
-                  />
-                );
-              })}
+              {products.map((product) => (
+                <ProductRow
+                  key={product.id}
+                  product={product}
+                  isSelected={quickAddProduct?.id === product.id}
+                  onQuickAdd={handleQuickAdd}
+                />
+              ))}
             </tbody>
           </table>
         </div>
@@ -247,22 +132,21 @@ export default function HybridFamilyTable({
       </div>
 
       {/* Quick Add Panel — in-flow, scrolls independently */}
-      {quickAddDisplayProduct && (
+      {quickAddProduct && (
         <div
           className="shrink-0 ml-4 flex flex-col shadow-lg rounded-xl overflow-hidden"
           style={{
-            width: 400,
+            width: 420,
             height: "100%",
             border: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",
           }}
         >
           <QuickAddPanel
-            key={quickAddDisplayProduct.id}
-            product={quickAddDisplayProduct}
-            familyLink={`/product/${quickAddDisplayProduct.id}`}
+            key={quickAddProduct.id}
+            product={quickAddProduct}
+            familyLink={`/product/${quickAddProduct.upc}`}
             onClose={handleClosePanel}
-            isLoading={!!quickAddCategoryId && isLoadingCategoryProducts}
           />
         </div>
       )}
@@ -270,287 +154,138 @@ export default function HybridFamilyTable({
   );
 }
 
-// ── Family Row ──────────────────────────────────────────────────────
+// ── Product Row ─────────────────────────────────────────────────────
 
-function FamilyRow({
+function ProductRow({
   product,
-  isExpanded,
-  onRowClick,
+  isSelected,
   onQuickAdd,
 }: {
   product: CatalogProduct;
-  isExpanded: boolean;
-  onRowClick: (id: string) => void;
+  isSelected: boolean;
   onQuickAdd: (product: CatalogProduct) => void;
 }) {
   const config = activeBrandConfig;
-  const familyLink = `/product/${product.id}`;
+  const productLink = `/product/${product.upc}`;
 
-  const { priceRange, skuCount, attrSummary } = useMemo(
-    () => computeFamilyMeta(product),
-    [product],
-  );
+  const stockStatus = product.availabilityStatus || "in-stock";
+  const stockLabel = stockStatus === "in-stock" ? "In Stock" : 
+                     stockStatus === "low-stock" ? "Low Stock" : 
+                     stockStatus === "out-of-stock" ? "Out of Stock" : "Pre-Order";
+  const stockColor = stockStatus === "in-stock" ? "#16A34A" : 
+                     stockStatus === "low-stock" ? "#D97706" : 
+                     stockStatus === "out-of-stock" ? "#DC2626" : "#7C3AED";
 
   return (
-    <>
-      {/* Main Row */}
-      <tr
-        className="cursor-pointer transition-colors"
-        onClick={() => onRowClick(product.id)}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = config.cardBg;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = isExpanded ? config.cardBg : "transparent";
-        }}
-        style={{ backgroundColor: isExpanded ? config.cardBg : "transparent" }}
+    <tr
+      className="transition-colors"
+      style={{
+        backgroundColor: isSelected ? config.cardBg : "transparent",
+      }}
+      onMouseEnter={(e) => {
+        if (!isSelected) e.currentTarget.style.backgroundColor = config.cardBg;
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
+      }}
+    >
+      {/* Image */}
+      <td
+        className="px-4 py-3"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
-        {/* Chevron */}
-        <td
-          className="px-3 py-3 text-center"
-          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          {isExpanded ? (
-            <DownOutlined className="text-[9px]" style={{ color: config.secondaryColor }} />
-          ) : (
-            <RightOutlined className="text-[9px]" style={{ color: config.secondaryColor }} />
-          )}
-        </td>
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          loading="lazy"
+          className="w-12 h-12 object-cover rounded-lg"
+          onError={(e) => {
+            e.currentTarget.src = "https://via.placeholder.com/48x48?text=No+Img";
+          }}
+        />
+      </td>
 
-        {/* Image */}
-        <td
-          className="px-3 py-2"
-          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
+      {/* Product Name */}
+      <td
+        className="px-4 py-3"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        <Link
+          to={productLink}
+          className="text-sm font-medium no-underline hover:underline block"
+          style={{ color: config.primaryColor }}
         >
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            loading="lazy"
-            className="w-10 h-10 object-cover rounded-md"
-          />
-        </td>
-
-        {/* Family Name */}
-        <td
-          className="px-3 py-2"
-          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          <Link
-            to={familyLink}
-            className="text-xs font-medium no-underline hover:underline"
-            style={{ color: config.primaryColor }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {product.name}
-          </Link>
-          <div className="text-[10px] font-mono mt-0.5" style={{ color: config.secondaryColor }}>
-            {product.sku}
+          {product.name}
+        </Link>
+        {product.brand && (
+          <div className="text-[10px] mt-0.5" style={{ color: config.secondaryColor }}>
+            {product.brand}
           </div>
-        </td>
+        )}
+      </td>
 
-        {/* Brand */}
-        <td
-          className="px-3 py-2 text-[11px]"
-          style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          {product.brand || "—"}
-        </td>
-
-        {/* Key Attributes */}
-        <td
-          className="px-3 py-2 text-[11px]"
-          style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          {attrSummary}
-        </td>
-
-        {/* Price Range */}
-        <td
-          className="px-3 py-2 text-right text-[11px] font-medium whitespace-nowrap"
-          style={{ color: config.primaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          {priceRange}
-        </td>
-
-        {/* SKU Count */}
-        <td
-          className="px-3 py-2 text-center"
-          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          <span
-            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: config.cardBg, color: config.primaryColor }}
-          >
-            {skuCount}
-          </span>
-        </td>
-
-        {/* Actions */}
-        <td
-          className="px-3 py-2 text-center"
-          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
-        >
-          {!isExpanded && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onQuickAdd(product);
-              }}
-              className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors"
-              style={{
-                backgroundColor: config.primaryColor,
-                color: "#fff",
-                border: "none",
-              }}
-            >
-              <ShoppingCartOutlined className="text-[9px]" />
-              Quick Add
-            </button>
-          )}
-        </td>
-      </tr>
-
-      {/* Expansion Row */}
-      {isExpanded && (
-        <tr>
-          <td
-            colSpan={8}
-            className="p-0"
-            style={{ borderBottom: `1px solid ${config.borderColor}` }}
-          >
-            <FamilyRowExpansion
-              product={product}
-              familyLink={familyLink}
-              onQuickAdd={() => onQuickAdd(product)}
-            />
-          </td>
-        </tr>
-      )}
-    </>
-  );
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function computeFamilyMeta(product: CatalogProduct) {
-  const variants = product.variants || [];
-  const skuCount = variants.length;
-
-  // Price range from variants
-  let minPrice = Infinity;
-  let maxPrice = -Infinity;
-  for (const v of variants) {
-    if (v.price < minPrice) minPrice = v.price;
-    if (v.price > maxPrice) maxPrice = v.price;
-  }
-
-  let priceRange: string;
-  if (skuCount === 0) {
-    priceRange = `$${product.price.toFixed(2)}`;
-  } else if (minPrice === maxPrice) {
-    priceRange = `$${minPrice.toFixed(2)}`;
-  } else {
-    priceRange = `$${minPrice.toFixed(2)} – $${maxPrice.toFixed(2)}`;
-  }
-
-  // Key attribute summary from variantAttributes (dynamic, industry-neutral)
-  const parts: string[] = [];
-  if (product.variantAttributes) {
-    for (const attr of product.variantAttributes) {
-      const uniqueCount = attr.values.length;
-      parts.push(`${uniqueCount} ${attr.name}${uniqueCount !== 1 ? "s" : ""}`);
-    }
-  }
-  const attrSummary = parts.length > 0 ? parts.join(" · ") : "—";
-
-  return { priceRange, skuCount, attrSummary };
-}
-
-// ── Category Row ────────────────────────────────────────────────────
-
-function CategoryRow({
-  category,
-  onQuickAdd,
-  tree,
-}: {
-  category: ProductOrCategory;
-  onQuickAdd: (category: ProductOrCategory) => void;
-  tree?: CategoryTree;
-}) {
-  const config = activeBrandConfig;
-  const categoryNode = category._categoryNode!;
-  
-  // Build proper slug path using the tree
-  const slugPath = tree ? getSlugPath(tree, categoryNode.id) : [categoryNode.slug];
-  const categoryLink = `/catalog/${slugPath.join("/")}`;
-
-  return (
-    <>
-      <tr
-        className="cursor-pointer transition-colors hover:bg-opacity-50"
-        style={{
-          borderBottom: `1px solid ${config.borderColor}`,
-          backgroundColor: "transparent",
-        }}
+      {/* UPC */}
+      <td
+        className="px-4 py-3"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
-        {/* Expand toggle - empty for categories */}
-        <td className="px-3 py-3" />
+        <span className="text-[11px] font-mono" style={{ color: config.secondaryColor }}>
+          {product.upc}
+        </span>
+      </td>
 
-        {/* Image */}
-        <td className="px-3 py-3">
-          <img
-            src={category.imageUrl}
-            alt={category.name}
-            className="w-12 h-12 object-cover rounded"
-            onError={(e) => {
-              e.currentTarget.src = "https://via.placeholder.com/48x48?text=Cat";
-            }}
-          />
-        </td>
+      {/* Price */}
+      <td
+        className="px-4 py-3 text-right"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+          ${product.price.toFixed(2)}
+        </span>
+        {product.originalPrice && product.originalPrice > product.price && (
+          <span className="text-[10px] line-through ml-1.5" style={{ color: config.secondaryColor }}>
+            ${product.originalPrice.toFixed(2)}
+          </span>
+        )}
+      </td>
 
-        {/* Category Name */}
-        <td className="px-3 py-3">
-          <Link
-            to={categoryLink}
-            className="font-medium hover:underline"
-            style={{ color: config.primaryColor }}
-          >
-            {category.name}
-          </Link>
-        </td>
+      {/* Stock Status */}
+      <td
+        className="px-4 py-3 text-center"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        <span
+          className="text-[10px] font-semibold px-2 py-1 rounded-full"
+          style={{
+            backgroundColor: `${stockColor}15`,
+            color: stockColor,
+          }}
+        >
+          {stockLabel}
+        </span>
+      </td>
 
-        {/* Description */}
-        <td className="px-3 py-3" style={{ color: config.secondaryColor }}>
-          {categoryNode.description || "—"}
-        </td>
-
-        {/* Product Count */}
-        <td className="px-3 py-3 text-center" style={{ color: config.secondaryColor }}>
-          {categoryNode.productCount || 0} products
-        </td>
-
-        {/* Empty columns for alignment */}
-        <td className="px-3 py-3" />
-        <td className="px-3 py-3" />
-
-        {/* Actions */}
-        <td className="px-3 py-3 text-center">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onQuickAdd(category);
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-            style={{
-              color: "#fff",
-              backgroundColor: config.primaryColor,
-            }}
-          >
-            <ShoppingCartOutlined className="text-sm" />
-            Quick Add
-          </button>
-        </td>
-      </tr>
-    </>
+      {/* Actions */}
+      <td
+        className="px-4 py-3 text-center"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onQuickAdd(product);
+          }}
+          className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-all"
+          style={{
+            backgroundColor: isSelected ? "#fff" : config.primaryColor,
+            color: isSelected ? config.primaryColor : "#fff",
+            border: isSelected ? `1px solid ${config.primaryColor}` : "none",
+          }}
+        >
+          <ShoppingCartOutlined className="text-xs" />
+          {isSelected ? "Selected" : "Quick Add"}
+        </button>
+      </td>
+    </tr>
   );
 }

@@ -20,7 +20,7 @@ export interface PurchaseOrder {
     id: string;
     productId: string;
     productName: string;
-    sku: string;
+    upc: string;
     variantAttributes: Record<string, string>;
     quantity: number;
     unitPrice: number;

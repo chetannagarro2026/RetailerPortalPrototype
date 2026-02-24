@@ -41,12 +41,10 @@ function HybridCollectionPage({
   slugPath, 
   tree,
   categoryId,
-  showCategoriesAsProducts = false,
 }: { 
   slugPath: string[];
   tree: CategoryTreeType;
   categoryId: string;
-  showCategoriesAsProducts?: boolean;
 }) {
   const config = activeBrandConfig;
   const node = getNodeBySlugPath(tree, slugPath)!;
@@ -57,7 +55,6 @@ function HybridCollectionPage({
     queryKey: ["products", categoryId],
     queryFn: () => fetchProductsByCategory(categoryId, 0, 9999),
     staleTime: 5 * 60 * 1000,
-    enabled: !showCategoriesAsProducts, // Only fetch if not showing categories as products
   });
 
   // Convert API products to CatalogProduct format
@@ -66,8 +63,8 @@ function HybridCollectionPage({
     
     return productsResponse.content.map((item) => ({
       id: item.id,
-      name: item.productName || item.familyLabels?.en || "Unknown Product",
-      sku: item.upcId,
+      name: item.name || "Unknown Product",
+      upc: item.upcId,
       imageUrl: item.imageIconPath 
         ? `${IMAGE_BASE_URL}${item.imageIconPath}`
         : "https://via.placeholder.com/300x300?text=No+Image",
@@ -95,35 +92,10 @@ function HybridCollectionPage({
   // Use API products if available, fallback to mock data
   const products = apiProducts.length > 0 ? apiProducts : catalog.filteredProducts;
 
-  // Convert child categories to "product" format if showCategoriesAsProducts is true
-  const categoriesAsProducts = useMemo(() => {
-    if (!showCategoriesAsProducts) return [];
-    
-    return children.map((child) => ({
-      id: child.id,
-      name: child.label,
-      sku: child.id,
-      imageUrl: child.heroImage || "https://via.placeholder.com/300x300?text=Category",
-      price: 0,
-      availabilityStatus: "in-stock" as const,
-      brand: undefined,
-      // Add custom flag to identify this as a category
-      _isCategory: true,
-      _categoryNode: child,
-    }));
-  }, [showCategoriesAsProducts, children]);
-
-  const displayItems = showCategoriesAsProducts ? categoriesAsProducts : products;
-
   // When a tab is active, load that child node's products directly
   // and apply the same filters/sorting from the parent catalog state
   const displayProducts = useMemo(() => {
-    if (showCategoriesAsProducts) {
-      // When showing categories as products, don't apply filtering
-      return displayItems;
-    }
-    
-    if (!activeTab) return displayItems;
+    if (!activeTab) return products;
 
     let tabProducts = getAllProductsForNode(activeTab);
 
@@ -157,7 +129,7 @@ function HybridCollectionPage({
       default: break;
     }
     return sorted;
-  }, [activeTab, displayItems, catalog.activeFilters, catalog.priceRange, catalog.sortBy, showCategoriesAsProducts]);
+  }, [activeTab, products, catalog.activeFilters, catalog.priceRange, catalog.sortBy]);
 
   // Paginate for table view
   const PAGE_SIZE = 20;
@@ -197,8 +169,7 @@ function HybridCollectionPage({
           >
             <CategoryTreeComponent activeNodeId={activeTab || node.id} rootNodeId={treeRoot!.id} tree={tree} />
 
-            {/* Hide filters when showing categories as products */}
-            {!showCategoriesAsProducts && catalog.resolvedFilters.length > 0 && (
+            {catalog.resolvedFilters.length > 0 && (
               <div
                 className="mt-5 pt-5"
                 style={{ borderTop: `1px solid ${config.borderColor}` }}
@@ -215,34 +186,29 @@ function HybridCollectionPage({
           </aside>
         )}
 
-        {/* Right: Header + Tabs + Table/Grid */}
         <div className="flex-1 min-w-0">
           <CollectionHeader
             title={node.label}
             familyCount={displayProducts.length}
-            totalFamilies={showCategoriesAsProducts ? displayProducts.length : catalog.allProducts.length}
-            subcategoryCount={showCategoriesAsProducts ? 0 : children.length}
-            hasActiveFilters={!showCategoriesAsProducts && (catalog.hasActiveFilters || activeTab !== null)}
+            totalFamilies={catalog.allProducts.length}
+            subcategoryCount={children.length}
+            hasActiveFilters={catalog.hasActiveFilters || activeTab !== null}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
             sortBy={catalog.sortBy}
             onSortChange={catalog.setSortBy}
           />
 
-          {/* Active Filter Chips - hide when showing categories as products */}
-          {!showCategoriesAsProducts && (
-            <ActiveFilterChips
-              activeFilters={catalog.activeFilters}
-              priceRange={catalog.priceRange}
-              onRemoveValue={catalog.removeFilterValue}
-              onRemoveFilter={catalog.removeFilter}
-              onClearAll={catalog.clearAllFilters}
-              onClearPriceRange={() => catalog.setPriceRange(null)}
-            />
-          )}
+          <ActiveFilterChips
+            activeFilters={catalog.activeFilters}
+            priceRange={catalog.priceRange}
+            onRemoveValue={catalog.removeFilterValue}
+            onRemoveFilter={catalog.removeFilter}
+            onClearAll={catalog.clearAllFilters}
+            onClearPriceRange={() => catalog.setPriceRange(null)}
+          />
 
-          {/* Subcategory Tabs - hide when showing categories as products */}
-          {!showCategoriesAsProducts && children.length > 0 && (
+          {children.length > 0 && (
             <SubcategoryTabs
               children={children}
               activeTabId={activeTab}
@@ -250,14 +216,12 @@ function HybridCollectionPage({
             />
           )}
 
-          {/* Content: Table (default) or Grid */}
           {viewMode === "table" ? (
             <HybridFamilyTable
               products={paginatedProducts}
               total={displayProducts.length}
               page={tablePage}
               onPageChange={setTablePage}
-              showCategoriesAsProducts={showCategoriesAsProducts}
               tree={tree}
             />
           ) : (
@@ -336,37 +300,28 @@ export default function CatalogNodePage() {
     );
   }
 
-  // If node has children, check if they should be shown as list or cards
+  // If node has children, show subcategory cards for navigation
   if (node.hasChildren) {
     const children = getChildren(tree, node.id);
     
     if (children.length > 0) {
-      const childrenHaveSubcategories = children.some(child => child.hasChildren);
-      
-      // Show as cards when children have subcategories (intermediate level - user navigates deeper)
-      // Show as list when children are leaf nodes (final level - quick add to cart)
-      if (childrenHaveSubcategories) {
-        // Children have more subcategories - show card view for navigation
-        return (
-          <div className="max-w-content-wide mx-auto px-6 py-8">
-            {node.level > 0 && <CatalogBreadcrumb node={node} tree={tree} />}
-            <div className="mb-6">
-              <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
-                {node.label}
-              </h1>
-              {node.level === 0 && (
-                <p className="text-sm" style={{ color: config.secondaryColor }}>
-                  Browse the complete {config.brandName} portfolio.
-                </p>
-              )}
-            </div>
-            <SubcategoryCardGrid node={node} children={children} tree={tree} />
+      // Show card view for navigation - users can click to see products
+      return (
+        <div className="max-w-content-wide mx-auto px-6 py-8">
+          {node.level > 0 && <CatalogBreadcrumb node={node} tree={tree} />}
+          <div className="mb-6">
+            <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
+              {node.label}
+            </h1>
+            {node.level === 0 && (
+              <p className="text-sm" style={{ color: config.secondaryColor }}>
+                Browse the complete {config.brandName} portfolio.
+              </p>
+            )}
           </div>
-        );
-      } else {
-        // Children are leaf nodes - show list view with quick add
-        return <HybridCollectionPage slugPath={slugPath} tree={tree} categoryId={node.id} showCategoriesAsProducts={true} />;
-      }
+          <SubcategoryCardGrid node={node} children={children} tree={tree} />
+        </div>
+      );
     }
   }
 

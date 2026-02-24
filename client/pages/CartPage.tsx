@@ -200,7 +200,7 @@ function CartItemList({
                   {item.productName}
                 </Link>
                 <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-                  {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
+                  {item.upc}{variantDesc ? ` · ${variantDesc}` : ""}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
                   ${item.unitPrice.toFixed(2)} / unit

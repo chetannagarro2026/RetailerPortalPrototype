@@ -1,13 +1,11 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { InputNumber, Pagination, Spin } from "antd";
-import { CloseOutlined, WarningOutlined, LoadingOutlined } from "@ant-design/icons";
+import { InputNumber } from "antd";
+import { CloseOutlined, WarningOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
 import { useCreditState } from "../../hooks/useCreditState";
-import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
-
-const PAGE_SIZE = 20;
+import type { CatalogProduct } from "../../data/catalogData";
 
 interface QuickAddPanelProps {
   product: CatalogProduct;
@@ -20,92 +18,60 @@ export default function QuickAddPanel({
   product,
   familyLink,
   onClose,
-  isLoading = false,
 }: QuickAddPanelProps) {
   const config = activeBrandConfig;
   const { addItems } = useOrder();
   const credit = useCreditState();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [page, setPage] = useState(1);
-
-  const variants = product.variants || [];
-
-  // Paginate variants
-  const paginatedVariants = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return variants.slice(start, start + PAGE_SIZE);
-  }, [variants, page]);
-
-  // Collect dynamic attribute column names (excluding Product which has its own column)
-  const attrColumns = useMemo(() => {
-    const cols = new Set<string>();
-    for (const v of variants) {
-      for (const key of Object.keys(v.attributes)) {
-        if (key !== 'Product') {
-          cols.add(key);
-        }
-      }
-    }
-    return Array.from(cols);
-  }, [variants]);
-
-  // Selection summary
-  const selectedEntries = useMemo(
-    () => Object.entries(quantities).filter(([, q]) => q > 0),
-    [quantities],
-  );
-  const selectedSkuCount = selectedEntries.length;
-  const totalUnits = selectedEntries.reduce((s, [, q]) => s + q, 0);
-  const subtotal = useMemo(() => {
-    return selectedEntries.reduce((sum, [vid, qty]) => {
-      const v = variants.find((vr) => vr.id === vid);
-      return sum + (v ? v.price * qty : 0);
-    }, 0);
-  }, [selectedEntries, variants]);
-
-  const wouldExceedCredit = credit.remainingAfterOrder - subtotal < 0 && subtotal > 0;
-
-  const handleQtyChange = useCallback(
-    (variantId: string, val: number | null, minQty: number, step: number) => {
-      setQuantities((prev) => {
-        const next = { ...prev };
-        if (!val || val <= 0) {
-          delete next[variantId];
-        } else {
-          const snapped = Math.max(minQty, Math.round(val / step) * step || step);
-          next[variantId] = snapped;
-        }
-        return next;
-      });
-    },
-    [],
-  );
-
-  const handleAddSelected = () => {
-    if (selectedEntries.length === 0 || wouldExceedCredit) return;
-    const items = selectedEntries
-      .map(([vid, qty]) => {
-        const v = variants.find((vr) => vr.id === vid);
-        if (!v) return null;
-        return {
-          id: v.id,
-          productId: product.id,
-          productName: v.attributes.Product || product.name,
-          sku: v.sku,
-          variantAttributes: v.attributes,
-          quantity: qty,
-          unitPrice: v.price,
-          imageUrl: v.imageUrl || product.imageUrl,
-        };
-      })
-      .filter(Boolean) as Parameters<typeof addItems>[0];
-
-    addItems(items);
-    setQuantities({});
-  };
+  const [quantity, setQuantity] = useState(1);
 
   const minQty = product.minOrderQty || 1;
   const step = product.casePackQty || 1;
+  const subtotal = quantity * product.price;
+  const wouldExceedCredit = credit.remainingAfterOrder - subtotal < 0 && subtotal > 0;
+
+  const stockStatus = product.availabilityStatus || "in-stock";
+  const isOutOfStock = stockStatus === "out-of-stock";
+  const stockLabel = stockStatus === "in-stock" ? "In Stock" : 
+                     stockStatus === "low-stock" ? "Low Stock" : 
+                     stockStatus === "out-of-stock" ? "Out of Stock" : "Pre-Order";
+  const stockColor = stockStatus === "in-stock" ? "#16A34A" : 
+                     stockStatus === "low-stock" ? "#D97706" : 
+                     stockStatus === "out-of-stock" ? "#DC2626" : "#7C3AED";
+
+  const handleQtyChange = useCallback((val: number | null) => {
+    if (!val || val <= 0) {
+      setQuantity(minQty);
+    } else {
+      const snapped = Math.max(minQty, Math.round(val / step) * step || step);
+      setQuantity(snapped);
+    }
+  }, [minQty, step]);
+
+  const handleIncrement = useCallback(() => {
+    setQuantity(prev => prev + step);
+  }, [step]);
+
+  const handleDecrement = useCallback(() => {
+    setQuantity(prev => Math.max(minQty, prev - step));
+  }, [minQty, step]);
+
+  const handleAddToCart = useCallback(() => {
+    if (isOutOfStock || wouldExceedCredit) return;
+
+    addItems([{
+      id: product.id,
+      productId: product.id,
+      productName: product.name,
+      upc: product.upc,
+      variantAttributes: {},
+      quantity: quantity,
+      unitPrice: product.price,
+      imageUrl: product.imageUrl,
+    }]);
+
+    // Reset quantity and close panel
+    setQuantity(1);
+  }, [product, quantity, addItems, isOutOfStock, wouldExceedCredit]);
 
   return (
     <div
@@ -117,22 +83,20 @@ export default function QuickAddPanel({
         className="flex items-start justify-between px-5 py-4 shrink-0"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3
-            className="text-sm font-semibold mb-0.5 truncate"
+            className="text-base font-semibold mb-1 leading-tight"
             style={{ color: config.primaryColor }}
           >
-            {product.name}
+            Quick Add
           </h3>
-          <div className="flex items-center gap-2 text-[11px]" style={{ color: config.secondaryColor }}>
-            {product.brand && <span>{product.brand}</span>}
-            <span>·</span>
-            <span>{variants.length} SKUs</span>
-          </div>
+          <p className="text-[11px]" style={{ color: config.secondaryColor }}>
+            Add this product to your cart
+          </p>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-md cursor-pointer transition-colors"
+          className="p-1.5 rounded-md cursor-pointer transition-colors hover:bg-gray-100"
           style={{ border: "none", background: "transparent", color: config.secondaryColor }}
           aria-label="Close panel"
         >
@@ -140,267 +104,190 @@ export default function QuickAddPanel({
         </button>
       </div>
 
-      {/* SKU Table */}
-      <div className="flex-1 overflow-auto">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 32, color: config.primaryColor }} spin />} />
+      {/* Product Info */}
+      <div className="flex-1 overflow-auto px-5 py-4">
+        <div className="flex gap-4 mb-6">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-24 h-24 object-cover rounded-xl flex-shrink-0"
+            onError={(e) => {
+              e.currentTarget.src = "https://via.placeholder.com/96x96?text=No+Img";
+            }}
+          />
+          <div className="min-w-0 flex-1">
+            <h4
+              className="text-sm font-semibold mb-1 leading-snug"
+              style={{ color: config.primaryColor }}
+            >
+              {product.name}
+            </h4>
+            {product.brand && (
+              <p className="text-[10px] mb-2" style={{ color: config.secondaryColor }}>
+                {product.brand}
+              </p>
+            )}
+            <p className="text-[10px] font-mono mb-2" style={{ color: config.secondaryColor }}>
+              UPC: {product.upc}
+            </p>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: `${stockColor}15`,
+                  color: stockColor,
+                }}
+              >
+                {stockLabel}
+              </span>
+            </div>
           </div>
-        ) : variants.length === 0 ? (
-          <div className="flex items-center justify-center py-20 text-sm" style={{ color: config.secondaryColor }}>
-            No products available
-          </div>
-        ) : (
-          <>
-        <table className="w-full border-collapse text-xs">
-          <thead>
-            <tr style={{ backgroundColor: config.cardBg }}>
-              <th
-                className="text-left px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
-              >
-                SKU
-              </th>
-              <th
-                className="text-left px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
-              >
-                Image
-              </th>
-              <th
-                className="text-left px-3 py-2.5 font-semibold sticky top-0"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1, minWidth: '120px' }}
-              >
-                Product
-              </th>
-              {attrColumns.map((col) => (
-                <th
-                  key={col}
-                  className="text-left px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
-                >
-                  {col}
-                </th>
-              ))}
-              <th
-                className="text-center px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
-              >
-                Stock
-              </th>
-              <th
-                className="text-right px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
-              >
-                Price
-              </th>
-              <th
-                className="text-center px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
-              >
-                Qty
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedVariants.map((v) => (
-              <SkuRow
-                key={v.id}
-                variant={v}
-                attrColumns={attrColumns}
-                qty={quantities[v.id] || 0}
-                minQty={minQty}
-                step={step}
-                onQtyChange={handleQtyChange}
-              />
-            ))}
-          </tbody>
-        </table>
+        </div>
 
-        {variants.length > PAGE_SIZE && (
-          <div className="flex justify-center py-3">
-            <Pagination
-              current={page}
-              total={variants.length}
-              pageSize={PAGE_SIZE}
-              onChange={setPage}
-              showSizeChanger={false}
-              size="small"
-            />
+        {/* Price Section */}
+        <div
+          className="rounded-xl p-4 mb-4"
+          style={{ backgroundColor: config.cardBg }}
+        >
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-[11px] font-medium" style={{ color: config.secondaryColor }}>
+              Unit Price
+            </span>
+            <span className="text-lg font-bold" style={{ color: config.primaryColor }}>
+              ${product.price.toFixed(2)}
+            </span>
           </div>
-        )}
-          </>
-        )}
+          {product.originalPrice && product.originalPrice > product.price && (
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px]" style={{ color: config.secondaryColor }}>
+                Original
+              </span>
+              <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
+                ${product.originalPrice.toFixed(2)}
+              </span>
+            </div>
+          )}
+          {product.unitMeasure && (
+            <p className="text-[10px] mt-2" style={{ color: config.secondaryColor }}>
+              {product.unitMeasure}
+            </p>
+          )}
+        </div>
+
+        {/* Quantity Selector */}
+        <div className="mb-4">
+          <label
+            className="block text-[11px] font-semibold mb-2"
+            style={{ color: config.primaryColor }}
+          >
+            Quantity
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDecrement}
+              disabled={quantity <= minQty || isOutOfStock}
+              className="w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: config.cardBg,
+                border: `1px solid ${config.borderColor}`,
+                color: config.primaryColor,
+              }}
+            >
+              <MinusOutlined className="text-sm" />
+            </button>
+            <InputNumber
+              size="large"
+              min={minQty}
+              step={step}
+              value={quantity}
+              onChange={handleQtyChange}
+              disabled={isOutOfStock}
+              className="flex-1 text-center"
+              controls={false}
+              style={{ textAlign: 'center' }}
+            />
+            <button
+              onClick={handleIncrement}
+              disabled={isOutOfStock}
+              className="w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: config.cardBg,
+                border: `1px solid ${config.borderColor}`,
+                color: config.primaryColor,
+              }}
+            >
+              <PlusOutlined className="text-sm" />
+            </button>
+          </div>
+          {step > 1 && (
+            <p className="text-[10px] mt-2" style={{ color: config.secondaryColor }}>
+              Sold in packs of {step}
+            </p>
+          )}
+          {minQty > 1 && (
+            <p className="text-[10px] mt-1" style={{ color: config.secondaryColor }}>
+              Minimum order: {minQty} units
+            </p>
+          )}
+        </div>
+
+        {/* Subtotal */}
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: config.primaryColor + "08" }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
+              Subtotal
+            </span>
+            <span className="text-xl font-bold" style={{ color: config.primaryColor }}>
+              ${subtotal.toFixed(2)}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Credit warning */}
       {wouldExceedCredit && (
         <div
-          className="flex items-center gap-2 px-5 py-2.5 text-[11px] font-medium shrink-0"
+          className="flex items-center gap-2 px-5 py-3 text-[11px] font-medium shrink-0"
           style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
         >
           <WarningOutlined />
-          Adding these items would exceed your available credit.
+          Adding this item would exceed your available credit.
         </div>
       )}
 
-      {/* Sticky footer */}
+      {/* Footer */}
       <div
         className="px-5 py-4 shrink-0"
         style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: config.cardBg }}
       >
-        <div className="flex items-center justify-between text-[11px] mb-3" style={{ color: config.secondaryColor }}>
-          <span><span className="font-semibold" style={{ color: config.primaryColor }}>{selectedSkuCount}</span> SKUs selected</span>
-          <span><span className="font-semibold" style={{ color: config.primaryColor }}>{totalUnits}</span> units</span>
-          <span className="font-semibold" style={{ color: config.primaryColor }}>${subtotal.toFixed(2)}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
-            onClick={handleAddSelected}
-            disabled={selectedEntries.length === 0 || wouldExceedCredit}
-            className="flex-1 text-[11px] font-semibold py-2 rounded-lg cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            onClick={handleAddToCart}
+            disabled={isOutOfStock || wouldExceedCredit}
+            className="flex-1 inline-flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-xl cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
               backgroundColor: config.primaryColor,
               color: "#fff",
               border: "none",
             }}
           >
-            Add Selected to Cart
+            <ShoppingCartOutlined className="text-base" />
+            Add to Cart
           </button>
-          <Link
-            to={familyLink}
-            className="text-[11px] font-medium px-3 py-2 rounded-lg no-underline transition-colors"
-            style={{
-              border: `1px solid ${config.borderColor}`,
-              color: config.primaryColor,
-              backgroundColor: "#fff",
-            }}
-          >
-            View Complete Detail
-          </Link>
         </div>
+        <Link
+          to={familyLink}
+          className="block text-center text-[11px] font-medium mt-3 py-2 no-underline transition-colors hover:underline"
+          style={{
+            color: config.secondaryColor,
+          }}
+        >
+          View Full Product Details →
+        </Link>
       </div>
     </div>
   );
-}
-
-// ── SKU Row ─────────────────────────────────────────────────────────
-
-function SkuRow({
-  variant,
-  attrColumns,
-  qty,
-  minQty,
-  step,
-  onQtyChange,
-}: {
-  variant: ProductVariant;
-  attrColumns: string[];
-  qty: number;
-  minQty: number;
-  step: number;
-  onQtyChange: (id: string, val: number | null, minQty: number, step: number) => void;
-}) {
-  const config = activeBrandConfig;
-  const disabled = variant.availabilityStatus === "out-of-stock";
-
-  return (
-    <tr
-      className="transition-colors"
-      style={{ opacity: disabled ? 0.5 : 1 }}
-      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.backgroundColor = config.cardBg; }}
-      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-    >
-      <td
-        className="px-3 py-2 font-mono text-[10px] whitespace-nowrap"
-        style={{ color: config.secondaryColor, borderBottom: `1px solid ${config.borderColor}` }}
-      >
-        {variant.sku}
-      </td>
-      <td
-        className="px-3 py-2"
-        style={{ borderBottom: `1px solid ${config.borderColor}` }}
-      >
-        {variant.imageUrl && (
-          <img
-            src={variant.imageUrl}
-            alt={variant.attributes.Product || variant.sku}
-            className="w-10 h-10 object-cover rounded"
-            onError={(e) => {
-              e.currentTarget.src = "https://via.placeholder.com/40x40?text=No+Img";
-            }}
-          />
-        )}
-      </td>
-      <td
-        className="px-3 py-2 text-[11px]"
-        style={{ 
-          color: config.primaryColor, 
-          borderBottom: `1px solid ${config.borderColor}`,
-          maxWidth: '120px',
-          wordWrap: 'break-word',
-          whiteSpace: 'normal',
-          lineHeight: '1.3'
-        }}
-      >
-        {variant.attributes.Product || '—'}
-      </td>
-      {attrColumns.map((col) => (
-        <td
-          key={col}
-          className="px-3 py-2 text-[11px] whitespace-nowrap"
-          style={{ color: config.primaryColor, borderBottom: `1px solid ${config.borderColor}` }}
-        >
-          {variant.attributes[col] || "—"}
-        </td>
-      ))}
-      <td
-        className="px-3 py-2 text-center"
-        style={{ borderBottom: `1px solid ${config.borderColor}` }}
-      >
-        <StockBadge status={variant.availabilityStatus} qty={variant.stockQty} />
-      </td>
-      <td
-        className="px-3 py-2 text-right text-[11px] font-medium whitespace-nowrap"
-        style={{ color: config.primaryColor, borderBottom: `1px solid ${config.borderColor}` }}
-      >
-        ${variant.price.toFixed(2)}
-      </td>
-      <td
-        className="px-3 py-2 text-center"
-        style={{ borderBottom: `1px solid ${config.borderColor}` }}
-      >
-        <InputNumber
-          size="small"
-          min={0}
-          step={step}
-          value={qty || undefined}
-          placeholder="0"
-          onChange={(v) => onQtyChange(variant.id, v, minQty, step)}
-          disabled={disabled}
-          className="w-[60px]"
-          controls={false}
-        />
-      </td>
-    </tr>
-  );
-}
-
-function StockBadge({ status, qty }: { status: string; qty: number }) {
-  if (status === "out-of-stock") {
-    return (
-      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>
-        OOS
-      </span>
-    );
-  }
-  if (status === "low-stock") {
-    return (
-      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: "#FFF7ED", color: "#9A3412" }}>
-        {qty}
-      </span>
-    );
-  }
-  return <span className="text-[10px]" style={{ color: "#16A34A" }}>{qty}</span>;
 }

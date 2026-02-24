@@ -3,7 +3,7 @@ import { Button, Row, Col, App } from "antd";
 import { ShoppingCartOutlined, SyncOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
-import { findVariantBySku } from "../data/skuIndex";
+import { findVariantByUpc } from "../data/skuIndex";
 import LineByLinePanel, {
   type OrderEntry,
   type EntryError,
@@ -33,12 +33,12 @@ function textToEntries(text: string): OrderEntry[] {
     // Support comma, space, or tab as separator
     const parts = line.split(/[,\t]+/).map((p) => p.trim());
     if (parts.length < 2) {
-      // Try space separator: last token is qty, rest is SKU
+      // Try space separator: last token is qty, rest is UPC
       const spaceParts = line.trim().split(/\s+/);
       if (spaceParts.length >= 2) {
         const qty = spaceParts[spaceParts.length - 1];
-        const sku = spaceParts.slice(0, -1).join(" ");
-        return { itemCode: sku, quantity: qty };
+        const upc = spaceParts.slice(0, -1).join(" ");
+        return { itemCode: upc, quantity: qty };
       }
     }
     return {
@@ -93,7 +93,7 @@ function validatePasteText(text: string): string | null {
       // Try space separator
       const spaceParts = line.split(/\s+/);
       if (spaceParts.length < 2) {
-        return `Invalid format on line ${i + 1}. Use SKU,Qty format.`;
+        return `Invalid format on line ${i + 1}. Use UPC,Qty format.`;
       }
       const qty = Number(spaceParts[spaceParts.length - 1]);
       if (isNaN(qty) || qty <= 0) {
@@ -118,7 +118,7 @@ export default function BulkOrder() {
   const [lastSource, setLastSource] = useState<Source>(null);
   const [lineErrors, setLineErrors] = useState<EntryError[]>([]);
   const [pasteError, setPasteError] = useState<string | null>(null);
-  const [skuErrors, setSkuErrors] = useState<string[]>([]);
+  const [upcErrors, setUpcErrors] = useState<string[]>([]);
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sync: lines → textarea (debounced)
@@ -137,7 +137,7 @@ export default function BulkOrder() {
       });
       setPasteText(entriesToText(validEntries));
       setPasteError(null);
-      setSkuErrors([]);
+      setUpcErrors([]);
     }, 500);
 
     return () => {
@@ -157,7 +157,7 @@ export default function BulkOrder() {
         const parsed = textToEntries(pasteText);
         setEntries(parsed.length > 0 ? parsed : [...EMPTY_ROWS]);
         setLineErrors([]);
-        setSkuErrors([]);
+        setUpcErrors([]);
       }
     }, 500);
 
@@ -187,31 +187,31 @@ export default function BulkOrder() {
 
   // ── Add to Cart handler (direct add, no preview) ────────────────
   const handleAddToCart = useCallback(() => {
-    setSkuErrors([]);
+    setUpcErrors([]);
 
-    // Gather valid entries and aggregate duplicate SKUs
-    const skuMap = new Map<string, number>();
+    // Gather valid entries and aggregate duplicate UPCs
+    const upcMap = new Map<string, number>();
     for (const entry of entries) {
-      const sku = entry.itemCode.trim();
+      const upc = entry.itemCode.trim();
       const qty = Number(entry.quantity);
-      if (!sku || isNaN(qty) || qty <= 0) continue;
-      skuMap.set(sku, (skuMap.get(sku) || 0) + qty);
+      if (!upc || isNaN(qty) || qty <= 0) continue;
+      upcMap.set(upc, (upcMap.get(upc) || 0) + qty);
     }
 
     const notFound: string[] = [];
     const itemsToAdd: Parameters<typeof addItems>[0] = [];
 
-    for (const [sku, qty] of skuMap) {
-      const result = findVariantBySku(sku);
+    for (const [upc, qty] of upcMap) {
+      const result = findVariantByUpc(upc);
       if (!result) {
-        notFound.push(sku);
+        notFound.push(upc);
         continue;
       }
       itemsToAdd.push({
         id: result.variant.id,
         productId: result.product.id,
         productName: result.product.name,
-        sku: result.variant.sku,
+        upc: result.variant.upc,
         variantAttributes: result.variant.attributes,
         quantity: qty,
         unitPrice: result.variant.price,
@@ -226,12 +226,12 @@ export default function BulkOrder() {
 
     // Handle results
     if (notFound.length > 0) {
-      setSkuErrors(notFound);
+      setUpcErrors(notFound);
     }
 
     if (itemsToAdd.length > 0 && notFound.length > 0) {
       message.warning({
-        content: `${itemsToAdd.length} item${itemsToAdd.length !== 1 ? "s" : ""} added. ${notFound.length} SKU${notFound.length !== 1 ? "s" : ""} not found.`,
+        content: `${itemsToAdd.length} item${itemsToAdd.length !== 1 ? "s" : ""} added. ${notFound.length} UPC${notFound.length !== 1 ? "s" : ""} not found.`,
         duration: 4,
       });
     } else if (itemsToAdd.length > 0) {
@@ -240,7 +240,7 @@ export default function BulkOrder() {
       setPasteText("");
     } else if (notFound.length > 0) {
       message.error({
-        content: `No valid SKUs found. ${notFound.length} SKU${notFound.length !== 1 ? "s" : ""} not recognized.`,
+        content: `No valid UPCs found. ${notFound.length} UPC${notFound.length !== 1 ? "s" : ""} not recognized.`,
         duration: 4,
       });
     }
@@ -286,23 +286,23 @@ export default function BulkOrder() {
         </Col>
       </Row>
 
-      {/* SKU Error Messages */}
-      {skuErrors.length > 0 && (
+      {/* UPC Error Messages */}
+      {upcErrors.length > 0 && (
         <div
           className="mt-4 rounded-lg px-4 py-3"
           style={{ backgroundColor: "#FEF2F2", border: "1px solid #FCA5A5" }}
         >
           <p className="text-sm font-medium mb-1" style={{ color: "#991B1B" }}>
-            {skuErrors.length} SKU{skuErrors.length !== 1 ? "s" : ""} not found:
+            {upcErrors.length} UPC{upcErrors.length !== 1 ? "s" : ""} not found:
           </p>
           <div className="flex flex-wrap gap-2">
-            {skuErrors.map((sku) => (
+            {upcErrors.map((upc) => (
               <span
-                key={sku}
+                key={upc}
                 className="text-xs font-mono px-2 py-0.5 rounded"
                 style={{ backgroundColor: "#FEE2E2", color: "#DC2626" }}
               >
-                {sku}
+                {upc}
               </span>
             ))}
           </div>

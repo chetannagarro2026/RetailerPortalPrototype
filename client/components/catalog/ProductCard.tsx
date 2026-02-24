@@ -217,7 +217,7 @@ function AvailabilityIndicator({ status }: { status?: CatalogProduct["availabili
   );
 }
 
-// ── Shared: Product Meta (name, sku, brand, attributes) ─────────────
+// ── Shared: Product Meta (name, upc, brand, attributes) ─────────────
 
 function ProductMeta({
   product,
@@ -249,7 +249,7 @@ function ProductMeta({
         {product.name}
       </Link>
       <p className={`${compact ? "text-[10px]" : "text-[11px]"} mb-0`} style={{ color: config.secondaryColor }}>
-        {product.sku}
+        {product.upc}
       </p>
 
       {attrs.length > 0 && (
@@ -350,7 +350,7 @@ function QuantityAddBlock({
       id: firstVariant?.id || product.id,
       productId: product.id,
       productName: product.name,
-      sku: firstVariant?.sku || product.sku,
+      upc: firstVariant?.upc || product.upc,
       variantAttributes: firstVariant?.attributes || {},
       quantity: qty,
       unitPrice: firstVariant?.price || product.price,

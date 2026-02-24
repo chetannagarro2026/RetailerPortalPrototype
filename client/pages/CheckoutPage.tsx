@@ -422,7 +422,7 @@ function ReviewStep({
                     {item.productName}
                   </p>
                   <p className="text-xs" style={{ color: config.secondaryColor }}>
-                    {item.sku}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
+                    {item.upc}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
                   </p>
                 </div>
                 <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
@@ -547,7 +547,7 @@ export default function CheckoutPage() {
           id: i.id,
           productId: i.productId,
           productName: i.productName,
-          sku: i.sku,
+          upc: i.upc,
           variantAttributes: i.variantAttributes,
           quantity: i.quantity,
           unitPrice: i.unitPrice,

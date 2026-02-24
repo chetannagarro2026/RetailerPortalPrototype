@@ -55,7 +55,7 @@ export default function QuickMatrix({ product, onClose }: QuickMatrixProps) {
           id: v.id,
           productId: product.id,
           productName: product.name,
-          sku: v.sku,
+          upc: v.upc,
           variantAttributes: v.attributes,
           quantity: qty,
           unitPrice: v.price,

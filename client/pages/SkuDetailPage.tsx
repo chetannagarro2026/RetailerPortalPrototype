@@ -19,10 +19,10 @@ export default function SkuDetailPage() {
     return (
       <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
-          SKU Not Found
+          UPC Not Found
         </h1>
         <p className="text-sm mb-4" style={{ color: config.secondaryColor }}>
-          The SKU you are looking for does not exist.
+          The UPC you are looking for does not exist.
         </p>
         <Link to="/catalog" className="text-sm font-medium no-underline" style={{ color: config.primaryColor }}>
           &larr; Back to Catalog
@@ -45,13 +45,13 @@ export default function SkuDetailPage() {
           >
             <img
               src={product.imageUrl}
-              alt={`${product.name} - ${variant.sku}`}
+              alt={`${product.name} - ${variant.upc}`}
               className="w-full h-full object-cover"
             />
           </div>
         </div>
 
-        {/* Right: SKU Details */}
+        {/* Right: UPC Details */}
         <div>
           <SkuHeader product={product} variant={variant} />
           <SkuOrderSection product={product} variant={variant} addItem={addItem} />
@@ -85,13 +85,13 @@ function SkuBreadcrumb({ product, variant }: { product: CatalogProduct; variant:
       </Link>
       <span>/</span>
       <span className="font-medium" style={{ color: config.primaryColor }}>
-        {variant.sku}
+        {variant.upc}
       </span>
     </nav>
   );
 }
 
-// ── SKU Header ──────────────────────────────────────────────────────
+// ── UPC Header ──────────────────────────────────────────────────────
 
 function SkuHeader({ product, variant }: { product: CatalogProduct; variant: ProductVariant }) {
   const config = activeBrandConfig;
@@ -110,7 +110,7 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
         {product.name}
       </h1>
       <p className="text-xs font-mono mb-2" style={{ color: config.secondaryColor }}>
-        SKU: {variant.sku}
+        UPC: {variant.upc}
       </p>
       <p className="text-sm mb-3" style={{ color: config.primaryColor }}>
         {variantDesc}
@@ -206,7 +206,7 @@ function SkuOrderSection({
       id: variant.id,
       productId: product.id,
       productName: product.name,
-      sku: variant.sku,
+      upc: variant.upc,
       variantAttributes: variant.attributes,
       quantity: qty,
       unitPrice: variant.price,
@@ -259,7 +259,7 @@ function SkuOrderSection({
 
       {disabled && (
         <p className="text-xs mt-2" style={{ color: "#DC2626" }}>
-          This SKU is currently out of stock.
+          This UPC is currently out of stock.
         </p>
       )}
     </div>

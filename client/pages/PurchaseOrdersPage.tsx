@@ -142,7 +142,7 @@ function OrderDetailPanel({
                       {item.productName}
                     </p>
                     <p className="text-xs" style={{ color: config.secondaryColor }}>
-                      {item.sku}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
+                      {item.upc}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
                     </p>
                   </div>
                 </div>

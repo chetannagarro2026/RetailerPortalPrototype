@@ -25,9 +25,9 @@ export default function PDPHeader({ product }: PDPHeaderProps) {
         {product.name}
       </h1>
 
-      {/* SKU */}
+      {/* UPC */}
       <p className="text-xs mb-3" style={{ color: config.secondaryColor }}>
-        SKU: {product.sku}
+        UPC: {product.upc}
       </p>
 
       {/* Badges */}

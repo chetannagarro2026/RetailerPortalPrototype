@@ -67,7 +67,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
                       <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-                        {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
+                        {item.upc}{variantDesc ? ` · ${variantDesc}` : ""}
                       </p>
                       <p className="text-xs mt-1 text-gray-400">
                         ${item.unitPrice.toFixed(2)} / unit

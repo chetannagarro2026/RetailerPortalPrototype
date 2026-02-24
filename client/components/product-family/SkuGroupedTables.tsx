@@ -119,9 +119,9 @@ export default function SkuGroupedTables({
         </div>
       )}
 
-      {/* SKU Count */}
+      {/* UPC Count */}
       <p className="text-xs mb-4" style={{ color: config.secondaryColor }}>
-        {variants.length} SKU{variants.length !== 1 ? "s" : ""}
+        {variants.length} UPC{variants.length !== 1 ? "s" : ""}
         {activeChips.length > 0 && ` (filtered from ${product.variants?.length || 0})`}
       </p>
 

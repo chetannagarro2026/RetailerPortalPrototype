@@ -7,7 +7,7 @@ import {
 
 // ── Types ───────────────────────────────────────────────────────────
 
-export interface SkuLookupResult {
+export interface UpcLookupResult {
   product: CatalogProduct;
   variant: ProductVariant;
   nodeId: string;
@@ -16,13 +16,13 @@ export interface SkuLookupResult {
 export interface SearchResult {
   product: CatalogProduct;
   nodeId: string;
-  matchType: "exact-sku" | "partial-sku" | "name" | "brand" | "attribute";
+  matchType: "exact-upc" | "partial-upc" | "name" | "brand" | "attribute";
 }
 
 // ── Lazy-initialized caches ─────────────────────────────────────────
 
 let _allProducts: Array<{ product: CatalogProduct; nodeId: string }> | null = null;
-let _skuMap: Map<string, SkuLookupResult> | null = null;
+let _upcMap: Map<string, UpcLookupResult> | null = null;
 
 function getLeafNodes() {
   return catalogNodes.filter((n) => n.productCount > 0);
@@ -41,19 +41,19 @@ function buildProductCache() {
   return _allProducts;
 }
 
-function buildSkuMap(): Map<string, SkuLookupResult> {
-  if (_skuMap) return _skuMap;
-  _skuMap = new Map();
+function buildUpcMap(): Map<string, UpcLookupResult> {
+  if (_upcMap) return _upcMap;
+  _upcMap = new Map();
   const all = buildProductCache();
   for (const { product, nodeId } of all) {
     if (product.variants) {
       for (const v of product.variants) {
-        _skuMap.set(v.sku.toUpperCase(), { product, variant: v, nodeId });
+        _upcMap.set(v.upc.toUpperCase(), { product, variant: v, nodeId });
       }
     }
-    // Also index the product-level SKU
-    if (!_skuMap.has(product.sku.toUpperCase()) && product.variants?.[0]) {
-      _skuMap.set(product.sku.toUpperCase(), {
+    // Also index the product-level UPC
+    if (!_upcMap.has(product.upc.toUpperCase()) && product.variants?.[0]) {
+      _upcMap.set(product.upc.toUpperCase(), {
         product,
         variant: product.variants[0],
         nodeId,
@@ -65,10 +65,10 @@ function buildSkuMap(): Map<string, SkuLookupResult> {
 
 // ── Public API ──────────────────────────────────────────────────────
 
-/** Find a specific variant by its exact SKU (case-insensitive) */
-export function findVariantBySku(sku: string): SkuLookupResult | null {
-  const map = buildSkuMap();
-  return map.get(sku.trim().toUpperCase()) || null;
+/** Find a specific variant by its exact UPC (case-insensitive) */
+export function findVariantByUpc(upc: string): UpcLookupResult | null {
+  const map = buildUpcMap();
+  return map.get(upc.trim().toUpperCase()) || null;
 }
 
 /** Search products across the entire catalog by query */
@@ -79,19 +79,19 @@ export function searchCatalog(query: string, limit = 20): SearchResult[] {
   const results: SearchResult[] = [];
   const seen = new Set<string>();
 
-  // 1. Exact SKU match (highest priority)
-  const skuMap = buildSkuMap();
-  const exactMatch = skuMap.get(q);
+  // 1. Exact UPC match (highest priority)
+  const upcMap = buildUpcMap();
+  const exactMatch = upcMap.get(q);
   if (exactMatch && !seen.has(exactMatch.product.id)) {
-    results.push({ product: exactMatch.product, nodeId: exactMatch.nodeId, matchType: "exact-sku" });
+    results.push({ product: exactMatch.product, nodeId: exactMatch.nodeId, matchType: "exact-upc" });
     seen.add(exactMatch.product.id);
   }
 
-  // 2. Partial SKU match on product SKU
+  // 2. Partial UPC match on product UPC
   for (const { product, nodeId } of all) {
     if (seen.has(product.id) || results.length >= limit) continue;
-    if (product.sku.toUpperCase().includes(q)) {
-      results.push({ product, nodeId, matchType: "partial-sku" });
+    if (product.upc.toUpperCase().includes(q)) {
+      results.push({ product, nodeId, matchType: "partial-upc" });
       seen.add(product.id);
     }
   }

@@ -32,7 +32,7 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
       id: variant.id,
       productId: product.id,
       productName: product.name,
-      sku: variant.sku,
+      upc: variant.upc,
       variantAttributes: variant.attributes,
       quantity: qty,
       unitPrice: variant.price,
@@ -72,7 +72,7 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
               {product.name}
             </Link>
             <p className="text-[11px] font-mono mb-1" style={{ color: config.secondaryColor }}>
-              {variant.sku}
+              {variant.upc}
             </p>
             <p className="text-xs mb-2" style={{ color: config.secondaryColor }}>
               {variantDesc}

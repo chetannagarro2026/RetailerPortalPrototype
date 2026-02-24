@@ -45,7 +45,7 @@ export default function SkuTableGroup({
         >
           {groupLabel}
           <span className="font-normal ml-2 opacity-80">
-            ({variants.length} SKU{variants.length !== 1 ? "s" : ""})
+            ({variants.length} UPC{variants.length !== 1 ? "s" : ""})
           </span>
         </div>
       )}
@@ -75,7 +75,7 @@ export default function SkuTableGroup({
                 className="text-left px-3 py-2.5 font-semibold whitespace-nowrap"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
               >
-                SKU
+                UPC
               </th>
               <th
                 className="text-center px-3 py-2.5 font-semibold whitespace-nowrap"
@@ -112,7 +112,7 @@ export default function SkuTableGroup({
   );
 }
 
-// ── SKU Row with Accordion ──────────────────────────────────────────
+// ── UPC Row with Accordion ──────────────────────────────────────────
 
 function SkuRow({
   variant,
@@ -173,7 +173,7 @@ function SkuRow({
           </td>
         ))}
 
-        {/* SKU */}
+        {/* UPC */}
         <td
           className="px-3 py-2.5 font-mono text-[11px] whitespace-nowrap"
           style={{
@@ -181,7 +181,7 @@ function SkuRow({
             borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}`,
           }}
         >
-          {variant.sku}
+          {variant.upc}
         </td>
 
         {/* Stock */}

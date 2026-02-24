@@ -46,7 +46,7 @@ export interface VariantAttribute {
 /** A single purchasable variant (one cell in the matrix) */
 export interface ProductVariant {
   id: string;
-  sku: string;
+  upc: string;
   name?: string;
   /** Map of attribute name → value for this variant */
   attributes: Record<string, string>;
@@ -60,7 +60,7 @@ export interface ProductVariant {
 export interface CatalogProduct {
   id: string;
   name: string;
-  sku: string;
+  upc: string;
   imageUrl: string;
   price: number;
   /** Optional strike-through original price */
@@ -536,7 +536,7 @@ function generateVariants(
         stockVal === 0 ? "out-of-stock" : stockVal < 15 ? "low-stock" : "in-stock";
       variants.push({
         id: `${productId}-v${idx}`,
-        sku: `${skuPrefix}-${Object.values(combo).map((v) => v.replace(/\s+/g, "").slice(0, 3).toUpperCase()).join("-")}`,
+        upc: `${skuPrefix}-${Object.values(combo).map((v) => v.replace(/\s+/g, "").slice(0, 3).toUpperCase()).join("-")}`,
         attributes: { ...combo },
         price: Math.round(basePrice * priceMod * 100) / 100,
         availabilityStatus: status,
@@ -671,7 +671,7 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
     return {
       id: `${nodeId}-p${idx}`,
       name: `${node.label} Style ${idx + 1}`,
-      sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+      upc: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
       imageUrl: images[idx % images.length],
@@ -842,8 +842,8 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
     const badge = badges[idx % badges.length];
     return {
       id: `${nodeId}-p${idx}`,
-      name: `${node.label} Style ${idx + 1}`,
-      sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+      name: "--------",
+      upc: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
       imageUrl: images[idx % images.length],
