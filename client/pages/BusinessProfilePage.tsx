@@ -71,46 +71,49 @@ export default function BusinessProfilePage() {
       {/* Identity Header */}
       <BusinessIdentityHeader />
 
-      {/* Tab section */}
-      <div className="flex gap-8 mt-8">
-        {/* Left: Vertical tab nav (240px, sticky) */}
-        <nav className="w-[240px] shrink-0 sticky top-[140px] self-start">
-          <div className="space-y-1">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left cursor-pointer transition-colors border-none"
-                  style={{
-                    backgroundColor: isActive ? config.primaryColor + "08" : "transparent",
-                    color: isActive ? config.primaryColor : config.secondaryColor,
-                    fontWeight: isActive ? 600 : 400,
-                    outline: "none",
-                    borderLeft: isActive ? `2px solid ${config.primaryColor}` : "2px solid transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "#F9FAFB";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  <span className="text-sm">{tab.icon}</span>
-                  <span className="text-sm">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Horizontal tab nav */}
+      <div className="mt-8">
+        <nav
+          className="flex gap-1 pb-0 mb-0"
+          style={{ borderBottom: `1px solid ${config.borderColor}` }}
+        >
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="flex items-center gap-2 px-4 py-2.5 cursor-pointer transition-colors border-none rounded-t-lg"
+                style={{
+                  backgroundColor: isActive ? "#fff" : "transparent",
+                  color: isActive ? config.primaryColor : config.secondaryColor,
+                  fontWeight: isActive ? 600 : 400,
+                  outline: "none",
+                  borderBottom: isActive ? `2px solid ${config.primaryColor}` : "2px solid transparent",
+                  marginBottom: "-1px",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.backgroundColor = "#F9FAFB";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                <span className="text-sm">{tab.icon}</span>
+                <span className="text-sm whitespace-nowrap">{tab.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
-        {/* Right: Content panel */}
+        {/* Content panel — fixed width */}
         <div
-          className="flex-1 min-w-0 rounded-xl p-6"
+          className="w-full rounded-b-xl rounded-tr-xl p-6"
           style={{
             border: `1px solid ${config.borderColor}`,
+            borderTop: "none",
             backgroundColor: "#fff",
+            minHeight: 400,
           }}
         >
           {tabPanels[activeTab]}
