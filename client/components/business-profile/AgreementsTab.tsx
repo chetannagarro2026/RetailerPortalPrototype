@@ -74,14 +74,6 @@ export default function AgreementsTab() {
                   </td>
                   <td className="py-3 text-xs" style={{ color: expiringSoon ? "#D97706" : "#6B7280" }}>
                     {fmtDate(a.expiryDate)}
-                    {expiringSoon && (
-                      <span
-                        className="ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                        style={{ backgroundColor: "#FFFBEB", color: "#D97706" }}
-                      >
-                        Renewal Required
-                      </span>
-                    )}
                   </td>
                   <td className="py-3">
                     <span
