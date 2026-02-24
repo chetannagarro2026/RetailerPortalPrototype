@@ -24,9 +24,24 @@ export default function KycTaxTab() {
 
   return (
     <div style={{ width: "100%" }}>
-      <h3 className="text-base font-semibold m-0 mb-5" style={{ color: config.primaryColor }}>
-        KYC & Tax Information
-      </h3>
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-base font-semibold m-0" style={{ color: config.primaryColor }}>
+          KYC & Tax Information
+        </h3>
+        <button
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-md cursor-pointer transition-colors"
+          style={{
+            color: config.secondaryColor,
+            border: `1px solid ${config.borderColor}`,
+            backgroundColor: "#fff",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#F9FAFB"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#fff"; }}
+        >
+          <UploadOutlined className="text-[11px]" />
+          Upload New Document
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left — GST */}
@@ -72,22 +87,6 @@ export default function KycTaxTab() {
         />
       </div>
 
-      {/* Upload button */}
-      <div className="mt-6">
-        <button
-          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-md cursor-pointer transition-colors"
-          style={{
-            color: config.secondaryColor,
-            border: `1px solid ${config.borderColor}`,
-            backgroundColor: "#fff",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#F9FAFB"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#fff"; }}
-        >
-          <UploadOutlined className="text-[11px]" />
-          Upload New Document
-        </button>
-      </div>
     </div>
   );
 }
