@@ -75,7 +75,7 @@ export default function BusinessProfilePage() {
       <div className="mt-8" style={{ width: "100%" }}>
         {/* Tab bar */}
         <div
-          className="flex items-end"
+          className="flex items-end gap-2"
           style={{ borderBottom: `1px solid ${config.borderColor}` }}
         >
           {tabs.map((tab) => {
@@ -94,7 +94,6 @@ export default function BusinessProfilePage() {
                   borderBottom: isActive ? "1px solid #fff" : `1px solid ${config.borderColor}`,
                   borderRadius: "8px 8px 0 0",
                   marginBottom: "-1px",
-                  marginRight: "-1px",
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) e.currentTarget.style.backgroundColor = "#F5F5F5";
