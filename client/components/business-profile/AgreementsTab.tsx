@@ -85,14 +85,6 @@ export default function AgreementsTab() {
                   </td>
                   <td className="py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        className="text-[11px] font-medium px-1.5 py-0.5 rounded cursor-pointer border-none bg-transparent transition-colors"
-                        style={{ color: config.secondaryColor }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = config.primaryColor; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = config.secondaryColor; }}
-                      >
-                        <DownloadOutlined style={{ fontSize: 16 }} />
-                      </button>
                       {(a.status === "Expired" || a.status === "Renewal Required") && (
                         <button
                           className="text-[11px] font-medium px-1.5 py-0.5 rounded cursor-pointer border-none bg-transparent transition-colors"
@@ -104,6 +96,14 @@ export default function AgreementsTab() {
                           <ReloadOutlined style={{ fontSize: 16 }} />
                         </button>
                       )}
+                      <button
+                        className="text-[11px] font-medium px-1.5 py-0.5 rounded cursor-pointer border-none bg-transparent transition-colors"
+                        style={{ color: config.secondaryColor }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = config.primaryColor; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = config.secondaryColor; }}
+                      >
+                        <DownloadOutlined style={{ fontSize: 16 }} />
+                      </button>
                     </div>
                   </td>
                 </tr>
