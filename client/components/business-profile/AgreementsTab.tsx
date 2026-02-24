@@ -26,7 +26,7 @@ export default function AgreementsTab() {
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <h3 className="text-base font-semibold m-0 mb-5" style={{ color: config.primaryColor }}>
         Contracts & Agreements
       </h3>

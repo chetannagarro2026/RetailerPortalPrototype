@@ -44,7 +44,7 @@ export default function BusinessProfilePage() {
   const isPendingKyc = businessIdentity.accountStatus === "Pending KYC";
 
   return (
-    <div className="max-w-[1280px] mx-auto px-6 py-8">
+    <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", padding: "32px 24px", boxSizing: "border-box" }}>
       {/* KYC Pending banner */}
       {isPendingKyc && (
         <div
@@ -72,7 +72,7 @@ export default function BusinessProfilePage() {
       <BusinessIdentityHeader />
 
       {/* Card-type Tabs (Ant DS style) */}
-      <div className="mt-8">
+      <div className="mt-8" style={{ width: "100%" }}>
         {/* Tab bar */}
         <div
           className="flex items-end"
@@ -110,7 +110,7 @@ export default function BusinessProfilePage() {
           })}
         </div>
 
-        {/* Content card — fixed width, does not change per tab */}
+        {/* Content card — locked to full container width */}
         <div
           style={{
             width: "100%",
@@ -119,11 +119,14 @@ export default function BusinessProfilePage() {
             borderTop: "none",
             borderRadius: "0 0 8px 8px",
             backgroundColor: "#fff",
-            padding: 24,
+            padding: 32,
             minHeight: 420,
+            overflow: "hidden",
           }}
         >
-          {tabPanels[activeTab]}
+          <div style={{ width: "100%", minWidth: 0 }}>
+            {tabPanels[activeTab]}
+          </div>
         </div>
       </div>
     </div>

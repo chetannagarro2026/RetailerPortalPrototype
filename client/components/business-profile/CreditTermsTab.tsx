@@ -13,7 +13,7 @@ export default function CreditTermsTab() {
     new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <h3 className="text-base font-semibold m-0 mb-5" style={{ color: config.primaryColor }}>
         Credit Terms & Policies
       </h3>

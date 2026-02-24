@@ -12,7 +12,7 @@ export default function DistributorsTab() {
   const config = activeBrandConfig;
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <h3 className="text-base font-semibold m-0 mb-2" style={{ color: config.primaryColor }}>
         Assigned Distributors
       </h3>

@@ -18,7 +18,7 @@ export default function AddressesTab() {
   const filtered = addresses.filter((a) => a.type === activeSubTab);
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-base font-semibold m-0" style={{ color: config.primaryColor }}>
           Registered Addresses

@@ -20,7 +20,7 @@ export default function DocumentsTab() {
     iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-base font-semibold m-0" style={{ color: config.primaryColor }}>
           Compliance Documents
