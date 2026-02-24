@@ -95,13 +95,13 @@ export default function AgreementsTab() {
                       </button>
                       {(a.status === "Expired" || a.status === "Renewal Required") && (
                         <button
-                          className="text-[10px] font-medium px-2 py-1 rounded cursor-pointer border-none transition-colors"
-                          style={{ backgroundColor: "#FFFBEB", color: "#D97706" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#FEF3C7"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#FFFBEB"; }}
+                          className="text-[11px] font-medium px-1.5 py-0.5 rounded cursor-pointer border-none bg-transparent transition-colors"
+                          style={{ color: config.secondaryColor }}
+                          title="Request Renewal"
+                          onMouseEnter={(e) => { e.currentTarget.style.color = config.primaryColor; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = config.secondaryColor; }}
                         >
-                          <ReloadOutlined className="text-[9px] mr-1" />
-                          Request Renewal
+                          <ReloadOutlined className="text-[10px]" />
                         </button>
                       )}
                     </div>
