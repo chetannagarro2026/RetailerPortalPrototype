@@ -91,7 +91,7 @@ export default function AgreementsTab() {
                         onMouseEnter={(e) => { e.currentTarget.style.color = config.primaryColor; }}
                         onMouseLeave={(e) => { e.currentTarget.style.color = config.secondaryColor; }}
                       >
-                        <DownloadOutlined className="text-[10px]" />
+                        <DownloadOutlined style={{ fontSize: 16 }} />
                       </button>
                       {(a.status === "Expired" || a.status === "Renewal Required") && (
                         <button
@@ -101,7 +101,7 @@ export default function AgreementsTab() {
                           onMouseEnter={(e) => { e.currentTarget.style.color = config.primaryColor; }}
                           onMouseLeave={(e) => { e.currentTarget.style.color = config.secondaryColor; }}
                         >
-                          <ReloadOutlined className="text-[10px]" />
+                          <ReloadOutlined style={{ fontSize: 16 }} />
                         </button>
                       )}
                     </div>

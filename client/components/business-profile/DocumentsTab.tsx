@@ -112,7 +112,7 @@ function ActionBtn({
       onMouseEnter={(e) => { e.currentTarget.style.color = config.primaryColor; }}
       onMouseLeave={(e) => { e.currentTarget.style.color = config.secondaryColor; }}
     >
-      <span className="text-[10px]">{icon}</span>
+      <span style={{ fontSize: 16 }}>{icon}</span>
       {label}
     </button>
   );
