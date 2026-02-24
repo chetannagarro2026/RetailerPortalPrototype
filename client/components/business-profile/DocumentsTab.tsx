@@ -41,7 +41,7 @@ export default function DocumentsTab() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
+        <table className="w-full text-sm" style={{ borderCollapse: "collapse", tableLayout: "fixed" }}>
           <thead>
             <tr>
               <Th>Document Name</Th>

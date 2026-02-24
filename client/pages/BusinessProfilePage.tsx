@@ -71,10 +71,11 @@ export default function BusinessProfilePage() {
       {/* Identity Header */}
       <BusinessIdentityHeader />
 
-      {/* Horizontal tab nav */}
+      {/* Card-type Tabs (Ant DS style) */}
       <div className="mt-8">
-        <nav
-          className="flex gap-1 pb-0 mb-0"
+        {/* Tab bar */}
+        <div
+          className="flex items-end"
           style={{ borderBottom: `1px solid ${config.borderColor}` }}
         >
           {tabs.map((tab) => {
@@ -83,20 +84,23 @@ export default function BusinessProfilePage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className="flex items-center gap-2 px-4 py-2.5 cursor-pointer transition-colors border-none rounded-t-lg"
+                className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors"
                 style={{
-                  backgroundColor: isActive ? "#fff" : "transparent",
+                  backgroundColor: isActive ? "#fff" : "#FAFAFA",
                   color: isActive ? config.primaryColor : config.secondaryColor,
                   fontWeight: isActive ? 600 : 400,
                   outline: "none",
-                  borderBottom: isActive ? `2px solid ${config.primaryColor}` : "2px solid transparent",
+                  border: `1px solid ${config.borderColor}`,
+                  borderBottom: isActive ? "1px solid #fff" : `1px solid ${config.borderColor}`,
+                  borderRadius: "8px 8px 0 0",
                   marginBottom: "-1px",
+                  marginRight: "-1px",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.backgroundColor = "#F9FAFB";
+                  if (!isActive) e.currentTarget.style.backgroundColor = "#F5F5F5";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
+                  if (!isActive) e.currentTarget.style.backgroundColor = "#FAFAFA";
                 }}
               >
                 <span className="text-sm">{tab.icon}</span>
@@ -104,16 +108,19 @@ export default function BusinessProfilePage() {
               </button>
             );
           })}
-        </nav>
+        </div>
 
-        {/* Content panel — fixed width */}
+        {/* Content card — fixed width, does not change per tab */}
         <div
-          className="w-full rounded-b-xl rounded-tr-xl p-6"
           style={{
+            width: "100%",
+            boxSizing: "border-box",
             border: `1px solid ${config.borderColor}`,
             borderTop: "none",
+            borderRadius: "0 0 8px 8px",
             backgroundColor: "#fff",
-            minHeight: 400,
+            padding: 24,
+            minHeight: 420,
           }}
         >
           {tabPanels[activeTab]}

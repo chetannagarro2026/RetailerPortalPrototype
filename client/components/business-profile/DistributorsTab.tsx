@@ -32,7 +32,7 @@ export default function DistributorsTab() {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
+          <table className="w-full text-sm" style={{ borderCollapse: "collapse", tableLayout: "fixed" }}>
             <thead>
               <tr>
                 <Th>Distributor Name</Th>

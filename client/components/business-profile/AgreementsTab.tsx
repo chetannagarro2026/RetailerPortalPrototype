@@ -32,7 +32,7 @@ export default function AgreementsTab() {
       </h3>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
+        <table className="w-full text-sm" style={{ borderCollapse: "collapse", tableLayout: "fixed" }}>
           <thead>
             <tr>
               <Th>Agreement</Th>
