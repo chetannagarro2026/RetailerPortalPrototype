@@ -43,7 +43,7 @@ export default function BusinessIdentityHeader() {
         boxSizing: "border-box",
         backgroundColor: "#F8F9FB",
         border: `1px solid ${config.borderColor}`,
-        padding: 24,
+        padding: 16,
       }}
     >
       {/* Top row: title + edit button */}
@@ -83,14 +83,14 @@ export default function BusinessIdentityHeader() {
       {/* 3-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">
         {/* Column 1: Business Identity */}
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <Field label="Legal Business Name" value={b.legalName} config={config} />
           <Field label="Trade Name" value={b.tradeName} config={config} />
           <Field label="Business Type" value={b.businessType} config={config} />
         </div>
 
         {/* Column 2: Contact Information */}
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <Field label="Primary Contact" value={b.primaryContact} config={config} />
           <Field label="Primary Email" value={b.primaryEmail} config={config} />
           <Field label="Phone" value={b.phone} config={config} />
@@ -98,7 +98,7 @@ export default function BusinessIdentityHeader() {
         </div>
 
         {/* Column 3: Compliance Snapshot */}
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <div>
             <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
               GST Number
@@ -123,7 +123,7 @@ export default function BusinessIdentityHeader() {
 
       {/* Inline status row */}
       <div
-        className="flex items-center gap-5 mt-5 pt-4"
+        className="flex items-center gap-5 mt-2 pt-4"
         style={{ borderTop: `1px solid ${config.borderColor}` }}
       >
         <StatusCheck label="GST Verified" checked={b.gstStatus === "Verified"} />
