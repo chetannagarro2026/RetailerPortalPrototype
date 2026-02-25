@@ -59,7 +59,7 @@ export default function BusinessProfilePage() {
       )}
 
       {/* Page Header */}
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-xl font-bold m-0 mb-1" style={{ color: config.primaryColor }}>
           Business Profile
         </h1>
@@ -72,7 +72,7 @@ export default function BusinessProfilePage() {
       <BusinessIdentityHeader />
 
       {/* Card-type Tabs (Ant DS style) */}
-      <div className="mt-8" style={{ width: "100%" }}>
+      <div className="mt-6" style={{ width: "100%" }}>
         {/* Tab bar */}
         <div
           className="flex items-end gap-2"
