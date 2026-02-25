@@ -43,7 +43,7 @@ export default function BusinessIdentityHeader() {
       }}
     >
       {/* Top row: title */}
-      <div className="mb-5">
+      <div className="mb-4">
         <h2 className="text-lg font-bold m-0" style={{ color: config.primaryColor }}>
           {b.legalName}
         </h2>
@@ -71,7 +71,7 @@ export default function BusinessIdentityHeader() {
 
         {/* Column 3: Compliance Snapshot */}
         <div className="space-y-2">
-          <div>
+          <div style={{ paddingBottom: 8 }}>
             <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
               GST Number
             </span>
@@ -80,7 +80,7 @@ export default function BusinessIdentityHeader() {
               <Badge label={b.gstStatus} />
             </div>
           </div>
-          <div>
+          <div style={{ paddingBottom: 8 }}>
             <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
               Account Status
             </span>
@@ -116,7 +116,7 @@ function Field({
   config: typeof activeBrandConfig;
 }) {
   return (
-    <div>
+    <div style={{ paddingBottom: 8 }}>
       <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
         {label}
       </span>
