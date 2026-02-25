@@ -131,10 +131,9 @@ function StatusCheck({ label, checked }: { label: string; checked: boolean }) {
   return (
     <div className="flex items-center gap-1.5">
       <CheckCircleOutlined
-        className="text-xs"
-        style={{ color: checked ? "#16A34A" : "#D1D5DB" }}
+        style={{ fontSize: 16, color: checked ? "#16A34A" : "#D1D5DB" }}
       />
-      <span className="text-[11px]" style={{ color: checked ? "#374151" : "#9CA3AF" }}>
+      <span className="text-xs" style={{ color: checked ? "#374151" : "#9CA3AF" }}>
         {label}
       </span>
     </div>
