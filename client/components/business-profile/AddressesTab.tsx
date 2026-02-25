@@ -102,7 +102,7 @@ function AddressCard({
           </span>
           {a.isDefault && (
             <span
-              className="text-[10px] font-medium px-2 py-0.5 rounded"
+              className="text-[11px] font-medium px-2 py-0.5 rounded"
               style={{ backgroundColor: "transparent", color: "#16A34A", border: "1px solid #16A34A" }}
             >
               Default

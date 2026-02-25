@@ -63,7 +63,7 @@ export default function AgreementsTab() {
                   </td>
                   <td className="py-3">
                     <span
-                      className="text-[10px] font-medium px-2 py-0.5 rounded"
+                      className="text-[11px] font-medium px-2 py-0.5 rounded"
                       style={{ color: tp.color, backgroundColor: "transparent", border: `1px solid ${tp.color}` }}
                     >
                       {a.type}

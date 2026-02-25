@@ -125,7 +125,7 @@ export default function SupportSnapshot({ onOpenDrawer }: SupportSnapshotProps) 
                   {latestTicket.id}
                 </span>
                 <span
-                  className="text-[10px] font-medium px-2 py-0.5 rounded"
+                  className="text-[11px] font-medium px-2 py-0.5 rounded"
                   style={{ color: chipStyle.color, backgroundColor: "transparent", border: `1px solid ${chipStyle.color}` }}
                 >
                   {displayStatus}

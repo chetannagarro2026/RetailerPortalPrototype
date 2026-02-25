@@ -34,7 +34,7 @@ export default function ProductCard({ data }: { data: Product }) {
         />
         {data.badge && badge && (
           <span
-            className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider px-2.5 py-1 rounded"
+            className="absolute top-3 left-3 text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded"
             style={{ backgroundColor: "transparent", color: badge.text, border: `1px solid ${badge.text}` }}
           >
             {data.badge}

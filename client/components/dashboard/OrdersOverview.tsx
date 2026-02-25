@@ -138,7 +138,7 @@ export default function OrdersOverview() {
                   </td>
                   <td className="py-3.5 text-right">
                     <span
-                      className="inline-block text-[11px] font-medium px-2.5 py-1 rounded"
+                      className="inline-block text-[11px] font-medium px-2 py-0.5 rounded"
                       style={{
                         color: o.statusColor,
                         backgroundColor: "transparent",
