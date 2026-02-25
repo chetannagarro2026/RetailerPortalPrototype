@@ -44,7 +44,7 @@ export default function BusinessProfilePage() {
   const isPendingKyc = businessIdentity.accountStatus === "Pending KYC";
 
   return (
-    <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", padding: "32px 24px", boxSizing: "border-box" }}>
+    <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", padding: "16px 24px", boxSizing: "border-box" }}>
       {/* KYC Pending banner */}
       {isPendingKyc && (
         <div
