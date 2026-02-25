@@ -1,8 +1,6 @@
 import {
   CheckCircleOutlined,
-  EditOutlined,
 } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { businessIdentity } from "../../data/businessProfileData";
 
@@ -30,8 +28,6 @@ function Badge({ label }: { label: string }) {
 export default function BusinessIdentityHeader() {
   const config = activeBrandConfig;
   const b = businessIdentity;
-  const isSuspended = b.accountStatus === "Suspended";
-
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
@@ -46,7 +42,7 @@ export default function BusinessIdentityHeader() {
         padding: 16,
       }}
     >
-      {/* Top row: title + edit button */}
+      {/* Top row: title + status checks */}
       <div className="flex items-start justify-between mb-5">
         <div>
           <h2 className="text-lg font-bold m-0" style={{ color: config.primaryColor }}>
@@ -56,28 +52,11 @@ export default function BusinessIdentityHeader() {
             {b.tradeName} &bull; {b.businessType}
           </p>
         </div>
-        {!isSuspended && (
-          <Link
-            to="/account/settings"
-            className="flex items-center gap-1.5 text-xs font-medium no-underline px-3 py-1.5 rounded-md transition-colors"
-            style={{
-              color: config.secondaryColor,
-              border: `1px solid ${config.borderColor}`,
-              backgroundColor: "#fff",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#F3F4F6";
-              e.currentTarget.style.color = config.primaryColor;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#fff";
-              e.currentTarget.style.color = config.secondaryColor;
-            }}
-          >
-            <EditOutlined className="text-[11px]" />
-            Edit Business Info
-          </Link>
-        )}
+        <div className="flex items-center gap-4">
+          <StatusCheck label="GST Verified" checked={b.gstStatus === "Verified"} />
+          <StatusCheck label="KYC Approved" checked={b.kycApproved} />
+          <StatusCheck label="Distributor Assigned" checked={b.distributorAssigned} />
+        </div>
       </div>
 
       {/* 3-column grid */}
@@ -121,15 +100,6 @@ export default function BusinessIdentityHeader() {
         </div>
       </div>
 
-      {/* Inline status row */}
-      <div
-        className="flex items-center gap-5 mt-2 pt-4"
-        style={{ borderTop: `1px solid ${config.borderColor}` }}
-      >
-        <StatusCheck label="GST Verified" checked={b.gstStatus === "Verified"} />
-        <StatusCheck label="KYC Approved" checked={b.kycApproved} />
-        <StatusCheck label="Distributor Assigned" checked={b.distributorAssigned} />
-      </div>
     </div>
   );
 }
