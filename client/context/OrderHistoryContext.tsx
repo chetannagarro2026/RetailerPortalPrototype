@@ -30,7 +30,7 @@ export interface PurchaseOrder {
   totalValue: number;
   shipping: Omit<SavedAddress, "id" | "isDefault">;
   paymentMethod: string;
-  status: "Pending" | "Confirmed" | "Shipped" | "Delivered";
+  status: "Pending Credit Approval" | "Accepted" | "Processing" | "Delivered" | "Rejected" | "Pending" | "Confirmed" | "Shipped";
   submittedAt: string;
 }
 
@@ -86,14 +86,64 @@ function getInitialAddresses(): SavedAddress[] {
   return [SEED_ADDRESS];
 }
 
+// ── Seed orders for demo ────────────────────────────────────────────
+
+const SEED_ORDERS: PurchaseOrder[] = [
+  {
+    orderNumber: "PO-2026-0121",
+    items: [{ id: "i1", productId: "p1", productName: "Arrow Oxford Shirt", sku: "ARW-OX-001", variantAttributes: { Color: "White", Size: "M" }, quantity: 120, unitPrice: 28.5 }],
+    totalUnits: 120,
+    totalValue: 3420,
+    shipping: { contactName: "Jane Cooper", companyName: "Acme Corp", address: "456 Commerce Blvd, Suite 200", city: "Chicago", state: "IL", zip: "60601", phone: "(312) 555-0199" },
+    paymentMethod: "Credit Account",
+    status: "Pending Credit Approval",
+    submittedAt: "2026-02-21T10:30:00Z",
+  },
+  {
+    orderNumber: "PO-2026-0118",
+    items: [{ id: "i2", productId: "p2", productName: "Calvin Klein Slim Chinos", sku: "CK-SC-045", variantAttributes: { Color: "Navy", Size: "32" }, quantity: 80, unitPrice: 42 }],
+    totalUnits: 80,
+    totalValue: 3360,
+    shipping: { contactName: "Jane Cooper", companyName: "Acme Corp", address: "456 Commerce Blvd, Suite 200", city: "Chicago", state: "IL", zip: "60601", phone: "(312) 555-0199" },
+    paymentMethod: "Credit Account",
+    status: "Pending Credit Approval",
+    submittedAt: "2026-02-18T14:15:00Z",
+  },
+  {
+    orderNumber: "PO-2026-0112",
+    items: [{ id: "i3", productId: "p3", productName: "Tommy Hilfiger Polo", sku: "TH-PL-012", variantAttributes: { Color: "Red", Size: "L" }, quantity: 200, unitPrice: 32.5 }],
+    totalUnits: 200,
+    totalValue: 6500,
+    shipping: { contactName: "Michael Chen", companyName: "Acme Corp", address: "789 Retail Ave", city: "New York", state: "NY", zip: "10001", phone: "(212) 555-0342" },
+    paymentMethod: "Credit Account",
+    status: "Pending Credit Approval",
+    submittedAt: "2026-02-12T09:00:00Z",
+  },
+  {
+    orderNumber: "PO-2026-0105",
+    items: [{ id: "i4", productId: "p4", productName: "IZOD Performance Jacket", sku: "IZ-PJ-078", variantAttributes: { Color: "Black", Size: "XL" }, quantity: 50, unitPrice: 65 }],
+    totalUnits: 50,
+    totalValue: 3250,
+    shipping: { contactName: "Jane Cooper", companyName: "Acme Corp", address: "456 Commerce Blvd, Suite 200", city: "Chicago", state: "IL", zip: "60601", phone: "(312) 555-0199" },
+    paymentMethod: "Credit Account",
+    status: "Pending Credit Approval",
+    submittedAt: "2026-02-05T16:45:00Z",
+  },
+];
+
+function getInitialOrders(): PurchaseOrder[] {
+  const stored = loadFromStorage<PurchaseOrder[]>(ORDERS_KEY, []);
+  if (stored.length > 0) return stored;
+  saveToStorage(ORDERS_KEY, SEED_ORDERS);
+  return SEED_ORDERS;
+}
+
 // ── Context ─────────────────────────────────────────────────────────
 
 const OrderHistoryContext = createContext<OrderHistoryContextValue | null>(null);
 
 export function OrderHistoryProvider({ children }: { children: ReactNode }) {
-  const [orders, setOrders] = useState<PurchaseOrder[]>(() =>
-    loadFromStorage<PurchaseOrder[]>(ORDERS_KEY, []),
-  );
+  const [orders, setOrders] = useState<PurchaseOrder[]>(getInitialOrders);
   const [addresses, setAddresses] = useState<SavedAddress[]>(getInitialAddresses);
 
   const addOrder = useCallback((order: PurchaseOrder) => {

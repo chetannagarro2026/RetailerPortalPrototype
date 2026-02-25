@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import SignInPage from "./pages/SignInPage";
 import DashboardPage from "./pages/DashboardPage";
 import BusinessProfilePage from "./pages/BusinessProfilePage";
+import PurchaseOrderDetailPage from "./pages/PurchaseOrderDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ export default function App() {
               <Route path="/checkout" element={<AuthGate message="To complete your purchase and use your credit account, please sign in."><CheckoutPage /></AuthGate>} />
               <Route path="/order-confirmation" element={<AuthGate><OrderConfirmation /></AuthGate>} />
               <Route path="/purchase-orders" element={<AuthGate message="Sign in to view your purchase orders and order history."><PurchaseOrdersPage /></AuthGate>} />
+              <Route path="/purchase-orders/:orderId" element={<AuthGate message="Sign in to view order details."><PurchaseOrderDetailPage /></AuthGate>} />
               <Route path="/account/credit" element={<AuthGate message="Sign in to view your credit history and financial details."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/invoices" element={<AuthGate message="Sign in to access your invoices."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/payments" element={<AuthGate message="Sign in to manage your payments."><PlaceholderPage /></AuthGate>} />
