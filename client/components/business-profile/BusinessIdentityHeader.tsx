@@ -4,21 +4,25 @@ import {
 import { activeBrandConfig } from "../../config/brandConfig";
 import { businessIdentity } from "../../data/businessProfileData";
 
-const statusBadgeStyles: Record<string, { bg: string; color: string }> = {
-  Verified: { bg: "#F0FDF4", color: "#16A34A" },
-  Active: { bg: "#F0FDF4", color: "#16A34A" },
-  Pending: { bg: "#FFFBEB", color: "#D97706" },
-  "Pending KYC": { bg: "#FFFBEB", color: "#D97706" },
-  Rejected: { bg: "#FEF2F2", color: "#DC2626" },
-  Suspended: { bg: "#FEF2F2", color: "#DC2626" },
+const statusBadgeStyles: Record<string, { color: string }> = {
+  Verified: { color: "#16A34A" },
+  Active: { color: "#16A34A" },
+  Pending: { color: "#D97706" },
+  "Pending KYC": { color: "#D97706" },
+  Rejected: { color: "#DC2626" },
+  Suspended: { color: "#DC2626" },
 };
 
 function Badge({ label }: { label: string }) {
   const style = statusBadgeStyles[label] || statusBadgeStyles.Pending;
   return (
     <span
-      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-      style={{ color: style.color, backgroundColor: style.bg }}
+      className="text-[11px] font-medium px-2 py-0.5 rounded"
+      style={{
+        color: style.color,
+        backgroundColor: "transparent",
+        border: `1px solid ${style.color}`,
+      }}
     >
       {label}
     </span>

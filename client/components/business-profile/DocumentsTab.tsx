@@ -73,8 +73,8 @@ export default function DocumentsTab() {
                   </td>
                   <td className="py-3">
                     <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{ color: st.color, backgroundColor: st.bg }}
+                      className="text-[11px] font-medium px-2 py-0.5 rounded"
+                      style={{ color: st.color, backgroundColor: "transparent", border: `1px solid ${st.color}` }}
                     >
                       {doc.status}
                     </span>

@@ -63,8 +63,8 @@ export default function AgreementsTab() {
                   </td>
                   <td className="py-3">
                     <span
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{ color: tp.color, backgroundColor: tp.bg }}
+                      className="text-[10px] font-medium px-2 py-0.5 rounded"
+                      style={{ color: tp.color, backgroundColor: "transparent", border: `1px solid ${tp.color}` }}
                     >
                       {a.type}
                     </span>
@@ -77,8 +77,8 @@ export default function AgreementsTab() {
                   </td>
                   <td className="py-3">
                     <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{ color: st.color, backgroundColor: st.bg }}
+                      className="text-[11px] font-medium px-2 py-0.5 rounded"
+                      style={{ color: st.color, backgroundColor: "transparent", border: `1px solid ${st.color}` }}
                     >
                       {a.status}
                     </span>

@@ -17,8 +17,8 @@ function StatusBadge({ status }: { status: string }) {
   const style = STATUS_STYLES[status] || STATUS_STYLES.Pending;
   return (
     <span
-      className="text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-      style={{ color: style.color, backgroundColor: style.bg }}
+      className="text-[11px] font-medium px-2.5 py-1 rounded whitespace-nowrap"
+      style={{ color: style.color, backgroundColor: "transparent", border: `1px solid ${style.color}` }}
     >
       {status}
     </span>

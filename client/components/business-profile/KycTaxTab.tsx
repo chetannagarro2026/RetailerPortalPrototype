@@ -127,10 +127,11 @@ function DocSection({
             <div className="flex items-center gap-2 mt-0.5">
               {f.badge ? (
                 <span
-                  className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                  className="text-[11px] font-medium px-2 py-0.5 rounded"
                   style={{
                     color: (statusStyles[f.badge] || statusStyles.Pending).color,
-                    backgroundColor: (statusStyles[f.badge] || statusStyles.Pending).bg,
+                    backgroundColor: "transparent",
+                    border: `1px solid ${(statusStyles[f.badge] || statusStyles.Pending).color}`,
                   }}
                 >
                   {f.value}
