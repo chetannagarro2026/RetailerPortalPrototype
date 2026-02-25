@@ -39,7 +39,7 @@ export default function BusinessIdentityHeader() {
         boxSizing: "border-box",
         backgroundColor: "#F8F9FB",
         border: `1px solid ${config.borderColor}`,
-        padding: 16,
+        padding: "8px 16px 16px 16px",
       }}
     >
       {/* Top row: title */}
