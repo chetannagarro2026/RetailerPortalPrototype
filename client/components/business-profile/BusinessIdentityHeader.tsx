@@ -42,21 +42,14 @@ export default function BusinessIdentityHeader() {
         padding: 16,
       }}
     >
-      {/* Top row: title + status checks */}
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <h2 className="text-lg font-bold m-0" style={{ color: config.primaryColor }}>
-            {b.legalName}
-          </h2>
-          <p className="text-xs m-0 mt-0.5" style={{ color: config.secondaryColor }}>
-            {b.tradeName} &bull; {b.businessType}
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <StatusCheck label="GST Verified" checked={b.gstStatus === "Verified"} />
-          <StatusCheck label="KYC Approved" checked={b.kycApproved} />
-          <StatusCheck label="Distributor Assigned" checked={b.distributorAssigned} />
-        </div>
+      {/* Top row: title */}
+      <div className="mb-5">
+        <h2 className="text-lg font-bold m-0" style={{ color: config.primaryColor }}>
+          {b.legalName}
+        </h2>
+        <p className="text-xs m-0 mt-0.5" style={{ color: config.secondaryColor }}>
+          {b.tradeName} &bull; {b.businessType}
+        </p>
       </div>
 
       {/* 3-column grid */}
@@ -100,6 +93,15 @@ export default function BusinessIdentityHeader() {
         </div>
       </div>
 
+      {/* Inline status row */}
+      <div
+        className="flex items-center gap-5 mt-2 pt-4"
+        style={{ borderTop: `1px solid ${config.borderColor}` }}
+      >
+        <StatusCheck label="GST Verified" checked={b.gstStatus === "Verified"} />
+        <StatusCheck label="KYC Approved" checked={b.kycApproved} />
+        <StatusCheck label="Distributor Assigned" checked={b.distributorAssigned} />
+      </div>
     </div>
   );
 }
