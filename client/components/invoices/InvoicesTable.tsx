@@ -56,7 +56,7 @@ interface Props {
 
 export default function InvoicesTable({ invoices }: Props) {
   const config = activeBrandConfig;
-  const columns = "15% 12% 12% 14% 14% 14% auto";
+  const columns = "1.4fr 1fr 1fr 1.1fr 1.1fr 1.1fr 1.3fr";
 
   if (invoices.length === 0) {
     return (
