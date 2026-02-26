@@ -4,7 +4,11 @@ import {
   lineBaseTotal,
   lineDiscountAmount,
   discountedLineTotal,
+  computeSubtotalBeforeDiscount,
+  computeTotalLineDiscounts,
+  computeOrderDiscountAmount,
   computeNetSubtotal,
+  computeTotalDiscount,
   computeTax,
   computeGrandTotal,
 } from "../../data/invoices";
@@ -28,12 +32,18 @@ interface Props {
 export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
   const config = activeBrandConfig;
   const hasLineDiscounts = items.some((i) => i.discount);
+  const hasOrderDiscount = !!orderDiscount;
 
   const columns = hasLineDiscounts
     ? "1.8fr 0.9fr 0.5fr 0.9fr 0.9fr 1fr"
     : "2fr 1fr 0.6fr 1fr 1fr";
 
+  const subtotalBefore = computeSubtotalBeforeDiscount(items);
+  const totalLineDisc = computeTotalLineDiscounts(items);
+  const orderDiscAmt = computeOrderDiscountAmount(items, orderDiscount);
   const netSubtotal = computeNetSubtotal(items, orderDiscount);
+  const totalDiscount = computeTotalDiscount(items, orderDiscount);
+  const hasAnyDiscount = totalDiscount > 0;
   const tax = computeTax(items, orderDiscount);
   const grandTotal = computeGrandTotal(items, orderDiscount);
 
@@ -122,7 +132,20 @@ export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
           style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
         >
           <div className="flex flex-col items-end gap-1">
-            <SummaryRow label="Subtotal" value={fmt(netSubtotal)} config={config} />
+            <SummaryRow label="Subtotal" value={fmt(subtotalBefore)} config={config} />
+
+            {hasAnyDiscount && (
+              <>
+                {totalLineDisc > 0 && (
+                  <SummaryRow label="Line Discounts" value={`–${fmt(totalLineDisc)}`} config={config} valueColor="#DC2626" />
+                )}
+                {hasOrderDiscount && (
+                  <SummaryRow label={orderDiscount!.label} value={`–${fmt(orderDiscAmt)}`} config={config} valueColor="#DC2626" />
+                )}
+                <SummaryRow label="Net Subtotal" value={fmt(netSubtotal)} config={config} />
+              </>
+            )}
+
             <SummaryRow label="Tax" value={fmt(tax)} config={config} />
             <div
               className="flex items-center gap-6 mt-1 pt-2"
