@@ -113,16 +113,18 @@ export default function SupportTicketsTable({ tickets }: Props) {
             </span>
 
             {/* Status */}
-            <span
-              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex self-center"
-              style={{
-                color: sts.color,
-                backgroundColor: "transparent",
-                border: `1px solid ${sts.color}`,
-              }}
-            >
-              {ticket.status}
-            </span>
+            <div>
+              <span
+                className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex"
+                style={{
+                  color: sts.color,
+                  backgroundColor: "transparent",
+                  border: `1px solid ${sts.color}`,
+                }}
+              >
+                {ticket.status}
+              </span>
+            </div>
 
             {/* Priority */}
             <span
