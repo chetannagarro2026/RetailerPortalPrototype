@@ -55,12 +55,21 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Status
           </p>
-          <span
-            className="text-[11px] font-medium rounded whitespace-nowrap inline-flex mt-0.5"
-            style={{ color: status.color, backgroundColor: `${status.color}14`, padding: "4px 10px" }}
-          >
-            {status.label}
-          </span>
+          <div className="flex flex-col items-start gap-0.5 mt-0.5">
+            <span
+              className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
+              style={{ color: status.color, backgroundColor: `${status.color}14`, padding: "4px 10px" }}
+            >
+              {status.label}
+            </span>
+            {status.days !== undefined && status.days !== 0 && (
+              <span className="text-[10px] pl-1" style={{ color: "#9CA3AF" }}>
+                {status.label === "Overdue"
+                  ? `${status.days} day${status.days !== 1 ? "s" : ""} overdue`
+                  : `${status.days} day${status.days !== 1 ? "s" : ""}`}
+              </span>
+            )}
+          </div>
         </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
