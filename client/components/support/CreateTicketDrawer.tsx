@@ -3,6 +3,7 @@ import { CloseOutlined, CloudUploadOutlined, DeleteOutlined } from "@ant-design/
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { TicketCategory } from "../../data/support";
 import { SUPPORT_TICKETS, generateTicketId } from "../../data/support";
+import DocumentSearchInput from "./DocumentSearchInput";
 
 const CATEGORIES: TicketCategory[] = [
   "Order Issue",
@@ -12,6 +13,25 @@ const CATEGORIES: TicketCategory[] = [
   "Product Issue",
   "Other",
 ];
+
+// Categories that require a related document
+const DOC_REQUIRED_CATEGORIES: TicketCategory[] = [
+  "Order Issue",
+  "Missing Items",
+  "Invoice Query",
+  "Payment Query",
+];
+
+// Dynamic description placeholders per category
+const DESCRIPTION_PLACEHOLDERS: Record<string, string> = {
+  "Order Issue": "Describe the issue with your order (e.g. wrong items, damaged goods, quantity mismatch)…",
+  "Missing Items": "List the missing items, expected quantities, and the affected PO number…",
+  "Invoice Query": "Describe the invoice discrepancy (e.g. incorrect amount, tax issue, missing credit)…",
+  "Payment Query": "Describe the payment issue (e.g. payment not reflected, refund pending, overpayment)…",
+  "Product Issue": "Describe the product defect or quality concern in detail…",
+  "Other": "Describe your issue or request in detail (minimum 20 characters)…",
+  "": "Describe the issue in detail (minimum 20 characters)",
+};
 
 export interface CreateTicketPreset {
   category?: TicketCategory;
@@ -39,6 +59,7 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
 
   const lockDoc = preset?.lockDocument ?? false;
   const isDirty = !!(category || relatedDoc || subject || description || files.length);
+  const docRequired = DOC_REQUIRED_CATEGORIES.includes(category as TicketCategory);
 
   // Reset form when drawer opens
   useEffect(() => {
@@ -52,6 +73,14 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
       setTimeout(() => subjectRef.current?.focus(), 200);
     }
   }, [visible, preset]);
+
+  // Clear related doc when category changes (unless preset-locked)
+  const handleCategoryChange = (newCategory: TicketCategory | "") => {
+    setCategory(newCategory);
+    if (!lockDoc) {
+      setRelatedDoc("");
+    }
+  };
 
   // ESC key
   useEffect(() => {
@@ -85,7 +114,11 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const isValid = category && subject.trim().length > 0 && description.trim().length >= 20;
+  const isValid =
+    category &&
+    subject.trim().length > 0 &&
+    description.trim().length >= 20 &&
+    (!docRequired || relatedDoc.trim().length > 0);
 
   const handleSubmit = () => {
     if (!isValid || submitting) return;
@@ -121,6 +154,13 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
   };
 
   if (!visible) return null;
+
+  const docPlaceholder =
+    category === "Invoice Query" || category === "Payment Query"
+      ? "Search Invoice #"
+      : category === "Order Issue" || category === "Missing Items"
+        ? "Search PO #"
+        : "Search Invoice # or PO #";
 
   return (
     <>
@@ -168,7 +208,7 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
           <FormField label="Category" required>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value as TicketCategory)}
+              onChange={(e) => handleCategoryChange(e.target.value as TicketCategory)}
               className="w-full text-sm rounded-lg px-3 py-2.5 outline-none appearance-none cursor-pointer"
               style={{
                 border: `1px solid ${config.borderColor}`,
@@ -184,20 +224,17 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
           </FormField>
 
           {/* Related Document */}
-          <FormField label="Related Document" hint={lockDoc && relatedDoc ? `Linked to ${relatedDoc}` : undefined}>
-            <input
-              type="text"
+          <FormField
+            label="Related Document"
+            required={docRequired}
+            hint={lockDoc && relatedDoc ? `Linked to ${relatedDoc}` : undefined}
+          >
+            <DocumentSearchInput
               value={relatedDoc}
-              onChange={(e) => setRelatedDoc(e.target.value)}
+              onChange={setRelatedDoc}
+              category={category}
               disabled={lockDoc}
-              placeholder="Search Invoice # or PO #"
-              className="w-full text-sm rounded-lg px-3 py-2.5 outline-none"
-              style={{
-                border: `1px solid ${config.borderColor}`,
-                color: config.primaryColor,
-                backgroundColor: lockDoc ? config.cardBg : "#fff",
-                opacity: lockDoc ? 0.7 : 1,
-              }}
+              placeholder={docPlaceholder}
             />
           </FormField>
 
@@ -226,7 +263,7 @@ export default function CreateTicketDrawer({ visible, onClose, onCreated, preset
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the issue in detail (minimum 20 characters)"
+              placeholder={DESCRIPTION_PLACEHOLDERS[category] || DESCRIPTION_PLACEHOLDERS[""]}
               rows={5}
               className="w-full text-sm rounded-lg px-3 py-2.5 outline-none resize-y"
               style={{
