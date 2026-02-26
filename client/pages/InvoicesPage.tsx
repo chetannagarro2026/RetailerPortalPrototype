@@ -1,8 +1,9 @@
-import { useState, useMemo, useRef, useEffect } from "react";
-import { FileTextOutlined, SearchOutlined, DownOutlined } from "@ant-design/icons";
+import { useState, useMemo } from "react";
+import { FileTextOutlined, SearchOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { INVOICES, type InvoiceStatus } from "../data/invoices";
 import InvoicesTable from "../components/invoices/InvoicesTable";
+import DateRangeFilter, { getFYStart, getFYEnd, toISODate, type DateRange } from "../components/credit-overview/DateRangeFilter";
 
 // ── Tab definitions ─────────────────────────────────────────────────
 
@@ -13,34 +14,20 @@ const TABS: { key: "All" | InvoiceStatus; label: string }[] = [
   { key: "Paid", label: "Paid" },
 ];
 
-// ── Date range presets ──────────────────────────────────────────────
-
-const DATE_RANGES = [
-  { key: "all", label: "All Time" },
-  { key: "30", label: "Last 30 Days" },
-  { key: "90", label: "Last 90 Days" },
-  { key: "fy", label: "This Financial Year" },
-] as const;
-
-type DateRangeKey = (typeof DATE_RANGES)[number]["key"];
-
-function getDateCutoff(key: DateRangeKey): Date | null {
-  const today = new Date();
-  if (key === "all") return null;
-  if (key === "30") { today.setDate(today.getDate() - 30); return today; }
-  if (key === "90") { today.setDate(today.getDate() - 90); return today; }
-  // FY: Apr 1 of current or previous year
-  const year = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
-  return new Date(year, 3, 1);
-}
-
 // ── Page ────────────────────────────────────────────────────────────
 
 export default function InvoicesPage() {
   const config = activeBrandConfig;
+  const today = useMemo(() => new Date(), []);
   const [activeTab, setActiveTab] = useState<"All" | InvoiceStatus>("All");
-  const [dateRange, setDateRange] = useState<DateRangeKey>("all");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    start: getFYStart(today),
+    end: getFYEnd(today),
+  });
   const [search, setSearch] = useState("");
+
+  const startISO = toISODate(dateRange.start);
+  const endISO = toISODate(dateRange.end);
 
   // Counts per tab
   const counts = useMemo(() => {
@@ -57,12 +44,8 @@ export default function InvoicesPage() {
     // Tab filter
     if (activeTab !== "All") list = list.filter((inv) => inv.status === activeTab);
 
-    // Date range
-    const cutoff = getDateCutoff(dateRange);
-    if (cutoff) {
-      const iso = cutoff.toISOString().slice(0, 10);
-      list = list.filter((inv) => inv.invoiceDate >= iso);
-    }
+    // Date range filter
+    list = list.filter((inv) => inv.invoiceDate >= startISO && inv.invoiceDate <= endISO);
 
     // Search
     if (search.trim()) {
@@ -72,7 +55,7 @@ export default function InvoicesPage() {
 
     // Sort latest first
     return [...list].sort((a, b) => (b.invoiceDate > a.invoiceDate ? 1 : -1));
-  }, [activeTab, dateRange, search]);
+  }, [activeTab, startISO, endISO, search]);
 
   // ── Empty state ─────────────────────────────────────────────────
 
@@ -127,8 +110,8 @@ export default function InvoicesPage() {
       </div>
 
       {/* Filter Row */}
-      <div className="flex items-center justify-start gap-3 mb-4">
-        <DateRangeDropdown value={dateRange} onChange={setDateRange} config={config} />
+      <div className="flex items-center justify-start gap-3 mb-4 relative z-10">
+        <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
         <div className="flex-1" />
 
@@ -155,80 +138,6 @@ export default function InvoicesPage() {
 
       {/* Table */}
       <InvoicesTable invoices={filtered} />
-    </div>
-  );
-}
-
-// ── Date Range Dropdown ─────────────────────────────────────────────
-
-function DateRangeDropdown({
-  value,
-  onChange,
-  config,
-}: {
-  value: DateRangeKey;
-  onChange: (v: DateRangeKey) => void;
-  config: typeof activeBrandConfig;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  const label = DATE_RANGES.find((r) => r.key === value)?.label || "All Time";
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 cursor-pointer transition-colors"
-        style={{
-          border: `1px solid ${config.borderColor}`,
-          color: config.primaryColor,
-          backgroundColor: "#fff",
-        }}
-      >
-        <span>{label}</span>
-        <DownOutlined style={{ fontSize: 10, color: config.secondaryColor }} />
-      </button>
-
-      {open && (
-        <div
-          className="absolute right-0 top-full mt-1 rounded-lg py-1 z-50"
-          style={{
-            backgroundColor: "#fff",
-            border: `1px solid ${config.borderColor}`,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-            minWidth: 180,
-          }}
-        >
-          {DATE_RANGES.map((r) => {
-            const isActive = value === r.key;
-            return (
-              <button
-                key={r.key}
-                onClick={() => { onChange(r.key); setOpen(false); }}
-                className="w-full text-left text-sm px-4 py-2 cursor-pointer transition-colors border-none"
-                style={{
-                  backgroundColor: isActive ? config.cardBg : "#fff",
-                  color: isActive ? config.primaryColor : config.secondaryColor,
-                  fontWeight: isActive ? 600 : 400,
-                }}
-                onMouseEnter={(e) => { if (!isActive) (e.currentTarget.style.backgroundColor = config.cardBg); }}
-                onMouseLeave={(e) => { if (!isActive) (e.currentTarget.style.backgroundColor = "#fff"); }}
-              >
-                {r.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
