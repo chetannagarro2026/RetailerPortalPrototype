@@ -164,7 +164,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             backgroundColor: "#fff",
             border: `1px solid ${config.borderColor}`,
             boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-            width: 340,
+            width: 460,
           }}
         >
           {/* Quick Select Chips */}
