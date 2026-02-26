@@ -22,7 +22,6 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
   const status = getStatusLabel(invoice);
   const isOverdue = invoice.status === "Overdue" || status.color === "#DC2626";
   const totalDiscount = computeTotalDiscount(invoice.items, invoice.orderDiscount);
-  const showDiscount = totalDiscount > 0;
 
   return (
     <div
@@ -83,18 +82,16 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
       {/* Row 2: Financial KPIs — Total Discount | Grand Total | Paid Amount | Outstanding Balance */}
       <div
         className="grid gap-6"
-        style={{ gridTemplateColumns: showDiscount ? "1fr 1fr 1fr 1fr" : "1fr 1fr 1fr" }}
+        style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr" }}
       >
-        {showDiscount && (
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
-              Total Discount
-            </p>
-            <p className="text-sm font-medium m-0 mt-0.5" style={{ color: config.primaryColor }}>
-              {fmt(totalDiscount)}
-            </p>
-          </div>
-        )}
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+            Total Discount
+          </p>
+          <p className="text-sm font-medium m-0 mt-0.5" style={{ color: config.primaryColor }}>
+            {totalDiscount > 0 ? fmt(totalDiscount) : "$0.00"}
+          </p>
+        </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Grand Total
