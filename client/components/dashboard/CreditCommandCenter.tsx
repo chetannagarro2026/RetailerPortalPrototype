@@ -103,7 +103,7 @@ export default function CreditCommandCenter({ onCardClick }: CreditCommandCenter
       </KpiShell>
 
       {/* Card 5 — This Month Payments */}
-      <KpiShell onClick={() => onCardClick?.("payments")}>
+      <KpiShell onClick={() => onCardClick?.("outstanding")}>
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
           This Month Payments
         </span>

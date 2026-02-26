@@ -73,17 +73,6 @@ const drawerConfig: Record<
       { key: "status", label: "Status" },
     ],
   },
-  payments: {
-    title: "Payment History",
-    footerLabel: "View Payment History",
-    footerPath: "/account/payment-history",
-    columns: [
-      { key: "reference", label: "Reference" },
-      { key: "date", label: "Date", render: (v: string) => fmtDate(v) },
-      { key: "amount", label: "Amount", render: (v: number) => fmtCurrency(v) },
-      { key: "status", label: "Status" },
-    ],
-  },
   support: {
     title: "Support Tickets",
     footerLabel: "Go to Support",

@@ -1,8 +1,6 @@
 import {
   CreditCardOutlined,
   FileTextOutlined,
-  DollarOutlined,
-  HistoryOutlined,
   RollbackOutlined,
   CustomerServiceOutlined,
   UserOutlined,
@@ -49,8 +47,6 @@ const authenticatedSections: DropdownSection[] = [
     items: [
       { key: "credit", label: "Credit Overview", icon: <CreditCardOutlined />, path: "/account/credit" },
       { key: "invoices", label: "Invoices", icon: <FileTextOutlined />, path: "/account/invoices" },
-      { key: "payments", label: "Payments", icon: <DollarOutlined />, path: "/account/payments" },
-      { key: "payment-history", label: "Payment History", icon: <HistoryOutlined />, path: "/account/payment-history" },
     ],
   },
   {

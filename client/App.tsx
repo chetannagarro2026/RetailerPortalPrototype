@@ -61,8 +61,6 @@ export default function App() {
               <Route path="/account/credit" element={<AuthGate message="Sign in to view your credit history and financial details."><CreditOverviewPage /></AuthGate>} />
               <Route path="/account/invoices" element={<AuthGate message="Sign in to access your invoices."><InvoicesPage /></AuthGate>} />
               <Route path="/account/invoices/:invoiceId" element={<AuthGate message="Sign in to view invoice details."><InvoiceDetailPage /></AuthGate>} />
-              <Route path="/account/payments" element={<AuthGate message="Sign in to manage your payments."><PlaceholderPage /></AuthGate>} />
-              <Route path="/account/payment-history" element={<AuthGate message="Sign in to view your payment history."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/support" element={<AuthGate message="Sign in to access customer service."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />
