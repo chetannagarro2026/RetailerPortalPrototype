@@ -130,6 +130,8 @@ export default function InvoicesPage() {
       <div className="flex items-center justify-start gap-3 mb-4">
         <DateRangeDropdown value={dateRange} onChange={setDateRange} config={config} />
 
+        <div className="flex-1" />
+
         <div className="relative">
           <SearchOutlined
             className="absolute left-3 top-1/2 -translate-y-1/2"
