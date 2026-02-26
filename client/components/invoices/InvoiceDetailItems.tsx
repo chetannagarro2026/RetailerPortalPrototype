@@ -48,7 +48,7 @@ export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
   const grandTotal = computeGrandTotal(items, orderDiscount);
 
   return (
-    <div className="mb-8">
+    <div className="mb-4">
       <h3 className="text-base font-semibold m-0 mb-2" style={{ color: config.primaryColor }}>
         Invoice Items
       </h3>

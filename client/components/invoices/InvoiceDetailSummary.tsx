@@ -25,7 +25,7 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
 
   return (
     <div
-      className="rounded-xl p-4 mb-6"
+      className="rounded-xl p-4 mb-4"
       style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
     >
       {/* Row 1: Date, Due Date, Status, Linked PO */}
