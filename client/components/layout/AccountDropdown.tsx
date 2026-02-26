@@ -133,7 +133,7 @@ function AuthenticatedContent({
               <span>{item.label}</span>
               {item.key === "support" && getUnreadCount(SUPPORT_TICKETS) > 0 && (
                 <span
-                  className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full text-white"
+                  className="ml-auto text-[10px] font-semibold px-[9px] py-0.5 rounded-full text-white"
                   style={{ backgroundColor: "#DC2626", minWidth: 18, textAlign: "center" }}
                 >
                   {getUnreadCount(SUPPORT_TICKETS)}
