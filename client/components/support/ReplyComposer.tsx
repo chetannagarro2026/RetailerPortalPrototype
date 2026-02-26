@@ -31,10 +31,9 @@ export default function ReplyComposer({ onSubmit }: Props) {
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
-    // Auto-expand
     const el = e.target;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 200) + "px";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
   };
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
@@ -78,27 +77,9 @@ export default function ReplyComposer({ onSubmit }: Props) {
         </div>
       )}
 
-      {/* Textarea */}
-      <textarea
-        ref={textareaRef}
-        value={message}
-        onChange={handleTextChange}
-        placeholder="Write your message…"
-        className="w-full text-sm rounded-lg px-4 py-3 resize-none outline-none"
-        style={{
-          border: `1px solid ${config.borderColor}`,
-          backgroundColor: "#fff",
-          color: config.primaryColor,
-          minHeight: 80,
-          maxHeight: 200,
-          fontFamily: "inherit",
-          boxSizing: "border-box",
-        }}
-      />
-
-      {/* Attached files */}
+      {/* Attached files (above the box) */}
       {files.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2 mb-2">
           {files.map((file, idx) => (
             <div
               key={`${file.name}-${idx}`}
@@ -120,36 +101,62 @@ export default function ReplyComposer({ onSubmit }: Props) {
         </div>
       )}
 
-      {/* Actions row */}
-      <div className="flex items-center justify-between mt-3">
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 text-xs font-medium cursor-pointer bg-transparent border-none px-0"
-          style={{ color: config.secondaryColor }}
-        >
-          <PaperClipOutlined style={{ fontSize: 13 }} />
-          Attach files
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ""; }}
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="flex items-center gap-2 text-sm font-medium px-5 py-2 rounded-lg text-white border-none cursor-pointer transition-opacity"
+      {/* Combined textarea box with inline controls */}
+      <div
+        className="rounded-lg overflow-hidden"
+        style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+      >
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={handleTextChange}
+          placeholder="Write your message…"
+          className="w-full text-sm px-4 pt-3 pb-2 resize-none outline-none border-none"
           style={{
-            backgroundColor: config.primaryColor,
-            opacity: canSubmit ? 1 : 0.4,
-            cursor: canSubmit ? "pointer" : "not-allowed",
+            backgroundColor: "transparent",
+            color: config.primaryColor,
+            minHeight: 70,
+            maxHeight: 160,
+            fontFamily: "inherit",
+            boxSizing: "border-box",
+            display: "block",
           }}
+        />
+
+        {/* Inline footer bar inside the box */}
+        <div
+          className="flex items-center justify-between px-3 py-2"
+          style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: config.cardBg }}
         >
-          <SendOutlined style={{ fontSize: 12 }} />
-          Send Reply
-        </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 text-xs font-medium cursor-pointer bg-transparent border-none px-1"
+            style={{ color: config.secondaryColor }}
+          >
+            <PaperClipOutlined style={{ fontSize: 13 }} />
+            Attach files
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ""; }}
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="flex items-center gap-1.5 text-xs font-medium px-4 py-1.5 rounded-md text-white border-none cursor-pointer transition-opacity"
+            style={{
+              backgroundColor: config.primaryColor,
+              opacity: canSubmit ? 1 : 0.4,
+              cursor: canSubmit ? "pointer" : "not-allowed",
+            }}
+          >
+            <SendOutlined style={{ fontSize: 11 }} />
+            Send Reply
+          </button>
+        </div>
       </div>
     </div>
   );
