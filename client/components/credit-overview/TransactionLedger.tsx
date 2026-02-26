@@ -79,7 +79,7 @@ export default function TransactionLedger() {
   const totalCredits = filtered.reduce((s, e) => s + e.credit, 0);
   const closingBalance = OPENING_BALANCE + totalDebits - totalCredits;
 
-  const columns = "140px 100px 110px 120px 120px 140px";
+  const columns = "1.4fr 1fr 1.1fr 1.2fr 1.2fr 1.4fr";
 
   return (
     <div>
