@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   CustomerServiceOutlined,
   ClockCircleOutlined,
@@ -5,35 +6,36 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import { supportData } from "../../data/dashboardData";
+import { SUPPORT_TICKETS } from "../../data/support";
 
 interface SupportSnapshotProps {
   onOpenDrawer: () => void;
 }
 
-const statusChipStyles: Record<string, { bg: string; color: string }> = {
-  "Open": { bg: "#FEF2F2", color: "#DC2626" },
-  "In Progress": { bg: "#EFF6FF", color: "#2563EB" },
-  "Awaiting Response": { bg: "#FFFBEB", color: "#D97706" },
-  "Resolved": { bg: "#F0FDF4", color: "#16A34A" },
+const statusChipStyles: Record<string, { color: string }> = {
+  Open: { color: "#D97706" },
+  Closed: { color: "#16A34A" },
 };
 
 export default function SupportSnapshot({ onOpenDrawer }: SupportSnapshotProps) {
   const config = activeBrandConfig;
-  const { openTickets, tickets } = supportData;
-  const highPriority = tickets.filter((t) => t.priority === "High").length;
-  const latestTicket = tickets[0];
+  const navigate = useNavigate();
 
-  // Calculate days since last update for "Awaiting Response" messaging
+  const openTickets = SUPPORT_TICKETS.filter((t) => t.status === "Open");
+  const highPriority = SUPPORT_TICKETS.filter((t) => t.priority === "High" && t.status === "Open").length;
+
+  // Latest ticket by lastUpdated
+  const sorted = [...SUPPORT_TICKETS].sort(
+    (a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+  );
+  const latestTicket = sorted[0] || null;
+
   const daysSinceUpdate = latestTicket
-    ? Math.max(0, Math.round((Date.now() - new Date(latestTicket.lastUpdate).getTime()) / 86400000))
+    ? Math.max(0, Math.round((Date.now() - new Date(latestTicket.lastUpdated).getTime()) / 86400000))
     : 0;
 
-  const displayStatus = latestTicket?.status === "Open" && daysSinceUpdate >= 2
-    ? "Awaiting Response"
-    : latestTicket?.status || "";
-
-  const chipStyle = statusChipStyles[displayStatus] || statusChipStyles["In Progress"];
+  const displayStatus = latestTicket?.status || "";
+  const chipStyle = statusChipStyles[displayStatus] || statusChipStyles.Open;
 
   return (
     <div
@@ -50,7 +52,7 @@ export default function SupportSnapshot({ onOpenDrawer }: SupportSnapshotProps) 
             </h2>
           </div>
           <button
-            onClick={onOpenDrawer}
+            onClick={() => navigate("/account/support")}
             className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none"
             style={{ color: config.primaryColor }}
           >
@@ -70,7 +72,7 @@ export default function SupportSnapshot({ onOpenDrawer }: SupportSnapshotProps) 
                 </span>
               </div>
               <p className="text-2xl font-bold m-0" style={{ color: config.primaryColor }}>
-                {openTickets}
+                {openTickets.length}
               </p>
             </div>
 
@@ -116,20 +118,19 @@ export default function SupportSnapshot({ onOpenDrawer }: SupportSnapshotProps) 
                 backgroundColor: "#fff",
                 border: `1px solid ${config.borderColor}`,
               }}
-              onClick={onOpenDrawer}
+              onClick={() => navigate(`/account/support/${latestTicket.ticketId}`)}
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#F9FAFB"; }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#fff"; }}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold" style={{ color: config.primaryColor }}>
-                  {latestTicket.id}
+                  {latestTicket.ticketId}
                 </span>
                 <span
                   className="text-[11px] font-medium px-2 py-0.5 rounded"
                   style={{ color: chipStyle.color, backgroundColor: "transparent", border: `1px solid ${chipStyle.color}` }}
                 >
                   {displayStatus}
-                  {displayStatus === "Awaiting Response" && ` (${daysSinceUpdate} days)`}
                 </span>
               </div>
               <p className="text-sm font-medium m-0 mb-2 line-clamp-1" style={{ color: "#374151" }}>
@@ -137,7 +138,8 @@ export default function SupportSnapshot({ onOpenDrawer }: SupportSnapshotProps) 
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-[11px]" style={{ color: config.secondaryColor }}>
-                  Updated {new Date(latestTicket.lastUpdate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  Updated {new Date(latestTicket.lastUpdated).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  {daysSinceUpdate > 0 && ` (${daysSinceUpdate}d ago)`}
                 </span>
                 <span className="text-xs font-medium flex items-center gap-1" style={{ color: config.primaryColor }}>
                   View <RightOutlined className="text-[9px]" />
