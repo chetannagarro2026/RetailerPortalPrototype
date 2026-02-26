@@ -109,7 +109,7 @@ export default function UpdatesSection() {
 
   return (
     <div
-      className="rounded-xl overflow-hidden p-3"
+      className="rounded-xl overflow-hidden p-3 flex-1"
       style={{ border: `1px solid ${config.borderColor}` }}
     >
       {/* Header */}

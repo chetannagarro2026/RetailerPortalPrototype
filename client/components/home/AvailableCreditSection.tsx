@@ -33,7 +33,7 @@ export default function AvailableCreditSection() {
 
   return (
     <div
-      className="rounded-xl p-3 flex flex-col my-0"
+      className="rounded-xl p-3 flex flex-col my-0 flex-1"
       style={{
         border: `1px solid ${config.borderColor}`,
         backgroundColor: "#fff",

@@ -19,12 +19,12 @@ export default function Index() {
         {isAuthenticated && (
           <>
             {/* Updates — 8 cols */}
-            <Col xs={24} lg={16}>
+            <Col xs={24} lg={16} className="flex">
               <UpdatesSection />
             </Col>
 
             {/* Available Credit — 4 cols */}
-            <Col xs={24} lg={8} className="py-0 h-auto grow-0">
+            <Col xs={24} lg={8} className="flex">
               <AvailableCreditSection />
             </Col>
           </>
