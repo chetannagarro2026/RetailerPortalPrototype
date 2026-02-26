@@ -99,41 +99,27 @@ export default function InvoicesPage() {
         </h1>
       </div>
 
-      {/* Tabs */}
+      {/* Status Segmented Filter */}
       <div className="mb-6">
-        <div className="flex items-end gap-2" style={{ borderBottom: `1px solid ${config.borderColor}` }}>
-          {TABS.map((tab) => {
+        <div
+          className="inline-flex rounded-lg overflow-hidden"
+          style={{ border: `1px solid ${config.borderColor}` }}
+        >
+          {TABS.map((tab, idx) => {
             const isActive = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors"
+                className="px-4 py-2 text-xs font-medium cursor-pointer transition-colors whitespace-nowrap"
                 style={{
-                  backgroundColor: isActive ? "#fff" : "#FAFAFA",
-                  color: isActive ? config.primaryColor : config.secondaryColor,
-                  fontWeight: isActive ? 600 : 400,
-                  outline: "none",
-                  border: `1px solid ${config.borderColor}`,
-                  borderBottom: isActive ? "1px solid #fff" : `1px solid ${config.borderColor}`,
-                  borderRadius: "8px 8px 0 0",
-                  marginBottom: "-1px",
+                  backgroundColor: isActive ? config.primaryColor : "#fff",
+                  color: isActive ? "#fff" : config.secondaryColor,
+                  border: "none",
+                  borderRight: idx < TABS.length - 1 ? `1px solid ${config.borderColor}` : "none",
                 }}
-                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = "#F5F5F5"; }}
-                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = isActive ? "#fff" : "#FAFAFA"; }}
               >
-                <span className="text-sm whitespace-nowrap">{tab.label}</span>
-                <span
-                  className="text-[11px] font-medium px-1.5 py-0.5 rounded-full"
-                  style={{
-                    backgroundColor: isActive ? config.primaryColor : config.borderColor,
-                    color: isActive ? "#fff" : config.secondaryColor,
-                    minWidth: 20,
-                    textAlign: "center",
-                  }}
-                >
-                  {counts[tab.key] || 0}
-                </span>
+                {tab.label} ({counts[tab.key] || 0})
               </button>
             );
           })}
