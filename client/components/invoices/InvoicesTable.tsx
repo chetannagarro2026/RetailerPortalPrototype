@@ -6,18 +6,34 @@ import { outstanding, getStatusLabel } from "../../data/invoices";
 // ── Status Badge (dynamic) ──────────────────────────────────────────
 
 function StatusBadge({ invoice }: { invoice: Invoice }) {
-  const { label, color } = getStatusLabel(invoice);
+  const { label, color, days } = getStatusLabel(invoice);
+  const daysText =
+    days !== undefined && days !== 0
+      ? label === "Overdue"
+        ? `${days} day${days !== 1 ? "s" : ""}`
+        : label === "Partially Paid" && days < 0
+          ? `Overdue ${Math.abs(days)}d`
+          : `${days} day${days !== 1 ? "s" : ""}`
+      : null;
+
   return (
-    <span
-      className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
-      style={{
-        color,
-        backgroundColor: `${color}12`,
-        padding: "4px 10px",
-      }}
-    >
-      {label}
-    </span>
+    <div className="inline-flex flex-col items-start gap-0.5">
+      <span
+        className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
+        style={{
+          color,
+          backgroundColor: `${color}14`,
+          padding: "4px 10px",
+        }}
+      >
+        {label}
+      </span>
+      {daysText && (
+        <span className="text-[10px] pl-1" style={{ color: "#9CA3AF" }}>
+          {daysText}
+        </span>
+      )}
+    </div>
   );
 }
 

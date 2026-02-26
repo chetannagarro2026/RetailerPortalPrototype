@@ -131,21 +131,32 @@ export function hasAnyDiscount(inv: Invoice): boolean {
   return inv.items.some((i) => i.discount) || !!inv.orderDiscount;
 }
 
-/** Dynamic status label based on due date and outstanding */
-export function getStatusLabel(inv: Invoice): { label: string; color: string } {
+/** Status label with fixed states + optional days sub-text */
+export function getStatusLabel(inv: Invoice): { label: string; color: string; days?: number } {
   const bal = outstanding(inv);
   if (bal <= 0) return { label: "Paid", color: "#16A34A" };
+
+  const hasPaid = inv.paid > 0;
+  if (hasPaid && bal > 0) {
+    // Partially Paid — still compute days for sub-text
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(inv.dueDate);
+    due.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return { label: "Partially Paid", color: "#D97706", days: diffDays };
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const due = new Date(inv.dueDate);
   due.setHours(0, 0, 0, 0);
-  const diffMs = due.getTime() - today.getTime();
-  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays < 0) return { label: `Overdue by ${Math.abs(diffDays)} days`, color: "#DC2626" };
-  if (diffDays === 0) return { label: "Due today", color: "#D97706" };
-  return { label: `Due in ${diffDays} days`, color: "#6B7B99" };
+  if (diffDays < 0) return { label: "Overdue", color: "#B91C1C", days: Math.abs(diffDays) };
+  if (diffDays === 0) return { label: "Due Today", color: "#D97706", days: 0 };
+  if (diffDays <= 7) return { label: "Due Soon", color: "#92400E", days: diffDays };
+  return { label: "Upcoming", color: "#6B7B99", days: diffDays };
 }
 
 // ── Mock Data ───────────────────────────────────────────────────────

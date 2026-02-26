@@ -56,8 +56,8 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
             Status
           </p>
           <span
-            className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-block mt-0.5"
-            style={{ color: status.color, border: `1px solid ${status.color}` }}
+            className="text-[11px] font-medium rounded whitespace-nowrap inline-flex mt-0.5"
+            style={{ color: status.color, backgroundColor: `${status.color}14`, padding: "4px 10px" }}
           >
             {status.label}
           </span>
