@@ -1,25 +1,18 @@
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { Invoice } from "../../data/invoices";
-import { balance } from "../../data/invoices";
+import { outstanding, getStatusLabel } from "../../data/invoices";
 
-// ── Status Badge ────────────────────────────────────────────────────
+// ── Status Badge (dynamic) ──────────────────────────────────────────
 
-const STATUS_COLORS: Record<string, string> = {
-  Paid: "#16A34A",
-  "Partially Paid": "#2563EB",
-  Overdue: "#DC2626",
-  Upcoming: "#6B7B99",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const color = STATUS_COLORS[status] || "#6B7B99";
+function StatusBadge({ invoice }: { invoice: Invoice }) {
+  const { label, color } = getStatusLabel(invoice);
   return (
     <span
       className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap"
       style={{ color, backgroundColor: "transparent", border: `1px solid ${color}` }}
     >
-      {status}
+      {label}
     </span>
   );
 }
@@ -35,10 +28,6 @@ function fmt(val: number): string {
   return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 }
 
-function isOverdue(inv: Invoice): boolean {
-  return inv.status === "Overdue";
-}
-
 // ── Component ───────────────────────────────────────────────────────
 
 interface Props {
@@ -47,7 +36,7 @@ interface Props {
 
 export default function InvoicesTable({ invoices }: Props) {
   const config = activeBrandConfig;
-  const columns = "1.2fr 1fr 1fr 1fr 1fr 1fr 1fr";
+  const columns = "1.2fr 1fr 1fr 1fr 1fr 1fr 1.2fr";
 
   if (invoices.length === 0) {
     return (
@@ -88,8 +77,8 @@ export default function InvoicesTable({ invoices }: Props) {
 
       {/* Rows */}
       {invoices.map((inv, idx) => {
-        const bal = balance(inv);
-        const overdue = isOverdue(inv);
+        const bal = outstanding(inv);
+        const isOverdue = inv.status === "Overdue";
         return (
           <div
             key={inv.id}
@@ -112,7 +101,7 @@ export default function InvoicesTable({ invoices }: Props) {
             </span>
             <span
               className="text-xs"
-              style={{ color: overdue ? "#DC2626" : config.secondaryColor }}
+              style={{ color: isOverdue ? "#DC2626" : config.secondaryColor }}
             >
               {formatDate(inv.dueDate)}
             </span>
@@ -125,13 +114,13 @@ export default function InvoicesTable({ invoices }: Props) {
             <span
               className="text-sm text-right"
               style={{
-                color: bal > 0 && overdue ? "#DC2626" : config.primaryColor,
-                fontWeight: bal > 0 && overdue ? 600 : 500,
+                color: bal > 0 && isOverdue ? "#DC2626" : config.primaryColor,
+                fontWeight: bal > 0 && isOverdue ? 600 : 500,
               }}
             >
               {fmt(bal)}
             </span>
-            <StatusBadge status={inv.status} />
+            <StatusBadge invoice={inv} />
           </div>
         );
       })}

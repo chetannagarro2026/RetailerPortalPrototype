@@ -1,14 +1,7 @@
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { Invoice } from "../../data/invoices";
-import { balance } from "../../data/invoices";
-
-const STATUS_COLORS: Record<string, string> = {
-  Paid: "#16A34A",
-  "Partially Paid": "#2563EB",
-  Overdue: "#DC2626",
-  Upcoming: "#6B7B99",
-};
+import { outstanding, getStatusLabel } from "../../data/invoices";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -25,69 +18,83 @@ interface Props {
 
 export default function InvoiceDetailSummary({ invoice }: Props) {
   const config = activeBrandConfig;
-  const statusColor = STATUS_COLORS[invoice.status] || "#6B7B99";
-  const bal = balance(invoice);
-  const overdue = invoice.status === "Overdue";
+  const bal = outstanding(invoice);
+  const status = getStatusLabel(invoice);
+  const isOverdue = invoice.status === "Overdue" || status.color === "#DC2626";
 
   return (
     <div
       className="rounded-xl p-5 mb-8"
       style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
     >
-      {/* Row 1 */}
+      {/* Row 1: Date, Due Date, Status, Linked PO */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-5">
         <Field label="Invoice Date" value={formatDate(invoice.invoiceDate)} config={config} />
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: config.secondaryColor }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Due Date
           </p>
-          <p className="text-sm font-medium mt-0.5" style={{ color: overdue ? "#DC2626" : config.primaryColor }}>
+          <p className="text-sm font-medium m-0 mt-0.5" style={{ color: isOverdue ? "#DC2626" : config.primaryColor }}>
             {formatDate(invoice.dueDate)}
           </p>
-          {overdue && (
+          {isOverdue && (
             <p className="text-[11px] mt-1 m-0" style={{ color: "#DC2626" }}>
               This invoice is overdue.
             </p>
           )}
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: config.secondaryColor }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Status
           </p>
           <span
-            className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap"
-            style={{ color: statusColor, border: `1px solid ${statusColor}` }}
+            className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-block mt-0.5"
+            style={{ color: status.color, border: `1px solid ${status.color}` }}
           >
-            {invoice.status}
+            {status.label}
           </span>
         </div>
-        <Field label="Total Amount" value={fmt(invoice.amount)} config={config} />
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+            Linked Purchase Order
+          </p>
+          <Link
+            to={`/purchase-orders/${invoice.linkedPO}`}
+            className="text-sm font-medium no-underline hover:underline mt-0.5 inline-block"
+            style={{ color: config.primaryColor }}
+          >
+            {invoice.linkedPO}
+          </Link>
+        </div>
       </div>
 
       {/* Divider */}
       <div className="mb-5" style={{ borderBottom: `1px solid ${config.borderColor}` }} />
 
-      {/* Row 2 */}
+      {/* Row 2: Financial hierarchy — Grand Total, Paid, Outstanding */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-        <Field label="Paid Amount" value={fmt(invoice.paid)} config={config} valueColor="#16A34A" />
-        <Field
-          label="Outstanding Balance"
-          value={fmt(bal)}
-          config={config}
-          valueColor={bal > 0 && overdue ? "#DC2626" : config.primaryColor}
-          bold={bal > 0 && overdue}
-        />
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: config.secondaryColor }}>
-            Linked Purchase Order
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+            Grand Total
           </p>
-          <Link
-            to={`/purchase-orders/${invoice.linkedPO}`}
-            className="text-sm font-medium no-underline hover:underline"
-            style={{ color: config.primaryColor }}
+          <p className="text-lg font-bold m-0 mt-0.5" style={{ color: config.primaryColor }}>
+            {fmt(invoice.amount)}
+          </p>
+        </div>
+        <Field label="Paid Amount" value={fmt(invoice.paid)} config={config} valueColor="#16A34A" />
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+            Outstanding Balance
+          </p>
+          <p
+            className="text-lg m-0 mt-0.5"
+            style={{
+              color: bal > 0 && isOverdue ? "#DC2626" : config.primaryColor,
+              fontWeight: 700,
+            }}
           >
-            {invoice.linkedPO}
-          </Link>
+            {fmt(bal)}
+          </p>
         </div>
       </div>
     </div>
@@ -99,23 +106,18 @@ function Field({
   value,
   config,
   valueColor,
-  bold,
 }: {
   label: string;
   value: string;
   config: typeof activeBrandConfig;
   valueColor?: string;
-  bold?: boolean;
 }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: config.secondaryColor }}>
+      <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
         {label}
       </p>
-      <p
-        className="text-sm mt-0.5"
-        style={{ color: valueColor || config.primaryColor, fontWeight: bold ? 600 : 500 }}
-      >
+      <p className="text-sm font-medium m-0 mt-0.5" style={{ color: valueColor || config.primaryColor }}>
         {value}
       </p>
     </div>

@@ -1,5 +1,6 @@
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { InvoiceLineItem } from "../../data/invoices";
+import { computeSubtotal, computeTax, computeGrandTotal } from "../../data/invoices";
 
 function fmt(val: number): string {
   return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
@@ -11,11 +12,11 @@ interface Props {
 
 export default function InvoiceDetailItems({ items }: Props) {
   const config = activeBrandConfig;
-  const columns = "1.8fr 1fr 0.6fr 1fr 0.8fr 1fr";
+  const columns = "2fr 1fr 0.6fr 1fr 1fr";
 
-  const subtotal = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-  const tax = items.reduce((s, i) => s + i.quantity * i.unitPrice * i.taxRate, 0);
-  const total = subtotal + tax;
+  const subtotal = computeSubtotal(items);
+  const tax = computeTax(items);
+  const grandTotal = computeGrandTotal(items);
 
   return (
     <div className="mb-8">
@@ -41,14 +42,12 @@ export default function InvoiceDetailItems({ items }: Props) {
           <span>SKU</span>
           <span className="text-right">Qty</span>
           <span className="text-right">Unit Price</span>
-          <span className="text-right">Tax</span>
-          <span className="text-right">Subtotal</span>
+          <span className="text-right">Line Total</span>
         </div>
 
         {/* Rows */}
         {items.map((item, idx) => {
-          const lineSubtotal = item.quantity * item.unitPrice;
-          const lineTax = lineSubtotal * item.taxRate;
+          const lineTotal = item.quantity * item.unitPrice;
           return (
             <div
               key={item.id}
@@ -59,9 +58,15 @@ export default function InvoiceDetailItems({ items }: Props) {
                 backgroundColor: "#fff",
               }}
             >
-              <span className="text-sm" style={{ color: config.primaryColor }}>
+              <a
+                href={`/product/${item.sku}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium no-underline hover:underline"
+                style={{ color: config.primaryColor }}
+              >
                 {item.productName}
-              </span>
+              </a>
               <span className="text-xs" style={{ color: config.secondaryColor }}>
                 {item.sku}
               </span>
@@ -71,11 +76,8 @@ export default function InvoiceDetailItems({ items }: Props) {
               <span className="text-sm text-right" style={{ color: config.primaryColor }}>
                 {fmt(item.unitPrice)}
               </span>
-              <span className="text-sm text-right" style={{ color: config.secondaryColor }}>
-                {fmt(lineTax)}
-              </span>
               <span className="text-sm font-medium text-right" style={{ color: config.primaryColor }}>
-                {fmt(lineSubtotal + lineTax)}
+                {fmt(lineTotal)}
               </span>
             </div>
           );
@@ -89,12 +91,12 @@ export default function InvoiceDetailItems({ items }: Props) {
           <span className="text-sm font-medium w-28 text-right" style={{ color: config.primaryColor }}>{fmt(subtotal)}</span>
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-xs" style={{ color: config.secondaryColor }}>Tax</span>
+          <span className="text-xs" style={{ color: config.secondaryColor }}>Tax (10%)</span>
           <span className="text-sm font-medium w-28 text-right" style={{ color: config.primaryColor }}>{fmt(tax)}</span>
         </div>
         <div className="flex items-center gap-6 mt-1 pt-2" style={{ borderTop: `1px solid ${config.borderColor}` }}>
-          <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>Total</span>
-          <span className="text-sm font-bold w-28 text-right" style={{ color: config.primaryColor }}>{fmt(total)}</span>
+          <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>Grand Total</span>
+          <span className="text-sm font-bold w-28 text-right" style={{ color: config.primaryColor }}>{fmt(grandTotal)}</span>
         </div>
       </div>
     </div>

@@ -12,9 +12,10 @@ function formatDate(iso: string): string {
 
 interface Props {
   payments: InvoicePayment[];
+  outstandingAmount: number;
 }
 
-export default function InvoiceDetailPayments({ payments }: Props) {
+export default function InvoiceDetailPayments({ payments, outstandingAmount }: Props) {
   const config = activeBrandConfig;
   const columns = "1.4fr 1fr 1fr 1fr";
 
@@ -26,12 +27,17 @@ export default function InvoiceDetailPayments({ payments }: Props) {
 
       {payments.length === 0 ? (
         <div
-          className="rounded-xl px-5 py-10 text-center"
+          className="rounded-xl px-5 py-6 text-center"
           style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
         >
-          <p className="text-sm m-0" style={{ color: config.secondaryColor }}>
-            Payment not received yet.
+          <p className="text-sm m-0 mb-2" style={{ color: config.secondaryColor }}>
+            No payments applied yet.
           </p>
+          {outstandingAmount > 0 && (
+            <p className="text-xs m-0" style={{ color: "#DC2626" }}>
+              Outstanding: {fmt(outstandingAmount)}
+            </p>
+          )}
         </div>
       ) : (
         <div

@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeftOutlined, LeftOutlined, RightOutlined, DownloadOutlined, CustomerServiceOutlined, FileTextOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
-import { INVOICES } from "../data/invoices";
+import { INVOICES, outstanding } from "../data/invoices";
 import InvoiceDetailSummary from "../components/invoices/InvoiceDetailSummary";
 import InvoiceDetailItems from "../components/invoices/InvoiceDetailItems";
 import InvoiceDetailPayments from "../components/invoices/InvoiceDetailPayments";
@@ -100,7 +100,7 @@ export default function InvoiceDetailPage() {
       <InvoiceDetailItems items={invoice.items} />
 
       {/* Payment History */}
-      <InvoiceDetailPayments payments={invoice.payments} />
+      <InvoiceDetailPayments payments={invoice.payments} outstandingAmount={outstanding(invoice)} />
 
       {/* Action Buttons */}
       <div className="flex items-center justify-end gap-3">
