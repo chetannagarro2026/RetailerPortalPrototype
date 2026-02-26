@@ -127,7 +127,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Filter Row */}
-      <div className="flex items-center justify-end gap-3 mb-4">
+      <div className="flex items-center justify-start gap-3 mb-4">
         <DateRangeDropdown value={dateRange} onChange={setDateRange} config={config} />
 
         <div className="relative">

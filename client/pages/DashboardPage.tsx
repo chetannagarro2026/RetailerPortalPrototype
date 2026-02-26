@@ -5,7 +5,6 @@ import CreditCommandCenter from "../components/dashboard/CreditCommandCenter";
 import CreditAlerts from "../components/dashboard/CreditAlerts";
 import OrdersOverview from "../components/dashboard/OrdersOverview";
 import SupportSnapshot from "../components/dashboard/SupportSnapshot";
-import AccountInfo from "../components/dashboard/AccountInfo";
 import DetailDrawer from "../components/dashboard/DetailDrawer";
 
 type DrawerType = string | null;
@@ -151,8 +150,6 @@ export default function DashboardPage() {
         {/* Section 3: Support Snapshot */}
         <SupportSnapshot onOpenDrawer={() => handleDrawerOpen("support")} />
 
-        {/* Section 4: Account Info */}
-        <AccountInfo />
       </div>
 
       {/* Detail Drawer */}
