@@ -58,7 +58,7 @@ interface Chip {
 }
 
 const CHIPS: Chip[] = [
-  { key: "fy", label: "This FY", getRange: (t) => [getFYStart(t), getFYEnd(t)] },
+  { key: "fy", label: "Current FY", getRange: (t) => [getFYStart(t), getFYEnd(t)] },
   { key: "last30", label: "Last 30 Days", getRange: getLast30 },
   { key: "q1", label: "Q1", getRange: (t) => getQuarterRange(0, t) },
   { key: "q2", label: "Q2", getRange: (t) => getQuarterRange(1, t) },
@@ -117,7 +117,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
     if (activeChip) {
       const chip = CHIPS.find((c) => c.key === activeChip);
       if (chip) {
-        if (chip.key === "fy") return "This Financial Year";
+        if (chip.key === "fy") return "Current Financial Year";
         if (chip.key === "last30") return "Last 30 Days";
         return chip.label;
       }
