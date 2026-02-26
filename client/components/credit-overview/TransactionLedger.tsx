@@ -26,12 +26,18 @@ const mockLedger: LedgerEntry[] = [
   { id: "10", date: "2026-01-20", type: "Invoice", reference: "INV-44612", debit: 9800, credit: 0 },
 ];
 
+const OPENING_BALANCE = 34750;
+
 const TYPE_OPTIONS = ["All", "Invoice", "Payment", "Credit Note", "Adjustment"] as const;
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function fmt(val: number): string {
   if (val === 0) return "—";
+  return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
+}
+
+function fmtBalance(val: number): string {
   return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 }
 
@@ -57,11 +63,10 @@ export default function TransactionLedger() {
     return list;
   }, [typeFilter, search]);
 
-  // Compute running balance (latest first, so balance decreases as we go down)
+  // Running balance from oldest to newest
   const withBalance = useMemo(() => {
-    // Start from the bottom (oldest) and compute forward
     const reversed = [...filtered].reverse();
-    let balance = 0;
+    let balance = OPENING_BALANCE;
     const computed = reversed.map((entry) => {
       balance += entry.debit - entry.credit;
       return { ...entry, balance };
@@ -69,7 +74,12 @@ export default function TransactionLedger() {
     return computed.reverse();
   }, [filtered]);
 
-  const columns = "100px 110px 140px 120px 120px 140px";
+  // Totals
+  const totalDebits = filtered.reduce((s, e) => s + e.debit, 0);
+  const totalCredits = filtered.reduce((s, e) => s + e.credit, 0);
+  const closingBalance = OPENING_BALANCE + totalDebits - totalCredits;
+
+  const columns = "140px 100px 110px 120px 120px 140px";
 
   return (
     <div>
@@ -77,7 +87,7 @@ export default function TransactionLedger() {
         Transaction Ledger
       </h3>
 
-      {/* Filter bar */}
+      {/* Filter bar + balances */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <select
           value={typeFilter}
@@ -93,8 +103,6 @@ export default function TransactionLedger() {
             <option key={t} value={t}>{t === "All" ? "All Types" : t}</option>
           ))}
         </select>
-
-        <div className="flex-1" />
 
         <div className="relative">
           <SearchOutlined
@@ -115,6 +123,20 @@ export default function TransactionLedger() {
             }}
           />
         </div>
+
+        <div className="flex-1" />
+
+        {/* Opening / Closing balance */}
+        <div className="flex items-center gap-5">
+          <div className="text-right">
+            <p className="text-[11px] m-0" style={{ color: config.secondaryColor }}>Opening Balance</p>
+            <p className="text-sm font-semibold m-0" style={{ color: config.primaryColor }}>{fmtBalance(OPENING_BALANCE)}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[11px] m-0" style={{ color: config.secondaryColor }}>Closing Balance</p>
+            <p className="text-sm font-semibold m-0" style={{ color: config.primaryColor }}>{fmtBalance(closingBalance)}</p>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -132,9 +154,9 @@ export default function TransactionLedger() {
             borderBottom: `1px solid ${config.borderColor}`,
           }}
         >
+          <span>Reference</span>
           <span>Date</span>
           <span>Type</span>
-          <span>Reference</span>
           <span className="text-right">Debit</span>
           <span className="text-right">Credit</span>
           <span className="text-right">Running Balance</span>
@@ -156,14 +178,18 @@ export default function TransactionLedger() {
                 backgroundColor: "#fff",
               }}
             >
+              <span
+                className="text-sm font-medium cursor-pointer"
+                style={{ color: config.primaryColor }}
+                title={`View ${entry.reference}`}
+              >
+                {entry.reference}
+              </span>
               <span className="text-xs" style={{ color: config.secondaryColor }}>
                 {formatDate(entry.date)}
               </span>
               <span>
                 <TypeBadge type={entry.type} />
-              </span>
-              <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
-                {entry.reference}
               </span>
               <span className="text-sm text-right" style={{ color: entry.debit > 0 ? config.primaryColor : config.secondaryColor }}>
                 {fmt(entry.debit)}
@@ -172,11 +198,23 @@ export default function TransactionLedger() {
                 {fmt(entry.credit)}
               </span>
               <span className="text-sm font-medium text-right" style={{ color: config.primaryColor }}>
-                ${Math.abs(entry.balance).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                {fmtBalance(entry.balance)}
               </span>
             </div>
           ))
         )}
+      </div>
+
+      {/* Totals below table */}
+      <div className="flex items-center gap-6 mt-3 justify-end">
+        <div className="text-right">
+          <span className="text-xs" style={{ color: config.secondaryColor }}>Total Debits: </span>
+          <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>{fmtBalance(totalDebits)}</span>
+        </div>
+        <div className="text-right">
+          <span className="text-xs" style={{ color: config.secondaryColor }}>Total Credits: </span>
+          <span className="text-xs font-semibold" style={{ color: "#16A34A" }}>{fmtBalance(totalCredits)}</span>
+        </div>
       </div>
     </div>
   );

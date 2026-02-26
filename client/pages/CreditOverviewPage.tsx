@@ -1,8 +1,8 @@
 import { activeBrandConfig } from "../config/brandConfig";
-import CreditSummaryStrip from "../components/credit-overview/CreditSummaryStrip";
-import AgingSummary from "../components/credit-overview/AgingSummary";
+import FinancialPosition from "../components/credit-overview/FinancialPosition";
+import ExposureByAging from "../components/credit-overview/ExposureByAging";
+import PendingCreditImpact from "../components/credit-overview/PendingCreditImpact";
 import TransactionLedger from "../components/credit-overview/TransactionLedger";
-import CreditPolicySnapshot from "../components/credit-overview/CreditPolicySnapshot";
 
 export default function CreditOverviewPage() {
   const config = activeBrandConfig;
@@ -11,31 +11,30 @@ export default function CreditOverviewPage() {
     <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", padding: "24px 24px", boxSizing: "border-box" }}>
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold m-0 mb-1" style={{ color: config.primaryColor }}>
+        <h1 className="text-xl font-bold m-0" style={{ color: config.primaryColor }}>
           Credit Overview
         </h1>
-        <p className="text-sm m-0" style={{ color: config.secondaryColor }}>
-          Detailed view of your credit utilization and transactions
-        </p>
       </div>
 
-      {/* Credit Summary Strip */}
+      {/* Financial Position */}
       <div className="mb-8">
-        <CreditSummaryStrip />
+        <FinancialPosition />
       </div>
 
-      {/* Aging Summary */}
+      {/* Exposure by Aging */}
       <div className="mb-8">
-        <AgingSummary />
+        <ExposureByAging />
+      </div>
+
+      {/* Pending Credit Impact */}
+      <div className="mb-8">
+        <PendingCreditImpact />
       </div>
 
       {/* Transaction Ledger */}
       <div className="mb-10">
         <TransactionLedger />
       </div>
-
-      {/* Credit Policy Snapshot */}
-      <CreditPolicySnapshot />
     </div>
   );
 }
