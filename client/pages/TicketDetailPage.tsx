@@ -27,10 +27,14 @@ export default function TicketDetailPage() {
     }
   }, [ticket]);
 
-  // Scroll to bottom on mount
+  // Page scroll to top, then conversation thread scroll to bottom
   useEffect(() => {
+    window.scrollTo(0, 0);
     setTimeout(() => {
-      conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      const container = conversationContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
     }, 100);
   }, []);
 
