@@ -4,12 +4,7 @@ import {
   lineBaseTotal,
   lineDiscountAmount,
   discountedLineTotal,
-  computeSubtotalBeforeDiscount,
-  computeTotalLineDiscounts,
-  computeSubtotalAfterLineDiscounts,
-  computeOrderDiscountAmount,
   computeNetSubtotal,
-  computeTotalDiscount,
   computeTax,
   computeGrandTotal,
 } from "../../data/invoices";
@@ -33,19 +28,12 @@ interface Props {
 export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
   const config = activeBrandConfig;
   const hasLineDiscounts = items.some((i) => i.discount);
-  const hasOrderDiscount = !!orderDiscount;
-  const hasAnyDiscount = hasLineDiscounts || hasOrderDiscount;
 
   const columns = hasLineDiscounts
     ? "1.8fr 0.9fr 0.5fr 0.9fr 0.9fr 1fr"
     : "2fr 1fr 0.6fr 1fr 1fr";
 
-  const subtotalBefore = computeSubtotalBeforeDiscount(items);
-  const totalLineDisc = computeTotalLineDiscounts(items);
-  const subtotalAfterLine = computeSubtotalAfterLineDiscounts(items);
-  const orderDiscAmt = computeOrderDiscountAmount(items, orderDiscount);
   const netSubtotal = computeNetSubtotal(items, orderDiscount);
-  const totalDiscount = computeTotalDiscount(items, orderDiscount);
   const tax = computeTax(items, orderDiscount);
   const grandTotal = computeGrandTotal(items, orderDiscount);
 
@@ -127,53 +115,27 @@ export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
             </div>
           );
         })}
-      </div>
 
-      {/* Summary Totals */}
-      <div className="flex flex-col items-end mt-3 gap-1">
-        {/* Subtotal (before discount) */}
-        <SummaryRow label="Subtotal" value={fmt(subtotalBefore)} config={config} />
-
-        {/* Discount rows — only if discounts exist */}
-        {hasAnyDiscount && (
-          <>
-            {totalLineDisc > 0 && (
-              <SummaryRow
-                label="Line Discounts"
-                value={`–${fmt(totalLineDisc)}`}
-                config={config}
-                valueColor="#DC2626"
-              />
-            )}
-            {hasOrderDiscount && (
-              <SummaryRow
-                label={orderDiscount!.label}
-                value={`–${fmt(orderDiscAmt)}`}
-                config={config}
-                valueColor="#DC2626"
-              />
-            )}
-            <SummaryRow label="Net Subtotal" value={fmt(netSubtotal)} config={config} />
-            <p className="text-[11px] m-0 mr-0" style={{ color: "#16A34A" }}>
-              You Saved: {fmt(totalDiscount)}
-            </p>
-          </>
-        )}
-
-        {/* Tax */}
-        <SummaryRow label="Tax" value={fmt(tax)} config={config} />
-
-        {/* Grand Total */}
+        {/* Footer Summary — inside card, not as table rows */}
         <div
-          className="flex items-center gap-6 mt-1 pt-2"
-          style={{ borderTop: `1px solid ${config.borderColor}` }}
+          className="px-5 py-4"
+          style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
         >
-          <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>
-            Grand Total
-          </span>
-          <span className="text-sm font-bold w-28 text-right" style={{ color: config.primaryColor }}>
-            {fmt(grandTotal)}
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            <SummaryRow label="Subtotal" value={fmt(netSubtotal)} config={config} />
+            <SummaryRow label="Tax" value={fmt(tax)} config={config} />
+            <div
+              className="flex items-center gap-6 mt-1 pt-2"
+              style={{ borderTop: `1px solid ${config.borderColor}` }}
+            >
+              <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>
+                Grand Total
+              </span>
+              <span className="text-sm font-bold w-28 text-right" style={{ color: config.primaryColor }}>
+                {fmt(grandTotal)}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

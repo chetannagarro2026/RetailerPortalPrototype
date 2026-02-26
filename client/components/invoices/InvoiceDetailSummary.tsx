@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { Invoice } from "../../data/invoices";
-import { outstanding, getStatusLabel } from "../../data/invoices";
+import { outstanding, getStatusLabel, computeTotalDiscount } from "../../data/invoices";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -21,6 +21,8 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
   const bal = outstanding(invoice);
   const status = getStatusLabel(invoice);
   const isOverdue = invoice.status === "Overdue" || status.color === "#DC2626";
+  const totalDiscount = computeTotalDiscount(invoice.items, invoice.orderDiscount);
+  const showDiscount = totalDiscount > 0;
 
   return (
     <div
@@ -29,7 +31,14 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
     >
       {/* Row 1: Date, Due Date, Status, Linked PO */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-5">
-        <Field label="Invoice Date" value={formatDate(invoice.invoiceDate)} config={config} />
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+            Invoice Date
+          </p>
+          <p className="text-sm font-medium m-0 mt-0.5" style={{ color: config.primaryColor }}>
+            {formatDate(invoice.invoiceDate)}
+          </p>
+        </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Due Date
@@ -71,8 +80,21 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
       {/* Divider */}
       <div className="mb-5" style={{ borderBottom: `1px solid ${config.borderColor}` }} />
 
-      {/* Row 2: Financial hierarchy — Grand Total, Paid, Outstanding */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+      {/* Row 2: Financial KPIs — Total Discount | Grand Total | Paid Amount | Outstanding Balance */}
+      <div
+        className="grid gap-6"
+        style={{ gridTemplateColumns: showDiscount ? "1fr 1fr 1fr 1fr" : "1fr 1fr 1fr" }}
+      >
+        {showDiscount && (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+              Total Discount
+            </p>
+            <p className="text-sm font-medium m-0 mt-0.5" style={{ color: config.primaryColor }}>
+              {fmt(totalDiscount)}
+            </p>
+          </div>
+        )}
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Grand Total
@@ -81,45 +103,23 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
             {fmt(invoice.amount)}
           </p>
         </div>
-        <Field label="Paid Amount" value={fmt(invoice.paid)} config={config} valueColor="#16A34A" />
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
+            Paid Amount
+          </p>
+          <p className="text-sm font-medium m-0 mt-0.5" style={{ color: "#16A34A" }}>
+            {fmt(invoice.paid)}
+          </p>
+        </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Outstanding Balance
           </p>
-          <p
-            className="text-lg m-0 mt-0.5"
-            style={{
-              color: bal > 0 && isOverdue ? "#DC2626" : config.primaryColor,
-              fontWeight: 700,
-            }}
-          >
+          <p className="text-lg m-0 mt-0.5 font-bold" style={{ color: config.primaryColor }}>
             {fmt(bal)}
           </p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  config,
-  valueColor,
-}: {
-  label: string;
-  value: string;
-  config: typeof activeBrandConfig;
-  valueColor?: string;
-}) {
-  return (
-    <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
-        {label}
-      </p>
-      <p className="text-sm font-medium m-0 mt-0.5" style={{ color: valueColor || config.primaryColor }}>
-        {value}
-      </p>
     </div>
   );
 }
