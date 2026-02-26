@@ -63,12 +63,9 @@ export default function TicketMeta({ ticket }: Props) {
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Priority
           </p>
-          <span
-            className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex mt-0.5"
-            style={{ color: pri.color, backgroundColor: "transparent", border: `1px solid ${pri.color}` }}
-          >
+          <p className="text-sm font-medium m-0 mt-0.5" style={{ color: pri.color }}>
             {ticket.priority}
-          </span>
+          </p>
         </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>

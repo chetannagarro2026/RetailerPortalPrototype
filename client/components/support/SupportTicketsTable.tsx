@@ -126,8 +126,8 @@ export default function SupportTicketsTable({ tickets }: Props) {
 
             {/* Priority */}
             <span
-              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex self-center"
-              style={{ color: pri.color, backgroundColor: "transparent", border: `1px solid ${pri.color}` }}
+              className="text-xs"
+              style={{ color: pri.color }}
             >
               {ticket.priority}
             </span>
