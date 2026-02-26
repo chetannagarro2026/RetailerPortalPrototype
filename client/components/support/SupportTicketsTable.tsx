@@ -59,7 +59,7 @@ export default function SupportTicketsTable({ tickets }: Props) {
         <span>Related Document</span>
         <span>Status</span>
         <span>Priority</span>
-        <span>Last Updated</span>
+        <span className="text-center">Last Updated</span>
       </div>
 
       {/* Rows */}
@@ -133,7 +133,7 @@ export default function SupportTicketsTable({ tickets }: Props) {
             </span>
 
             {/* Last Updated */}
-            <span className="text-xs" style={{ color: config.secondaryColor }}>
+            <span className="text-xs text-center" style={{ color: config.secondaryColor }}>
               {formatDate(ticket.lastUpdated)}
             </span>
 
