@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { SearchOutlined } from "@ant-design/icons";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { SearchOutlined, DownOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import DateRangeFilter, { getFYStart, getFYEnd, toISODate, type DateRange } from "./DateRangeFilter";
 
@@ -127,20 +127,11 @@ export default function TransactionLedger() {
       <div className="flex flex-wrap items-center gap-3 mb-4 relative z-10">
         <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
-        <select
+        <TypeFilterDropdown
           value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="text-sm rounded-lg px-3 py-2 outline-none cursor-pointer"
-          style={{
-            border: `1px solid ${config.borderColor}`,
-            color: config.primaryColor,
-            backgroundColor: "#fff",
-          }}
-        >
-          {TYPE_OPTIONS.map((t) => (
-            <option key={t} value={t}>{t === "All" ? "All Types" : t}</option>
-          ))}
-        </select>
+          onChange={setTypeFilter}
+          config={config}
+        />
 
         <div className="relative">
           <SearchOutlined
@@ -261,6 +252,80 @@ export default function TransactionLedger() {
           <span className="text-xs font-semibold" style={{ color: "#16A34A" }}>{fmtBalance(totalCredits)}</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Type Filter Dropdown ─────────────────────────────────────────────
+
+function TypeFilterDropdown({
+  value,
+  onChange,
+  config,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  config: typeof activeBrandConfig;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const label = value === "All" ? "All Types" : value;
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 cursor-pointer transition-colors"
+        style={{
+          border: `1px solid ${config.borderColor}`,
+          color: config.primaryColor,
+          backgroundColor: "#fff",
+        }}
+      >
+        <span>{label}</span>
+        <DownOutlined style={{ fontSize: 10, color: config.secondaryColor }} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-1 rounded-lg py-1 z-50"
+          style={{
+            backgroundColor: "#fff",
+            border: `1px solid ${config.borderColor}`,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+            minWidth: 160,
+          }}
+        >
+          {TYPE_OPTIONS.map((t) => {
+            const isActive = value === t;
+            return (
+              <button
+                key={t}
+                onClick={() => { onChange(t); setOpen(false); }}
+                className="w-full text-left text-sm px-4 py-2 cursor-pointer transition-colors border-none"
+                style={{
+                  backgroundColor: isActive ? config.cardBg : "#fff",
+                  color: isActive ? config.primaryColor : config.secondaryColor,
+                  fontWeight: isActive ? 600 : 400,
+                }}
+                onMouseEnter={(e) => { if (!isActive) (e.currentTarget.style.backgroundColor = config.cardBg); }}
+                onMouseLeave={(e) => { if (!isActive) (e.currentTarget.style.backgroundColor = "#fff"); }}
+              >
+                {t === "All" ? "All Types" : t}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
