@@ -94,7 +94,7 @@ export default function FeaturedBrandsSection() {
           >
             Browse by Brand
           </p>
-          <h2 className="text-lg font-semibold" style={{ color: config.primaryColor }}>
+          <h2 className="text-lg font-medium" style={{ color: config.primaryColor }}>
             Featured Brands
           </h2>
         </div>

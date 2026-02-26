@@ -41,7 +41,7 @@ export default function AvailableCreditSection() {
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="text-xs" style={{ color: config.primaryColor }}>
+        <div className="text-xs font-medium" style={{ color: config.secondaryColor }}>
           Available Credit
         </div>
         <div
@@ -53,7 +53,7 @@ export default function AvailableCreditSection() {
       </div>
 
       {/* Available Credit — Large */}
-      <div className="mb-5">
+      <div className="mb-3">
         <p className="text-2xl font-semibold pt-1" style={{ color: config.primaryColor }}>
           {formatCurrency(available)}
         </p>

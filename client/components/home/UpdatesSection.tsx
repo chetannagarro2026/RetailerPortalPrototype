@@ -114,7 +114,7 @@ export default function UpdatesSection() {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-semibold" style={{ color: config.primaryColor }}>
+        <h2 className="text-lg font-medium" style={{ color: config.secondaryColor }}>
           Updates
         </h2>
         <div className="flex items-center gap-2">
