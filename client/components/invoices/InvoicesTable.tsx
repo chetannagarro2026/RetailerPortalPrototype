@@ -87,8 +87,8 @@ export default function InvoicesTable({ invoices }: Props) {
         }}
       >
         <span>Invoice #</span>
-        <span>Invoice Date</span>
-        <span>Due Date</span>
+        <span className="text-center">Invoice Date</span>
+        <span className="text-center">Due Date</span>
         <span className="text-right">Amount</span>
         <span className="text-right">Paid</span>
         <span className="text-right">Balance</span>
@@ -116,11 +116,11 @@ export default function InvoicesTable({ invoices }: Props) {
             >
               {inv.invoiceNumber}
             </Link>
-            <span className="text-xs" style={{ color: config.secondaryColor }}>
+            <span className="text-xs text-center" style={{ color: config.secondaryColor }}>
               {formatDate(inv.invoiceDate)}
             </span>
             <span
-              className="text-xs"
+              className="text-xs text-center"
               style={{ color: isOverdue ? "#DC2626" : config.secondaryColor }}
             >
               {formatDate(inv.dueDate)}
