@@ -55,9 +55,9 @@ export default function InvoiceDetailPayments({ payments, outstandingAmount }: P
             }}
           >
             <span>Payment Ref</span>
-            <span>Date</span>
+            <span className="text-center">Date</span>
             <span className="text-right">Amount</span>
-            <span>Mode</span>
+            <span className="text-right">Mode</span>
           </div>
 
           {/* Rows */}
@@ -78,13 +78,13 @@ export default function InvoiceDetailPayments({ payments, outstandingAmount }: P
               >
                 {pay.ref}
               </span>
-              <span className="text-xs" style={{ color: config.secondaryColor }}>
+              <span className="text-xs text-center" style={{ color: config.secondaryColor }}>
                 {formatDate(pay.date)}
               </span>
               <span className="text-sm font-medium text-right" style={{ color: "#16A34A" }}>
                 {fmt(pay.amount)}
               </span>
-              <span className="text-xs" style={{ color: config.secondaryColor }}>
+              <span className="text-xs text-right" style={{ color: config.secondaryColor }}>
                 {pay.mode}
               </span>
             </div>
