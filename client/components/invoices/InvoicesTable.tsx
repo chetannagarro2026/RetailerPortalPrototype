@@ -9,8 +9,12 @@ function StatusBadge({ invoice }: { invoice: Invoice }) {
   const { label, color } = getStatusLabel(invoice);
   return (
     <span
-      className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap"
-      style={{ color, backgroundColor: "transparent", border: `1px solid ${color}` }}
+      className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
+      style={{
+        color,
+        backgroundColor: `${color}12`,
+        padding: "4px 10px",
+      }}
     >
       {label}
     </span>
@@ -36,7 +40,7 @@ interface Props {
 
 export default function InvoicesTable({ invoices }: Props) {
   const config = activeBrandConfig;
-  const columns = "1.2fr 1fr 1fr 1fr 1fr 1fr 1.2fr";
+  const columns = "15% 12% 12% 14% 14% 14% auto";
 
   if (invoices.length === 0) {
     return (
@@ -72,7 +76,7 @@ export default function InvoicesTable({ invoices }: Props) {
         <span className="text-right">Amount</span>
         <span className="text-right">Paid</span>
         <span className="text-right">Balance</span>
-        <span>Status</span>
+        <span className="text-left">Status</span>
       </div>
 
       {/* Rows */}
