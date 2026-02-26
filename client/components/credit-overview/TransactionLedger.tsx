@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import DateRangeFilter, { getFYStart, getFYEnd, toISODate, type DateRange } from "./DateRangeFilter";
 
 // ── Types & Mock Data ───────────────────────────────────────────────
 
@@ -13,7 +14,7 @@ interface LedgerEntry {
   credit: number;
 }
 
-const mockLedger: LedgerEntry[] = [
+const ALL_LEDGER: LedgerEntry[] = [
   { id: "1", date: "2026-02-24", type: "Invoice", reference: "INV-44821", debit: 12400, credit: 0 },
   { id: "2", date: "2026-02-20", type: "Payment", reference: "PAY-10234", debit: 0, credit: 8500 },
   { id: "3", date: "2026-02-18", type: "Invoice", reference: "INV-44798", debit: 6500, credit: 0 },
@@ -24,9 +25,18 @@ const mockLedger: LedgerEntry[] = [
   { id: "8", date: "2026-01-28", type: "Invoice", reference: "INV-44690", debit: 34250, credit: 0 },
   { id: "9", date: "2026-01-25", type: "Payment", reference: "PAY-10155", debit: 0, credit: 20000 },
   { id: "10", date: "2026-01-20", type: "Invoice", reference: "INV-44612", debit: 9800, credit: 0 },
+  // Pre-FY entries (before Apr 2025) for opening balance demo
+  { id: "11", date: "2025-03-15", type: "Invoice", reference: "INV-43210", debit: 22000, credit: 0 },
+  { id: "12", date: "2025-03-10", type: "Payment", reference: "PAY-09800", debit: 0, credit: 18000 },
+  { id: "13", date: "2025-02-20", type: "Invoice", reference: "INV-43105", debit: 15500, credit: 0 },
+  { id: "14", date: "2025-02-05", type: "Payment", reference: "PAY-09650", debit: 0, credit: 14000 },
+  // Older seed balance anchor
+  { id: "15", date: "2025-04-10", type: "Invoice", reference: "INV-43400", debit: 8200, credit: 0 },
+  { id: "16", date: "2025-05-02", type: "Payment", reference: "PAY-09900", debit: 0, credit: 6000 },
 ];
 
-const OPENING_BALANCE = 34750;
+// Base balance before ALL data (historical anchor)
+const BASE_BALANCE = 27000;
 
 const TYPE_OPTIONS = ["All", "Invoice", "Payment", "Credit Note", "Adjustment"] as const;
 
@@ -50,34 +60,60 @@ function formatDate(iso: string): string {
 
 export default function TransactionLedger() {
   const config = activeBrandConfig;
+  const today = useMemo(() => new Date(), []);
+
+  // Default: This Financial Year
+  const [dateRange, setDateRange] = useState<DateRange>({
+    start: getFYStart(today),
+    end: getFYEnd(today),
+  });
   const [typeFilter, setTypeFilter] = useState<string>("All");
   const [search, setSearch] = useState("");
 
+  const startISO = toISODate(dateRange.start);
+  const endISO = toISODate(dateRange.end);
+
+  // Opening balance = BASE_BALANCE + net of all entries BEFORE start date
+  const openingBalance = useMemo(() => {
+    let bal = BASE_BALANCE;
+    for (const e of ALL_LEDGER) {
+      if (e.date < startISO) bal += e.debit - e.credit;
+    }
+    return bal;
+  }, [startISO]);
+
+  // Entries within date range
+  const inRange = useMemo(
+    () => ALL_LEDGER.filter((e) => e.date >= startISO && e.date <= endISO).sort((a, b) => (b.date > a.date ? 1 : -1)),
+    [startISO, endISO],
+  );
+
+  // Apply type + search filters
   const filtered = useMemo(() => {
-    let list = mockLedger;
+    let list = inRange;
     if (typeFilter !== "All") list = list.filter((e) => e.type === typeFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((e) => e.reference.toLowerCase().includes(q));
     }
     return list;
-  }, [typeFilter, search]);
+  }, [inRange, typeFilter, search]);
 
-  // Running balance from oldest to newest
+  // Running balance (oldest first, start from opening)
   const withBalance = useMemo(() => {
     const reversed = [...filtered].reverse();
-    let balance = OPENING_BALANCE;
+    let balance = openingBalance;
     const computed = reversed.map((entry) => {
       balance += entry.debit - entry.credit;
       return { ...entry, balance };
     });
     return computed.reverse();
-  }, [filtered]);
+  }, [filtered, openingBalance]);
 
   // Totals
-  const totalDebits = filtered.reduce((s, e) => s + e.debit, 0);
-  const totalCredits = filtered.reduce((s, e) => s + e.credit, 0);
-  const closingBalance = OPENING_BALANCE + totalDebits - totalCredits;
+  const totalDebits = inRange.reduce((s, e) => s + e.debit, 0);
+  const totalCredits = inRange.reduce((s, e) => s + e.credit, 0);
+  const closingBalance = openingBalance + totalDebits - totalCredits;
 
   const columns = "1.4fr 1fr 1.1fr 1.2fr 1.2fr 1.4fr";
 
@@ -87,8 +123,10 @@ export default function TransactionLedger() {
         Transaction Ledger
       </h3>
 
-      {/* Filter bar + balances */}
+      {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
+        <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
@@ -130,7 +168,7 @@ export default function TransactionLedger() {
         <div className="flex items-center gap-5">
           <div className="text-right">
             <p className="text-[11px] m-0" style={{ color: config.secondaryColor }}>Opening Balance</p>
-            <p className="text-sm font-semibold m-0" style={{ color: config.primaryColor }}>{fmtBalance(OPENING_BALANCE)}</p>
+            <p className="text-sm font-semibold m-0" style={{ color: config.primaryColor }}>{fmtBalance(openingBalance)}</p>
           </div>
           <div className="text-right">
             <p className="text-[11px] m-0" style={{ color: config.secondaryColor }}>Closing Balance</p>
@@ -138,6 +176,11 @@ export default function TransactionLedger() {
           </div>
         </div>
       </div>
+
+      {/* Based on selected range hint */}
+      <p className="text-[11px] m-0 mb-3" style={{ color: config.secondaryColor }}>
+        Based on selected date range
+      </p>
 
       {/* Table */}
       <div
@@ -165,7 +208,9 @@ export default function TransactionLedger() {
         {/* Rows */}
         {withBalance.length === 0 ? (
           <div className="px-5 py-10 text-center">
-            <p className="text-sm" style={{ color: config.secondaryColor }}>No transactions found.</p>
+            <p className="text-sm" style={{ color: config.secondaryColor }}>
+              No transactions found for selected period.
+            </p>
           </div>
         ) : (
           withBalance.map((entry, idx) => (
