@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeftOutlined, LeftOutlined, RightOutlined, DownloadOutlined, CustomerServiceOutlined, FileTextOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
@@ -6,11 +7,13 @@ import InvoiceDetailSummary from "../components/invoices/InvoiceDetailSummary";
 import InvoiceDetailItems from "../components/invoices/InvoiceDetailItems";
 import InvoiceDetailPayments from "../components/invoices/InvoiceDetailPayments";
 import { downloadInvoicePdf } from "../utils/invoicePdf";
+import CreateTicketDrawer from "../components/support/CreateTicketDrawer";
 
 export default function InvoiceDetailPage() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const { invoiceId } = useParams<{ invoiceId: string }>();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Sort same as list page (latest first)
   const sorted = [...INVOICES].sort((a, b) => (b.invoiceDate > a.invoiceDate ? 1 : -1));
@@ -106,6 +109,7 @@ export default function InvoiceDetailPage() {
       {/* Action Buttons */}
       <div className="flex items-center justify-end gap-3">
         <button
+          onClick={() => setDrawerOpen(true)}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg cursor-pointer transition-colors"
           style={{
             border: `1px solid ${config.borderColor}`,
@@ -125,6 +129,21 @@ export default function InvoiceDetailPage() {
           Download PDF
         </button>
       </div>
+
+      {/* Create Ticket Drawer */}
+      <CreateTicketDrawer
+        visible={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onCreated={(ticketId) => {
+          setDrawerOpen(false);
+          navigate(`/account/support/${ticketId}`);
+        }}
+        preset={{
+          category: "Invoice Query",
+          relatedDocument: invoice.invoiceNumber,
+          lockDocument: true,
+        }}
+      />
     </div>
   );
 }

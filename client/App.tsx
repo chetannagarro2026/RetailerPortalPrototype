@@ -27,6 +27,8 @@ import ToastProvider from "./components/toast/ToastProvider";
 import CreditOverviewPage from "./pages/CreditOverviewPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import InvoiceDetailPage from "./pages/InvoiceDetailPage";
+import SupportPageWrapper from "./pages/SupportPageWrapper";
+import TicketDetailPage from "./pages/TicketDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -62,7 +64,8 @@ export default function App() {
               <Route path="/account/invoices" element={<AuthGate message="Sign in to access your invoices."><InvoicesPage /></AuthGate>} />
               <Route path="/account/invoices/:invoiceId" element={<AuthGate message="Sign in to view invoice details."><InvoiceDetailPage /></AuthGate>} />
               <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><PlaceholderPage /></AuthGate>} />
-              <Route path="/account/support" element={<AuthGate message="Sign in to access customer service."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/support" element={<AuthGate message="Sign in to access customer support."><SupportPageWrapper /></AuthGate>} />
+              <Route path="/account/support/:ticketId" element={<AuthGate message="Sign in to view ticket details."><TicketDetailPage /></AuthGate>} />
               <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />
               <Route path="/account/business-profile" element={<AuthGate message="Sign in to view your business profile."><BusinessProfilePage /></AuthGate>} />
               <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><SettingsPage /></AuthGate>} />

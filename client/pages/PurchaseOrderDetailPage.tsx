@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeftOutlined, FileTextOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, FileTextOutlined, CustomerServiceOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrderHistory } from "../context/OrderHistoryContext";
 import OrderDetailMeta from "../components/purchase-orders/OrderDetailMeta";
 import OrderDetailShipping from "../components/purchase-orders/OrderDetailShipping";
 import OrderDetailItems from "../components/purchase-orders/OrderDetailItems";
+import CreateTicketDrawer from "../components/support/CreateTicketDrawer";
 
 // ── Normalise legacy statuses ───────────────────────────────────────
 
@@ -21,6 +23,7 @@ export default function PurchaseOrderDetailPage() {
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId: string }>();
   const { orders } = useOrderHistory();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const order = orders.find((o) => o.orderNumber === orderId);
 
@@ -69,6 +72,18 @@ export default function PurchaseOrderDetailPage() {
             Placed on {new Date(order.submittedAt).toLocaleDateString("en-GB")}
           </p>
         </div>
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg cursor-pointer transition-colors"
+          style={{
+            border: `1px solid ${config.borderColor}`,
+            backgroundColor: "#fff",
+            color: config.secondaryColor,
+          }}
+        >
+          <CustomerServiceOutlined style={{ fontSize: 14 }} />
+          Raise Ticket
+        </button>
       </div>
 
       {/* Meta strip */}
@@ -79,6 +94,21 @@ export default function PurchaseOrderDetailPage() {
 
       {/* Items */}
       <OrderDetailItems items={order.items} />
+
+      {/* Create Ticket Drawer */}
+      <CreateTicketDrawer
+        visible={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onCreated={(ticketId) => {
+          setDrawerOpen(false);
+          navigate(`/account/support/${ticketId}`);
+        }}
+        preset={{
+          category: "Order Issue",
+          relatedDocument: order.orderNumber,
+          lockDocument: true,
+        }}
+      />
     </div>
   );
 }

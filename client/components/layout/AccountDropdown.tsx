@@ -14,6 +14,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useAuth } from "../../context/AuthContext";
+import { SUPPORT_TICKETS, getUnreadCount } from "../../data/support";
 
 interface AccountDropdownProps {
   visible: boolean;
@@ -52,7 +53,7 @@ const authenticatedSections: DropdownSection[] = [
   {
     title: "Support",
     items: [
-      { key: "support", label: "Customer Service", icon: <CustomerServiceOutlined />, path: "/account/support" },
+      { key: "support", label: "Customer Support", icon: <CustomerServiceOutlined />, path: "/account/support" },
       { key: "returns", label: "Returns & Claims", icon: <RollbackOutlined />, path: "/account/returns" },
     ],
   },
@@ -130,6 +131,14 @@ function AuthenticatedContent({
                 {item.icon}
               </span>
               <span>{item.label}</span>
+              {item.key === "support" && getUnreadCount(SUPPORT_TICKETS) > 0 && (
+                <span
+                  className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full text-white"
+                  style={{ backgroundColor: "#DC2626", minWidth: 18, textAlign: "center" }}
+                >
+                  {getUnreadCount(SUPPORT_TICKETS)}
+                </span>
+              )}
             </Link>
           ))}
           {sectionIdx < authenticatedSections.length - 1 && (

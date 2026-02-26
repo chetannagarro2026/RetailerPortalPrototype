@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { SUPPORT_TICKETS, getUnreadCount } from "../../data/support";
 
 interface MobileNavProps {
   open: boolean;
@@ -47,11 +48,9 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
         children: [
           { key: "acc-credit", icon: <CreditCardOutlined />, label: <Link to="/account/credit" onClick={onClose}>Credit Overview</Link> },
           { key: "acc-invoices", icon: <FileTextOutlined />, label: <Link to="/account/invoices" onClick={onClose}>Invoices</Link> },
-          { key: "acc-payments", icon: <DollarOutlined />, label: <Link to="/account/payments" onClick={onClose}>Payments</Link> },
-          { key: "acc-history", icon: <HistoryOutlined />, label: <Link to="/account/payment-history" onClick={onClose}>Payment History</Link> },
           { type: "divider" as const },
           { key: "acc-returns", icon: <RollbackOutlined />, label: <Link to="/account/returns" onClick={onClose}>Returns & Claims</Link> },
-          { key: "acc-support", icon: <CustomerServiceOutlined />, label: <Link to="/account/support" onClick={onClose}>Customer Service</Link> },
+          { key: "acc-support", icon: <CustomerServiceOutlined />, label: <Link to="/account/support" onClick={onClose}>Customer Support{getUnreadCount(SUPPORT_TICKETS) > 0 ? ` (${getUnreadCount(SUPPORT_TICKETS)})` : ""}</Link> },
           { type: "divider" as const },
           { key: "acc-details", icon: <UserOutlined />, label: <Link to="/account/details" onClick={onClose}>Account Details</Link> },
           { key: "acc-settings", icon: <SettingOutlined />, label: <Link to="/account/settings" onClick={onClose}>Settings</Link> },
