@@ -49,7 +49,7 @@ export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
 
   return (
     <div className="mb-8">
-      <h3 className="text-base font-semibold m-0 mb-4" style={{ color: config.primaryColor }}>
+      <h3 className="text-base font-semibold m-0 mb-2" style={{ color: config.primaryColor }}>
         Invoice Items
       </h3>
 

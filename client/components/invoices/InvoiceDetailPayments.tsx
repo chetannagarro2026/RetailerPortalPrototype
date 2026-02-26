@@ -20,8 +20,8 @@ export default function InvoiceDetailPayments({ payments, outstandingAmount }: P
   const columns = "1.4fr 1fr 1fr 1fr";
 
   return (
-    <div className="mb-8">
-      <h3 className="text-base font-semibold m-0 mb-4" style={{ color: config.primaryColor }}>
+    <div className="mb-4">
+      <h3 className="text-base font-semibold m-0 mb-2" style={{ color: config.primaryColor }}>
         Payments Applied
       </h3>
 
