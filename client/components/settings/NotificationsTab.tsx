@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { CheckCircleOutlined, LoadingOutlined } from "@ant-design/icons";
+import { LoadingOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { useToast } from "../toast/ToastProvider";
 
 interface Props {
   setDirty: (v: boolean) => void;
@@ -50,54 +51,34 @@ const CHANNEL_ITEMS: { key: keyof Preferences; label: string }[] = [
 
 export default function NotificationsTab({ setDirty }: Props) {
   const config = activeBrandConfig;
+  const { showToast } = useToast();
   const [prefs, setPrefs] = useState<Preferences>(INITIAL);
   const lastSavedRef = useRef<Preferences>(INITIAL);
   const [saving, setSaving] = useState(false);
-  const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [apiError, setApiError] = useState(false);
 
   const toggle = (key: keyof Preferences) => {
     setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
     setDirty(true);
-    setSavedAt(null);
-    setApiError(false);
   };
 
   const handleSave = async () => {
     setSaving(true);
-    setApiError(false);
     await new Promise((r) => setTimeout(r, 1000));
     setSaving(false);
     setDirty(false);
     lastSavedRef.current = { ...prefs };
-    const now = new Date();
-    setSavedAt(now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    showToast("success", "Notification preferences saved.");
   };
 
   useEffect(() => () => setDirty(false), [setDirty]);
 
   return (
     <div>
-      {/* API Error banner */}
-      {apiError && (
-        <div
-          className="rounded-lg px-4 py-3 mb-6 text-xs font-medium"
-          style={{ backgroundColor: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B" }}
-        >
-          We couldn't save your preferences. Please try again.
-        </div>
-      )}
-
       {/* Section title */}
       <div className="mb-6">
-        <h3 className="text-base font-semibold m-0 mb-1" style={{ color: config.primaryColor }}>
+        <h3 className="text-base font-semibold m-0" style={{ color: config.primaryColor }}>
           Notification Preferences
         </h3>
-        {savedAt && (
-          <p className="text-xs m-0 flex items-center gap-1" style={{ color: "#16A34A" }}>
-            <CheckCircleOutlined style={{ fontSize: 12 }} /> Preferences saved
-          </p>
-        )}
       </div>
 
       {/* Group 1 — Order Updates */}

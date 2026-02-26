@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { CheckCircleOutlined, LoadingOutlined, UserOutlined } from "@ant-design/icons";
+import { LoadingOutlined, UserOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { useToast } from "../toast/ToastProvider";
 
 interface Props {
   setDirty: (v: boolean) => void;
@@ -29,22 +30,15 @@ const INITIAL: FormData = {
 
 export default function ProfileTab({ setDirty }: Props) {
   const config = activeBrandConfig;
+  const { showToast } = useToast();
   const [form, setForm] = useState<FormData>(INITIAL);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [apiError, setApiError] = useState(false);
-
-  const markDirty = useCallback(() => {
-    setDirty(true);
-    setSavedAt(null);
-    setApiError(false);
-  }, [setDirty]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
-    markDirty();
+    setDirty(true);
   };
 
   const validate = (): boolean => {
@@ -58,45 +52,25 @@ export default function ProfileTab({ setDirty }: Props) {
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    setApiError(false);
-    // Simulate API call
     await new Promise((r) => setTimeout(r, 1200));
     setSaving(false);
     setDirty(false);
-    const now = new Date();
-    setSavedAt(now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    showToast("success", "Profile updated successfully.");
   };
 
-  // Cleanup dirty on unmount
   useEffect(() => () => setDirty(false), [setDirty]);
 
   return (
     <div>
-      {/* API Error banner */}
-      {apiError && (
-        <div
-          className="rounded-lg px-4 py-3 mb-6 text-xs font-medium"
-          style={{ backgroundColor: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B" }}
-        >
-          We couldn't update your profile. Please try again.
-        </div>
-      )}
-
       {/* Section title */}
       <div className="mb-6">
-        <h3 className="text-base font-semibold m-0 mb-1" style={{ color: config.primaryColor }}>
+        <h3 className="text-base font-semibold m-0" style={{ color: config.primaryColor }}>
           Profile Information
         </h3>
-        {savedAt && (
-          <p className="text-xs m-0 flex items-center gap-1" style={{ color: "#16A34A" }}>
-            <CheckCircleOutlined style={{ fontSize: 12 }} /> Changes saved at {savedAt}
-          </p>
-        )}
       </div>
 
       {/* Two-column form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-        {/* Left column */}
         <FormField
           label="First Name"
           required

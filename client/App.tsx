@@ -23,6 +23,7 @@ import DashboardPage from "./pages/DashboardPage";
 import BusinessProfilePage from "./pages/BusinessProfilePage";
 import PurchaseOrderDetailPage from "./pages/PurchaseOrderDetailPage";
 import SettingsPage from "./pages/SettingsPage";
+import ToastProvider from "./components/toast/ToastProvider";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AntApp>
         <AuthProvider>
+        <ToastProvider>
         <OrderHistoryProvider>
         <OrderProvider>
           <BrowserRouter>
@@ -69,6 +71,7 @@ export default function App() {
           </BrowserRouter>
         </OrderProvider>
         </OrderHistoryProvider>
+        </ToastProvider>
         </AuthProvider>
       </AntApp>
     </QueryClientProvider>

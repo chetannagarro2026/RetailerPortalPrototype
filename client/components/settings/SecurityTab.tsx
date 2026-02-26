@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { CheckCircleOutlined, LoadingOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { LoadingOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { useToast } from "../toast/ToastProvider";
 
 interface Props {
   setDirty: (v: boolean) => void;
@@ -20,16 +21,15 @@ interface PasswordErrors {
 
 export default function SecurityTab({ setDirty }: Props) {
   const config = activeBrandConfig;
+  const { showToast } = useToast();
   const [form, setForm] = useState<PasswordForm>({ current: "", newPassword: "", confirm: "" });
   const [errors, setErrors] = useState<PasswordErrors>({});
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (field: keyof PasswordForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
     setDirty(true);
-    setSuccess(false);
   };
 
   const validate = (): boolean => {
@@ -46,29 +46,17 @@ export default function SecurityTab({ setDirty }: Props) {
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    setSuccess(false);
     await new Promise((r) => setTimeout(r, 1200));
     setSaving(false);
     setDirty(false);
     setForm({ current: "", newPassword: "", confirm: "" });
-    setSuccess(true);
+    showToast("success", "Password updated successfully.");
   };
 
   useEffect(() => () => setDirty(false), [setDirty]);
 
   return (
     <div>
-      {/* Success banner */}
-      {success && (
-        <div
-          className="rounded-lg px-4 py-3 mb-6 text-xs font-medium flex items-center gap-2"
-          style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0", color: "#166534" }}
-        >
-          <CheckCircleOutlined style={{ fontSize: 13 }} />
-          Your password has been updated successfully.
-        </div>
-      )}
-
       {/* Block 1 — Change Password */}
       <div className="mb-8">
         <h3 className="text-base font-semibold m-0 mb-5" style={{ color: config.primaryColor }}>
