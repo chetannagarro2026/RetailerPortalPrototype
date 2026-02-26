@@ -97,7 +97,7 @@ export default function InvoiceDetailPage() {
       <InvoiceDetailSummary invoice={invoice} />
 
       {/* Line Items */}
-      <InvoiceDetailItems items={invoice.items} />
+      <InvoiceDetailItems items={invoice.items} orderDiscount={invoice.orderDiscount} />
 
       {/* Payment History */}
       <InvoiceDetailPayments payments={invoice.payments} outstandingAmount={outstanding(invoice)} />

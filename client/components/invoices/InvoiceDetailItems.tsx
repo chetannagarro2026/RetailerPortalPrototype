@@ -1,22 +1,53 @@
 import { activeBrandConfig } from "../../config/brandConfig";
-import type { InvoiceLineItem } from "../../data/invoices";
-import { computeSubtotal, computeTax, computeGrandTotal } from "../../data/invoices";
+import type { InvoiceLineItem, OrderDiscount } from "../../data/invoices";
+import {
+  lineBaseTotal,
+  lineDiscountAmount,
+  discountedLineTotal,
+  computeSubtotalBeforeDiscount,
+  computeTotalLineDiscounts,
+  computeSubtotalAfterLineDiscounts,
+  computeOrderDiscountAmount,
+  computeNetSubtotal,
+  computeTotalDiscount,
+  computeTax,
+  computeGrandTotal,
+} from "../../data/invoices";
 
 function fmt(val: number): string {
   return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 }
 
-interface Props {
-  items: InvoiceLineItem[];
+function formatDiscountLabel(item: InvoiceLineItem): string {
+  if (!item.discount) return "";
+  if (item.discount.type === "percentage") return `${item.discount.value}%`;
+  if (item.discount.type === "volume") return item.discount.label || "Volume Offer";
+  return `–${fmt(item.discount.value)}`;
 }
 
-export default function InvoiceDetailItems({ items }: Props) {
-  const config = activeBrandConfig;
-  const columns = "2fr 1fr 0.6fr 1fr 1fr";
+interface Props {
+  items: InvoiceLineItem[];
+  orderDiscount?: OrderDiscount;
+}
 
-  const subtotal = computeSubtotal(items);
-  const tax = computeTax(items);
-  const grandTotal = computeGrandTotal(items);
+export default function InvoiceDetailItems({ items, orderDiscount }: Props) {
+  const config = activeBrandConfig;
+  const hasLineDiscounts = items.some((i) => i.discount);
+  const hasOrderDiscount = !!orderDiscount;
+  const hasAnyDiscount = hasLineDiscounts || hasOrderDiscount;
+
+  const columns = hasLineDiscounts
+    ? "1.8fr 0.9fr 0.5fr 0.9fr 0.9fr 1fr"
+    : "2fr 1fr 0.6fr 1fr 1fr";
+
+  const subtotalBefore = computeSubtotalBeforeDiscount(items);
+  const totalLineDisc = computeTotalLineDiscounts(items);
+  const subtotalAfterLine = computeSubtotalAfterLineDiscounts(items);
+  const orderDiscAmt = computeOrderDiscountAmount(items, orderDiscount);
+  const netSubtotal = computeNetSubtotal(items, orderDiscount);
+  const totalDiscount = computeTotalDiscount(items, orderDiscount);
+  const tax = computeTax(items, orderDiscount);
+  const grandTotal = computeGrandTotal(items, orderDiscount);
 
   return (
     <div className="mb-8">
@@ -42,12 +73,15 @@ export default function InvoiceDetailItems({ items }: Props) {
           <span>SKU</span>
           <span className="text-right">Qty</span>
           <span className="text-right">Unit Price</span>
+          {hasLineDiscounts && <span className="text-right">Discount</span>}
           <span className="text-right">Line Total</span>
         </div>
 
         {/* Rows */}
         {items.map((item, idx) => {
-          const lineTotal = item.quantity * item.unitPrice;
+          const base = lineBaseTotal(item);
+          const disc = lineDiscountAmount(item);
+          const total = discountedLineTotal(item);
           return (
             <div
               key={item.id}
@@ -76,29 +110,93 @@ export default function InvoiceDetailItems({ items }: Props) {
               <span className="text-sm text-right" style={{ color: config.primaryColor }}>
                 {fmt(item.unitPrice)}
               </span>
+              {hasLineDiscounts && (
+                <span className="text-sm text-right" style={{ color: disc > 0 ? "#DC2626" : config.secondaryColor }}>
+                  {disc > 0 ? (
+                    <span title={`–${fmt(disc)}`}>
+                      {formatDiscountLabel(item)}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              )}
               <span className="text-sm font-medium text-right" style={{ color: config.primaryColor }}>
-                {fmt(lineTotal)}
+                {fmt(total)}
               </span>
             </div>
           );
         })}
       </div>
 
-      {/* Totals */}
+      {/* Summary Totals */}
       <div className="flex flex-col items-end mt-3 gap-1">
-        <div className="flex items-center gap-6">
-          <span className="text-xs" style={{ color: config.secondaryColor }}>Subtotal</span>
-          <span className="text-sm font-medium w-28 text-right" style={{ color: config.primaryColor }}>{fmt(subtotal)}</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span className="text-xs" style={{ color: config.secondaryColor }}>Tax (10%)</span>
-          <span className="text-sm font-medium w-28 text-right" style={{ color: config.primaryColor }}>{fmt(tax)}</span>
-        </div>
-        <div className="flex items-center gap-6 mt-1 pt-2" style={{ borderTop: `1px solid ${config.borderColor}` }}>
-          <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>Grand Total</span>
-          <span className="text-sm font-bold w-28 text-right" style={{ color: config.primaryColor }}>{fmt(grandTotal)}</span>
+        {/* Subtotal (before discount) */}
+        <SummaryRow label="Subtotal" value={fmt(subtotalBefore)} config={config} />
+
+        {/* Discount rows — only if discounts exist */}
+        {hasAnyDiscount && (
+          <>
+            {totalLineDisc > 0 && (
+              <SummaryRow
+                label="Line Discounts"
+                value={`–${fmt(totalLineDisc)}`}
+                config={config}
+                valueColor="#DC2626"
+              />
+            )}
+            {hasOrderDiscount && (
+              <SummaryRow
+                label={orderDiscount!.label}
+                value={`–${fmt(orderDiscAmt)}`}
+                config={config}
+                valueColor="#DC2626"
+              />
+            )}
+            <SummaryRow label="Net Subtotal" value={fmt(netSubtotal)} config={config} />
+            <p className="text-[11px] m-0 mr-0" style={{ color: "#16A34A" }}>
+              You Saved: {fmt(totalDiscount)}
+            </p>
+          </>
+        )}
+
+        {/* Tax */}
+        <SummaryRow label="Tax" value={fmt(tax)} config={config} />
+
+        {/* Grand Total */}
+        <div
+          className="flex items-center gap-6 mt-1 pt-2"
+          style={{ borderTop: `1px solid ${config.borderColor}` }}
+        >
+          <span className="text-xs font-semibold" style={{ color: config.primaryColor }}>
+            Grand Total
+          </span>
+          <span className="text-sm font-bold w-28 text-right" style={{ color: config.primaryColor }}>
+            {fmt(grandTotal)}
+          </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  config,
+  valueColor,
+}: {
+  label: string;
+  value: string;
+  config: typeof activeBrandConfig;
+  valueColor?: string;
+}) {
+  return (
+    <div className="flex items-center gap-6">
+      <span className="text-xs" style={{ color: config.secondaryColor }}>{label}</span>
+      <span className="text-sm font-medium w-28 text-right" style={{ color: valueColor || config.primaryColor }}>
+        {value}
+      </span>
     </div>
   );
 }
