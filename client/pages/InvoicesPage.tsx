@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { FileTextOutlined, SearchOutlined } from "@ant-design/icons";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { FileTextOutlined, SearchOutlined, DownOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { INVOICES, type InvoiceStatus } from "../data/invoices";
 import InvoicesTable from "../components/invoices/InvoicesTable";
@@ -128,20 +128,7 @@ export default function InvoicesPage() {
 
       {/* Filter Row */}
       <div className="flex items-center justify-end gap-3 mb-4">
-        <select
-          value={dateRange}
-          onChange={(e) => setDateRange(e.target.value as DateRangeKey)}
-          className="text-sm rounded-lg px-3 py-2 outline-none cursor-pointer"
-          style={{
-            border: `1px solid ${config.borderColor}`,
-            color: config.primaryColor,
-            backgroundColor: "#fff",
-          }}
-        >
-          {DATE_RANGES.map((r) => (
-            <option key={r.key} value={r.key}>{r.label}</option>
-          ))}
-        </select>
+        <DateRangeDropdown value={dateRange} onChange={setDateRange} config={config} />
 
         <div className="relative">
           <SearchOutlined
@@ -166,6 +153,80 @@ export default function InvoicesPage() {
 
       {/* Table */}
       <InvoicesTable invoices={filtered} />
+    </div>
+  );
+}
+
+// ── Date Range Dropdown ─────────────────────────────────────────────
+
+function DateRangeDropdown({
+  value,
+  onChange,
+  config,
+}: {
+  value: DateRangeKey;
+  onChange: (v: DateRangeKey) => void;
+  config: typeof activeBrandConfig;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const label = DATE_RANGES.find((r) => r.key === value)?.label || "All Time";
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 cursor-pointer transition-colors"
+        style={{
+          border: `1px solid ${config.borderColor}`,
+          color: config.primaryColor,
+          backgroundColor: "#fff",
+        }}
+      >
+        <span>{label}</span>
+        <DownOutlined style={{ fontSize: 10, color: config.secondaryColor }} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 rounded-lg py-1 z-50"
+          style={{
+            backgroundColor: "#fff",
+            border: `1px solid ${config.borderColor}`,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+            minWidth: 180,
+          }}
+        >
+          {DATE_RANGES.map((r) => {
+            const isActive = value === r.key;
+            return (
+              <button
+                key={r.key}
+                onClick={() => { onChange(r.key); setOpen(false); }}
+                className="w-full text-left text-sm px-4 py-2 cursor-pointer transition-colors border-none"
+                style={{
+                  backgroundColor: isActive ? config.cardBg : "#fff",
+                  color: isActive ? config.primaryColor : config.secondaryColor,
+                  fontWeight: isActive ? 600 : 400,
+                }}
+                onMouseEnter={(e) => { if (!isActive) (e.currentTarget.style.backgroundColor = config.cardBg); }}
+                onMouseLeave={(e) => { if (!isActive) (e.currentTarget.style.backgroundColor = "#fff"); }}
+              >
+                {r.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
