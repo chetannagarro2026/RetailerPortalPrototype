@@ -61,7 +61,7 @@ export default function Footer() {
       style={{ backgroundColor: config.primaryColor }}
     >
       {/* Main footer columns */}
-      <div className="max-w-content-wide mx-auto px-6 pt-10 pb-8">
+      <div className="max-w-content-wide mx-auto px-6 pt-10 pb-8 flex flex-col justify-center items-center">
         {/* Desktop / Tablet grid */}
         <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {sections.map((section) => (
