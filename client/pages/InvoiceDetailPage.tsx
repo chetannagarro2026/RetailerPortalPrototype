@@ -5,6 +5,7 @@ import { INVOICES, outstanding } from "../data/invoices";
 import InvoiceDetailSummary from "../components/invoices/InvoiceDetailSummary";
 import InvoiceDetailItems from "../components/invoices/InvoiceDetailItems";
 import InvoiceDetailPayments from "../components/invoices/InvoiceDetailPayments";
+import { downloadInvoicePdf } from "../utils/invoicePdf";
 
 export default function InvoiceDetailPage() {
   const config = activeBrandConfig;
@@ -116,6 +117,7 @@ export default function InvoiceDetailPage() {
           Contact Support
         </button>
         <button
+          onClick={() => downloadInvoicePdf(invoice)}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg cursor-pointer text-white border-none transition-colors"
           style={{ backgroundColor: config.primaryColor }}
         >
