@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { EyeOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { SupportTicket } from "../../data/support";
 
@@ -25,7 +24,7 @@ interface Props {
 
 export default function SupportTicketsTable({ tickets }: Props) {
   const config = activeBrandConfig;
-  const columns = "1.2fr 2fr 1.2fr 0.8fr 0.8fr 1fr 0.6fr";
+  const columns = "1.2fr 2fr 1.2fr 0.8fr 0.8fr 1fr";
 
   if (tickets.length === 0) {
     return (
@@ -61,7 +60,6 @@ export default function SupportTicketsTable({ tickets }: Props) {
         <span>Status</span>
         <span>Priority</span>
         <span>Last Updated</span>
-        <span className="text-center">Action</span>
       </div>
 
       {/* Rows */}
@@ -139,15 +137,6 @@ export default function SupportTicketsTable({ tickets }: Props) {
               {formatDate(ticket.lastUpdated)}
             </span>
 
-            {/* Action */}
-            <Link
-              to={`/account/support/${ticket.ticketId}`}
-              className="flex items-center justify-center gap-1 text-xs font-medium no-underline hover:underline"
-              style={{ color: config.primaryColor }}
-            >
-              <EyeOutlined style={{ fontSize: 12 }} />
-              View
-            </Link>
           </div>
         );
       })}
