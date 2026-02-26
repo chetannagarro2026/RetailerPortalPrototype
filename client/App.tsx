@@ -24,6 +24,7 @@ import BusinessProfilePage from "./pages/BusinessProfilePage";
 import PurchaseOrderDetailPage from "./pages/PurchaseOrderDetailPage";
 import SettingsPage from "./pages/SettingsPage";
 import ToastProvider from "./components/toast/ToastProvider";
+import CreditOverviewPage from "./pages/CreditOverviewPage";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +56,7 @@ export default function App() {
               <Route path="/order-confirmation" element={<AuthGate><OrderConfirmation /></AuthGate>} />
               <Route path="/purchase-orders" element={<AuthGate message="Sign in to view your purchase orders and order history."><PurchaseOrdersPage /></AuthGate>} />
               <Route path="/purchase-orders/:orderId" element={<AuthGate message="Sign in to view order details."><PurchaseOrderDetailPage /></AuthGate>} />
-              <Route path="/account/credit" element={<AuthGate message="Sign in to view your credit history and financial details."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/credit" element={<AuthGate message="Sign in to view your credit history and financial details."><CreditOverviewPage /></AuthGate>} />
               <Route path="/account/invoices" element={<AuthGate message="Sign in to access your invoices."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/payments" element={<AuthGate message="Sign in to manage your payments."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/payment-history" element={<AuthGate message="Sign in to view your payment history."><PlaceholderPage /></AuthGate>} />
