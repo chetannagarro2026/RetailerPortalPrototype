@@ -22,6 +22,7 @@ import SignInPage from "./pages/SignInPage";
 import DashboardPage from "./pages/DashboardPage";
 import BusinessProfilePage from "./pages/BusinessProfilePage";
 import PurchaseOrderDetailPage from "./pages/PurchaseOrderDetailPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -60,7 +61,7 @@ export default function App() {
               <Route path="/account/support" element={<AuthGate message="Sign in to access customer service."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />
               <Route path="/account/business-profile" element={<AuthGate message="Sign in to view your business profile."><BusinessProfilePage /></AuthGate>} />
-              <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><SettingsPage /></AuthGate>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
