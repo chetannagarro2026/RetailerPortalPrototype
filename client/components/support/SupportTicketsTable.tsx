@@ -8,9 +8,9 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-const statusStyles: Record<string, { color: string; bg: string }> = {
-  Open: { color: "#D97706", bg: "rgba(217,119,6,0.08)" },
-  Closed: { color: "#16A34A", bg: "rgba(22,163,74,0.08)" },
+const statusStyles: Record<string, { color: string }> = {
+  Open: { color: "#D97706" },
+  Closed: { color: "#16A34A" },
 };
 
 const priorityStyles: Record<string, { color: string }> = {
@@ -114,11 +114,11 @@ export default function SupportTicketsTable({ tickets }: Props) {
 
             {/* Status */}
             <span
-              className="text-[11px] font-medium rounded whitespace-nowrap inline-flex self-center"
+              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex self-center"
               style={{
                 color: sts.color,
-                backgroundColor: sts.bg,
-                padding: "4px 10px",
+                backgroundColor: "transparent",
+                border: `1px solid ${sts.color}`,
               }}
             >
               {ticket.status}
@@ -126,8 +126,8 @@ export default function SupportTicketsTable({ tickets }: Props) {
 
             {/* Priority */}
             <span
-              className="text-xs"
-              style={{ color: pri.color }}
+              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex self-center"
+              style={{ color: pri.color, backgroundColor: "transparent", border: `1px solid ${pri.color}` }}
             >
               {ticket.priority}
             </span>

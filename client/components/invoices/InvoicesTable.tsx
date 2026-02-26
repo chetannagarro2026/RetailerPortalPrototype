@@ -19,11 +19,11 @@ function StatusBadge({ invoice }: { invoice: Invoice }) {
   return (
     <div className="inline-flex flex-col items-end gap-0.5">
       <span
-        className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
+        className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex"
         style={{
           color,
-          backgroundColor: `${color}14`,
-          padding: "4px 10px",
+          backgroundColor: "transparent",
+          border: `1px solid ${color}`,
         }}
       >
         {label}

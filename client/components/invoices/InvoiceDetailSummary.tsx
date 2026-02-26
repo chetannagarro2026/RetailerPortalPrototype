@@ -57,8 +57,8 @@ export default function InvoiceDetailSummary({ invoice }: Props) {
           </p>
           <div className="flex flex-col items-start gap-0.5 mt-0.5">
             <span
-              className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
-              style={{ color: status.color, backgroundColor: `${status.color}14`, padding: "4px 10px" }}
+              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex"
+              style={{ color: status.color, backgroundColor: "transparent", border: `1px solid ${status.color}` }}
             >
               {status.label}
             </span>

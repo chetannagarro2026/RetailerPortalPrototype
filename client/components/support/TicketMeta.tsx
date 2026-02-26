@@ -6,9 +6,9 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-const statusStyles: Record<string, { color: string; bg: string }> = {
-  Open: { color: "#D97706", bg: "rgba(217,119,6,0.08)" },
-  Closed: { color: "#16A34A", bg: "rgba(22,163,74,0.08)" },
+const statusStyles: Record<string, { color: string }> = {
+  Open: { color: "#D97706" },
+  Closed: { color: "#16A34A" },
 };
 
 const priorityStyles: Record<string, { color: string }> = {
@@ -53,8 +53,8 @@ export default function TicketMeta({ ticket }: Props) {
             Status
           </p>
           <span
-            className="text-[11px] font-medium rounded whitespace-nowrap inline-flex mt-0.5"
-            style={{ color: sts.color, backgroundColor: sts.bg, padding: "4px 10px" }}
+            className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex mt-0.5"
+            style={{ color: sts.color, backgroundColor: "transparent", border: `1px solid ${sts.color}` }}
           >
             {ticket.status}
           </span>
@@ -63,9 +63,12 @@ export default function TicketMeta({ ticket }: Props) {
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
             Priority
           </p>
-          <p className="text-sm font-medium m-0 mt-0.5" style={{ color: pri.color }}>
+          <span
+            className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex mt-0.5"
+            style={{ color: pri.color, backgroundColor: "transparent", border: `1px solid ${pri.color}` }}
+          >
             {ticket.priority}
-          </p>
+          </span>
         </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider mb-1 m-0" style={{ color: config.secondaryColor }}>
