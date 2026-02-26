@@ -17,7 +17,7 @@ function StatusBadge({ invoice }: { invoice: Invoice }) {
       : null;
 
   return (
-    <div className="inline-flex flex-col items-start gap-0.5">
+    <div className="inline-flex flex-col items-end gap-0.5">
       <span
         className="text-[11px] font-medium rounded whitespace-nowrap inline-flex"
         style={{
@@ -78,7 +78,7 @@ export default function InvoicesTable({ invoices }: Props) {
     >
       {/* Header */}
       <div
-        className="grid gap-4 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider"
+        className="grid gap-4 px-4 py-3 text-[11px] font-semibold uppercase tracking-wider"
         style={{
           gridTemplateColumns: columns,
           backgroundColor: config.cardBg,
@@ -92,7 +92,7 @@ export default function InvoicesTable({ invoices }: Props) {
         <span className="text-right">Amount</span>
         <span className="text-right">Paid</span>
         <span className="text-right">Balance</span>
-        <span className="text-left">Status</span>
+        <span className="text-right">Status</span>
       </div>
 
       {/* Rows */}
@@ -102,7 +102,7 @@ export default function InvoicesTable({ invoices }: Props) {
         return (
           <div
             key={inv.id}
-            className="grid gap-4 px-5 py-4 items-center transition-colors"
+            className="grid gap-4 px-4 py-4 items-center transition-colors"
             style={{
               gridTemplateColumns: columns,
               borderBottom: idx < invoices.length - 1 ? `1px solid ${config.borderColor}` : "none",
