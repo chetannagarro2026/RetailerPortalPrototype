@@ -82,8 +82,9 @@ export default function InvoicesPage() {
         </h1>
       </div>
 
-      {/* Status Segmented Filter */}
-      <div className="mb-6">
+      {/* Toolbar: Tabs + Date Range + Search */}
+      <div className="flex items-center gap-3 mb-4 relative z-10">
+        {/* Status Segmented Filter */}
         <div
           className="inline-flex rounded-lg overflow-hidden"
           style={{ border: `1px solid ${config.borderColor}` }}
@@ -107,10 +108,7 @@ export default function InvoicesPage() {
             );
           })}
         </div>
-      </div>
 
-      {/* Filter Row */}
-      <div className="flex items-center justify-start gap-3 mb-4 relative z-10">
         <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
         <div className="flex-1" />
