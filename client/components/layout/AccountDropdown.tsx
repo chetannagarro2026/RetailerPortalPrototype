@@ -47,7 +47,7 @@ const authenticatedSections: DropdownSection[] = [
   {
     title: "Financials",
     items: [
-      { key: "credit", label: "Credit History", icon: <CreditCardOutlined />, path: "/account/credit" },
+      { key: "credit", label: "Credit Overview", icon: <CreditCardOutlined />, path: "/account/credit" },
       { key: "invoices", label: "Invoices", icon: <FileTextOutlined />, path: "/account/invoices" },
       { key: "payments", label: "Payments", icon: <DollarOutlined />, path: "/account/payments" },
       { key: "payment-history", label: "Payment History", icon: <HistoryOutlined />, path: "/account/payment-history" },
