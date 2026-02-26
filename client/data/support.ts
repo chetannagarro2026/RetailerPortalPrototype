@@ -10,13 +10,21 @@ export type TicketCategory =
   | "Product Issue"
   | "Other";
 
+export interface TicketAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: "image" | "pdf" | "other";
+  size?: string; // e.g. "1.2 MB"
+}
+
 export interface TicketMessage {
   id: string;
   sender: "customer" | "support";
   senderName: string;
   message: string;
   timestamp: string;
-  attachments?: string[];
+  attachments?: TicketAttachment[];
 }
 
 export interface SupportTicket {
@@ -85,6 +93,10 @@ export const SUPPORT_TICKETS: SupportTicket[] = [
         senderName: "You",
         message: "We received size M instead of size L for the Polo shirts in PO-10042. Please arrange a replacement.",
         timestamp: "2026-02-20T10:30:00Z",
+        attachments: [
+          { id: "a1", name: "wrong-sizes-photo.jpg", url: "/mock/wrong-sizes.jpg", type: "image", size: "1.2 MB" },
+          { id: "a2", name: "packing-slip.pdf", url: "/mock/packing-slip.pdf", type: "pdf", size: "340 KB" },
+        ],
       },
       {
         id: "m2",
@@ -106,6 +118,9 @@ export const SUPPORT_TICKETS: SupportTicket[] = [
         senderName: "Sarah K.",
         message: "Yes, please use the prepaid return label we've sent to your email. The replacement has been dispatched — tracking number: TRK-884921.",
         timestamp: "2026-02-24T14:15:00Z",
+        attachments: [
+          { id: "a3", name: "return-label.pdf", url: "/mock/return-label.pdf", type: "pdf", size: "128 KB" },
+        ],
       },
     ],
   },
@@ -198,8 +213,13 @@ export const SUPPORT_TICKETS: SupportTicket[] = [
         id: "m11",
         sender: "customer",
         senderName: "You",
-        message: "Multiple units of the Denim Jacket – Indigo Wash from our last order are showing significant color fading after a single wash cycle. This is affecting customer returns on our end.",
+        message: "Multiple units of the Denim Jacket – Indigo Wash from our last order are showing significant color fading after a single wash cycle. This is affecting customer returns on our end. We've tested three separate units and all show the same issue after a standard cold wash. Our QA team has documented everything and we need this resolved before we can continue selling this product line. The fading is especially noticeable on the collar and sleeve areas.",
         timestamp: "2026-02-22T09:15:00Z",
+        attachments: [
+          { id: "a4", name: "fading-example-1.jpg", url: "/mock/fading-1.jpg", type: "image", size: "2.1 MB" },
+          { id: "a5", name: "fading-example-2.jpg", url: "/mock/fading-2.jpg", type: "image", size: "1.8 MB" },
+          { id: "a6", name: "qa-report.xlsx", url: "/mock/qa-report.xlsx", type: "other", size: "56 KB" },
+        ],
       },
     ],
   },
