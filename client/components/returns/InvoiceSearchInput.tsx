@@ -26,7 +26,7 @@ export default function InvoiceSearchInput({ onSelect }: Props) {
   const recentInvoices = useMemo(() => {
     return [...INVOICES]
       .sort((a, b) => (b.invoiceDate > a.invoiceDate ? 1 : -1))
-      .slice(0, 5);
+      .slice(0, 3);
   }, []);
 
   const suggestions = useMemo(() => {
