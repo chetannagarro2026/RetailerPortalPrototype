@@ -15,7 +15,7 @@ export default function ClaimAttachments({ attachments }: Props) {
   return (
     <>
       <div
-        className="rounded-xl p-5 sticky top-6 mt-4"
+        className="rounded-xl p-5 mt-4"
         style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
       >
         <h3 className="text-sm font-semibold m-0 mb-3" style={{ color: config.primaryColor }}>
