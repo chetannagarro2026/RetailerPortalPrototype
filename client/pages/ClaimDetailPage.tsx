@@ -95,7 +95,7 @@ export default function ClaimDetailPage() {
           {/* Credit Note Section */}
           {claim.creditNoteNumber && (
             <div
-              className="rounded-xl p-4 mb-5"
+              className="rounded-xl px-4 py-3 mb-6"
               style={{ border: "1px solid #BBF7D0", backgroundColor: "#F0FDF4" }}
             >
               <p className="text-xs font-semibold uppercase tracking-wider m-0 mb-2" style={{ color: "#16A34A" }}>

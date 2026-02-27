@@ -14,7 +14,7 @@ export default function ClaimItemsTable({ claim }: Props) {
   const hasApproval = claim.items.some((i) => i.approvedQty !== undefined);
 
   return (
-    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${config.borderColor}` }}>
+    <div className="rounded-xl overflow-hidden mb-4" style={{ border: `1px solid ${config.borderColor}` }}>
       <div
         className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider"
         style={{ backgroundColor: config.cardBg, color: config.secondaryColor, borderBottom: `1px solid ${config.borderColor}` }}
