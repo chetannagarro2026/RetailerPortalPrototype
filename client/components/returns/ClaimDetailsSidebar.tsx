@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { ReturnClaim } from "../../data/returns";
 
@@ -17,9 +16,10 @@ function formatDate(iso: string): string {
 
 interface Props {
   claim: ReturnClaim;
+  onInvoiceClick?: () => void;
 }
 
-export default function ClaimDetailsSidebar({ claim }: Props) {
+export default function ClaimDetailsSidebar({ claim, onInvoiceClick }: Props) {
   const config = activeBrandConfig;
   const sts = statusStyles[claim.status] || statusStyles.Submitted;
 
@@ -28,13 +28,13 @@ export default function ClaimDetailsSidebar({ claim }: Props) {
     {
       label: "Linked Invoice",
       value: (
-        <Link
-          to={`/account/invoices/${claim.invoiceNumber}`}
-          className="no-underline hover:underline text-sm font-medium"
+        <button
+          onClick={onInvoiceClick}
+          className="bg-transparent border-none p-0 cursor-pointer hover:underline text-sm font-medium"
           style={{ color: config.primaryColor }}
         >
           {claim.invoiceNumber}
-        </Link>
+        </button>
       ),
     },
     {

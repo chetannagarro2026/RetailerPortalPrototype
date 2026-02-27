@@ -1,4 +1,5 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined, DownloadOutlined, FileTextOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { RETURN_CLAIMS } from "../data/returns";
@@ -6,6 +7,7 @@ import ClaimDetailsSidebar from "../components/returns/ClaimDetailsSidebar";
 import ClaimItemsTable from "../components/returns/ClaimItemsTable";
 import ClaimComments from "../components/returns/ClaimComments";
 import ClaimSummary from "../components/returns/ClaimSummary";
+import InvoiceOverlayPanel from "../components/returns/InvoiceOverlayPanel";
 import { downloadCreditNotePdf } from "../utils/creditNotePdf";
 
 
@@ -13,6 +15,8 @@ export default function ClaimDetailPage() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const { claimId } = useParams<{ claimId: string }>();
+  const [invoiceOverlayOpen, setInvoiceOverlayOpen] = useState(false);
+  const closeOverlay = useCallback(() => setInvoiceOverlayOpen(false), []);
 
   const claim = RETURN_CLAIMS.find((c) => c.claimId === claimId) || null;
 
@@ -69,13 +73,13 @@ export default function ClaimDetailPage() {
           </h1>
           <p className="text-sm m-0 mb-5" style={{ color: config.secondaryColor }}>
             Return claim for{" "}
-            <Link
-              to={`/account/invoices/${claim.invoiceNumber}`}
-              className="no-underline hover:underline font-medium"
-              style={{ color: config.primaryColor }}
+            <button
+              onClick={() => setInvoiceOverlayOpen(true)}
+              className="font-medium bg-transparent border-none p-0 cursor-pointer hover:underline"
+              style={{ color: config.primaryColor, fontSize: "inherit" }}
             >
               {claim.invoiceNumber}
-            </Link>
+            </button>
           </p>
 
           {/* Partial Approval Banner */}
@@ -144,9 +148,16 @@ export default function ClaimDetailPage() {
 
         {/* Right column — 30% */}
         <div style={{ flex: "0 0 28%", minWidth: 0 }}>
-          <ClaimDetailsSidebar claim={claim} />
+          <ClaimDetailsSidebar claim={claim} onInvoiceClick={() => setInvoiceOverlayOpen(true)} />
         </div>
       </div>
+
+      {/* Invoice Overlay */}
+      <InvoiceOverlayPanel
+        invoiceNumber={claim.invoiceNumber}
+        visible={invoiceOverlayOpen}
+        onClose={closeOverlay}
+      />
     </div>
   );
 }
