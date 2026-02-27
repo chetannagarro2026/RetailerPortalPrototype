@@ -65,6 +65,31 @@ export default function ClaimItemsTable({ claim }: Props) {
           })}
         </tbody>
       </table>
+
+      {/* Footer Summary — right-aligned like invoice detail */}
+      {hasApproval && claim.approvedAmount !== undefined && (
+        <div
+          className="px-5 py-4"
+          style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+        >
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-6">
+              <span className="text-xs" style={{ color: config.secondaryColor }}>Claimed Amount</span>
+              <span className="text-sm font-medium w-28 text-right" style={{ color: config.primaryColor }}>{fmt(claim.claimedAmount)}</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className="text-xs" style={{ color: config.secondaryColor }}>Approved Amount</span>
+              <span className="text-sm font-semibold w-28 text-right" style={{ color: "#16A34A" }}>{fmt(claim.approvedAmount)}</span>
+            </div>
+            {claim.approvedAmount < claim.claimedAmount && (
+              <div className="flex items-center gap-6">
+                <span className="text-xs" style={{ color: config.secondaryColor }}>Rejected Amount</span>
+                <span className="text-sm font-medium w-28 text-right" style={{ color: "#DC2626" }}>{fmt(claim.claimedAmount - claim.approvedAmount)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

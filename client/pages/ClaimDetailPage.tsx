@@ -6,7 +6,6 @@ import { RETURN_CLAIMS } from "../data/returns";
 import ClaimDetailsSidebar from "../components/returns/ClaimDetailsSidebar";
 import ClaimItemsTable from "../components/returns/ClaimItemsTable";
 import ClaimComments from "../components/returns/ClaimComments";
-import ClaimSummary from "../components/returns/ClaimSummary";
 import InvoiceOverlayPanel from "../components/returns/InvoiceOverlayPanel";
 import { downloadCreditNotePdf } from "../utils/creditNotePdf";
 
@@ -89,9 +88,6 @@ export default function ClaimDetailPage() {
 
           {/* Claimed Items Table */}
           <ClaimItemsTable claim={claim} />
-
-          {/* Claim Summary (Financial Totals) */}
-          <ClaimSummary claim={claim} />
 
           {/* Credit Note Section */}
           {claim.creditNoteNumber && (
