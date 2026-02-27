@@ -73,7 +73,7 @@ export default function ClaimDetailsSidebar({ claim, onInvoiceClick, onCreditNot
 
   return (
     <div
-      className="rounded-xl p-5 sticky top-6"
+      className="rounded-xl p-5"
       style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
     >
       <h3 className="text-sm font-semibold m-0 mb-4" style={{ color: config.primaryColor }}>

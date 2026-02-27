@@ -123,7 +123,7 @@ export default function ClaimDetailPage() {
         </div>
 
         {/* Right column — 30% */}
-        <div style={{ flex: "0 0 28%", minWidth: 0 }}>
+        <div style={{ flex: "0 0 28%", minWidth: 0, alignSelf: "flex-start", position: "sticky", top: 24 }}>
           <ClaimDetailsSidebar claim={claim} onInvoiceClick={() => setInvoiceOverlayOpen(true)} onCreditNoteClick={() => setCnOverlayOpen(true)} />
           <ClaimAttachments attachments={claim.attachments} />
         </div>
