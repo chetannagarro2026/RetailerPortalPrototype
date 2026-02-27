@@ -8,13 +8,6 @@ import ClaimComments from "../components/returns/ClaimComments";
 import ClaimSummary from "../components/returns/ClaimSummary";
 import { downloadCreditNotePdf } from "../utils/creditNotePdf";
 
-const statusStyles: Record<string, { color: string }> = {
-  Submitted: { color: "#2563EB" },
-  "Under Review": { color: "#D97706" },
-  Approved: { color: "#16A34A" },
-  Rejected: { color: "#DC2626" },
-  Completed: { color: "#6B7B99" },
-};
 
 export default function ClaimDetailPage() {
   const config = activeBrandConfig;
@@ -33,8 +26,6 @@ export default function ClaimDetailPage() {
       </div>
     );
   }
-
-  const sts = statusStyles[claim.status] || statusStyles.Submitted;
 
   // Partial approval detection
   const hasApproval = claim.items.some((i) => i.approvedQty !== undefined);
@@ -72,23 +63,10 @@ export default function ClaimDetailPage() {
       <div className="flex gap-6 px-6 pb-6" style={{ minHeight: "calc(100vh - 260px)" }}>
         {/* Left column — 70% */}
         <div style={{ flex: "0 0 70%", minWidth: 0 }}>
-          {/* Header: Claim ID + Status Badge */}
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="font-bold m-0" style={{ color: config.primaryColor, fontSize: 20 }}>
-              {claim.claimId}
-            </h1>
-            <span
-              className="text-[11px] font-medium px-2.5 py-0.5 rounded whitespace-nowrap"
-              style={{
-                color: sts.color,
-                backgroundColor: "transparent",
-                border: `1px solid ${sts.color}`,
-                cursor: "default",
-              }}
-            >
-              {claim.status}
-            </span>
-          </div>
+          {/* Header: Claim ID */}
+          <h1 className="font-bold m-0 mb-1" style={{ color: config.primaryColor, fontSize: 20 }}>
+            {claim.claimId}
+          </h1>
           <p className="text-sm m-0 mb-5" style={{ color: config.secondaryColor }}>
             Return claim for{" "}
             <Link
