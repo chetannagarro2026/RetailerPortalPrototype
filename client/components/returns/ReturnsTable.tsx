@@ -59,7 +59,7 @@ export default function ReturnsTable({ claims }: Props) {
         <span>Invoice Reference</span>
         <span className="text-center">Items</span>
         <span className="text-right">Claimed Amount</span>
-        <span>Status</span>
+        <span className="text-center">Status</span>
         <span className="text-center">Created Date</span>
       </div>
 
@@ -97,7 +97,7 @@ export default function ReturnsTable({ claims }: Props) {
               {fmt(claim.claimedAmount)}
             </span>
 
-            <div>
+            <div className="flex flex-col justify-center items-center">
               <span
                 className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex"
                 style={{ color: sts.color, backgroundColor: "transparent", border: `1px solid ${sts.color}` }}
