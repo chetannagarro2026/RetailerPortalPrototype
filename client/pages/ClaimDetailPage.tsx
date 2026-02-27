@@ -68,19 +68,9 @@ export default function ClaimDetailPage() {
         {/* Left column — 70% */}
         <div style={{ flex: "0 0 70%", minWidth: 0 }}>
           {/* Header: Claim ID */}
-          <h1 className="font-bold m-0 mb-1" style={{ color: config.primaryColor, fontSize: 20 }}>
+          <h1 className="font-bold m-0 mb-5" style={{ color: config.primaryColor, fontSize: 20 }}>
             {claim.claimId}
           </h1>
-          <p className="text-sm m-0 mb-5" style={{ color: config.secondaryColor }}>
-            Return claim for{" "}
-            <button
-              onClick={() => setInvoiceOverlayOpen(true)}
-              className="font-medium bg-transparent border-none p-0 cursor-pointer hover:underline"
-              style={{ color: config.primaryColor, fontSize: "inherit" }}
-            >
-              {claim.invoiceNumber}
-            </button>
-          </p>
 
           {/* Partial Approval Banner */}
           {isPartialApproval && partialBannerText && (
