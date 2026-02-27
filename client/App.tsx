@@ -29,6 +29,9 @@ import InvoicesPage from "./pages/InvoicesPage";
 import InvoiceDetailPage from "./pages/InvoiceDetailPage";
 import SupportPageWrapper from "./pages/SupportPageWrapper";
 import TicketDetailPage from "./pages/TicketDetailPage";
+import ReturnsPage from "./pages/ReturnsPage";
+import CreateReturnPage from "./pages/CreateReturnPage";
+import ClaimDetailPage from "./pages/ClaimDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -63,7 +66,9 @@ export default function App() {
               <Route path="/account/credit" element={<AuthGate message="Sign in to view your credit history and financial details."><CreditOverviewPage /></AuthGate>} />
               <Route path="/account/invoices" element={<AuthGate message="Sign in to access your invoices."><InvoicesPage /></AuthGate>} />
               <Route path="/account/invoices/:invoiceId" element={<AuthGate message="Sign in to view invoice details."><InvoiceDetailPage /></AuthGate>} />
-              <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><ReturnsPage /></AuthGate>} />
+              <Route path="/account/returns/new" element={<AuthGate message="Sign in to create a return."><CreateReturnPage /></AuthGate>} />
+              <Route path="/account/returns/:claimId" element={<AuthGate message="Sign in to view claim details."><ClaimDetailPage /></AuthGate>} />
               <Route path="/account/support" element={<AuthGate message="Sign in to access customer support."><SupportPageWrapper /></AuthGate>} />
               <Route path="/account/support/:ticketId" element={<AuthGate message="Sign in to view ticket details."><TicketDetailPage /></AuthGate>} />
               <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeftOutlined, LeftOutlined, RightOutlined, DownloadOutlined, CustomerServiceOutlined, FileTextOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, LeftOutlined, RightOutlined, DownloadOutlined, CustomerServiceOutlined, FileTextOutlined, RollbackOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { INVOICES, outstanding } from "../data/invoices";
 import InvoiceDetailSummary from "../components/invoices/InvoiceDetailSummary";
@@ -108,6 +108,18 @@ export default function InvoiceDetailPage() {
 
       {/* Action Buttons */}
       <div className="flex items-center justify-end gap-3">
+        <button
+          onClick={() => navigate(`/account/returns/new?invoice=${invoice.invoiceNumber}`)}
+          className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg cursor-pointer transition-colors"
+          style={{
+            border: `1px solid ${config.borderColor}`,
+            backgroundColor: "#fff",
+            color: config.secondaryColor,
+          }}
+        >
+          <RollbackOutlined style={{ fontSize: 14 }} />
+          Raise Return
+        </button>
         <button
           onClick={() => setDrawerOpen(true)}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg cursor-pointer transition-colors"
