@@ -15,10 +15,6 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-function fmt(val: number): string {
-  return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
-}
-
 interface Props {
   claim: ReturnClaim;
 }
@@ -52,21 +48,22 @@ export default function ClaimDetailsSidebar({ claim }: Props) {
         </span>
       ),
     },
-    { label: "Claimed Amount", value: fmt(claim.claimedAmount) },
+    { label: "Created Date", value: formatDate(claim.createdAt) },
   ];
 
-  if (claim.approvedAmount !== undefined) {
-    fields.push({ label: "Approved Amount", value: <span style={{ color: "#16A34A" }}>{fmt(claim.approvedAmount)}</span> });
+  if (claim.reviewedAt) {
+    fields.push({ label: "Reviewed Date", value: formatDate(claim.reviewedAt) });
   }
 
   if (claim.creditNoteNumber) {
-    fields.push({ label: "Credit Note", value: claim.creditNoteNumber });
-  }
-
-  fields.push({ label: "Created", value: formatDate(claim.createdAt) });
-
-  if (claim.reviewedAt) {
-    fields.push({ label: "Reviewed", value: formatDate(claim.reviewedAt) });
+    fields.push({
+      label: "Credit Note",
+      value: (
+        <span className="text-sm font-medium" style={{ color: "#16A34A" }}>
+          {claim.creditNoteNumber}
+        </span>
+      ),
+    });
   }
 
   return (

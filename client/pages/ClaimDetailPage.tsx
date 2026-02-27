@@ -1,11 +1,20 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeftOutlined, DownloadOutlined, FileTextOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, DownloadOutlined, FileTextOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { RETURN_CLAIMS } from "../data/returns";
 import ClaimDetailsSidebar from "../components/returns/ClaimDetailsSidebar";
 import ClaimItemsTable from "../components/returns/ClaimItemsTable";
 import ClaimComments from "../components/returns/ClaimComments";
+import ClaimSummary from "../components/returns/ClaimSummary";
 import { downloadCreditNotePdf } from "../utils/creditNotePdf";
+
+const statusStyles: Record<string, { color: string }> = {
+  Submitted: { color: "#2563EB" },
+  "Under Review": { color: "#D97706" },
+  Approved: { color: "#16A34A" },
+  Rejected: { color: "#DC2626" },
+  Completed: { color: "#6B7B99" },
+};
 
 export default function ClaimDetailPage() {
   const config = activeBrandConfig;
@@ -25,7 +34,25 @@ export default function ClaimDetailPage() {
     );
   }
 
-  const fmt = (v: number) => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  const sts = statusStyles[claim.status] || statusStyles.Submitted;
+
+  // Partial approval detection
+  const hasApproval = claim.items.some((i) => i.approvedQty !== undefined);
+  const isPartialApproval = hasApproval && claim.approvedAmount !== undefined && claim.approvedAmount < claim.claimedAmount;
+
+  // Build partial approval banner text
+  let partialBannerText = "";
+  if (isPartialApproval) {
+    const partials = claim.items
+      .filter((i) => i.approvedQty !== undefined && i.approvedQty < i.returnQty)
+      .map((i) => `${i.approvedQty} of ${i.returnQty} ${i.productName.split("–")[0].trim().toLowerCase()}`);
+    if (partials.length > 0) {
+      partialBannerText = `Partial approval: ${partials.join(", ")} approved.`;
+    }
+  }
+
+  // Comment composer visibility: visible for Submitted, Under Review, Approved; hidden for Rejected, Completed
+  const showComposer = ["Submitted", "Under Review", "Approved"].includes(claim.status);
 
   return (
     <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}>
@@ -45,10 +72,23 @@ export default function ClaimDetailPage() {
       <div className="flex gap-6 px-6 pb-6" style={{ minHeight: "calc(100vh - 260px)" }}>
         {/* Left column — 70% */}
         <div style={{ flex: "0 0 70%", minWidth: 0 }}>
-          {/* Subject */}
-          <h1 className="font-bold m-0 mb-1" style={{ color: config.primaryColor, fontSize: 20 }}>
-            {claim.claimId}
-          </h1>
+          {/* Header: Claim ID + Status Badge */}
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="font-bold m-0" style={{ color: config.primaryColor, fontSize: 20 }}>
+              {claim.claimId}
+            </h1>
+            <span
+              className="text-[11px] font-medium px-2.5 py-0.5 rounded whitespace-nowrap"
+              style={{
+                color: sts.color,
+                backgroundColor: "transparent",
+                border: `1px solid ${sts.color}`,
+                cursor: "default",
+              }}
+            >
+              {claim.status}
+            </span>
+          </div>
           <p className="text-sm m-0 mb-5" style={{ color: config.secondaryColor }}>
             Return claim for{" "}
             <Link
@@ -60,47 +100,49 @@ export default function ClaimDetailPage() {
             </Link>
           </p>
 
-          {/* Claimed Items */}
+          {/* Partial Approval Banner */}
+          {isPartialApproval && partialBannerText && (
+            <div
+              className="flex items-center gap-2.5 rounded-lg px-4 py-3 mb-4 text-sm"
+              style={{
+                backgroundColor: "#F0F4FF",
+                border: "1px solid #BFDBFE",
+                color: "#1E40AF",
+              }}
+            >
+              <InfoCircleOutlined style={{ fontSize: 14, flexShrink: 0 }} />
+              {partialBannerText}
+            </div>
+          )}
+
+          {/* Claimed Items Table */}
           <ClaimItemsTable claim={claim} />
 
-          {/* Amounts Summary */}
-          <div className="rounded-xl p-4 mt-5 mb-5" style={{ border: `1px solid ${config.borderColor}`, backgroundColor: config.cardBg }}>
-            <div className="flex justify-between text-sm mb-2">
-              <span style={{ color: config.secondaryColor }}>Claimed Amount</span>
-              <span className="font-medium" style={{ color: config.primaryColor }}>{fmt(claim.claimedAmount)}</span>
-            </div>
-            {claim.approvedAmount !== undefined && (
-              <div className="flex justify-between text-sm mb-2">
-                <span style={{ color: config.secondaryColor }}>Approved Amount</span>
-                <span className="font-semibold" style={{ color: "#16A34A" }}>{fmt(claim.approvedAmount)}</span>
-              </div>
-            )}
-            {claim.approvedAmount !== undefined && claim.approvedAmount < claim.claimedAmount && (
-              <div className="flex justify-between text-sm">
-                <span style={{ color: config.secondaryColor }}>Rejected Amount</span>
-                <span style={{ color: "#DC2626" }}>{fmt(claim.claimedAmount - claim.approvedAmount)}</span>
-              </div>
-            )}
-          </div>
+          {/* Claim Summary (Financial Totals) */}
+          <ClaimSummary claim={claim} />
 
-          {/* Credit Note download */}
+          {/* Credit Note Section */}
           {claim.creditNoteNumber && (
             <div
-              className="rounded-xl p-4 mb-5 flex items-center justify-between"
-              style={{ border: `1px solid #BBF7D0`, backgroundColor: "#F0FDF4" }}
+              className="rounded-xl p-4 mb-5"
+              style={{ border: "1px solid #BBF7D0", backgroundColor: "#F0FDF4" }}
             >
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider m-0 mb-1" style={{ color: "#16A34A" }}>Credit Note</p>
-                <p className="text-sm font-medium m-0" style={{ color: config.primaryColor }}>{claim.creditNoteNumber}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider m-0 mb-2" style={{ color: "#16A34A" }}>
+                Credit Note Issued
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
+                  {claim.creditNoteNumber}
+                </span>
+                <button
+                  onClick={() => downloadCreditNotePdf(claim)}
+                  className="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg cursor-pointer border-none"
+                  style={{ backgroundColor: "#16A34A", color: "#fff" }}
+                >
+                  <DownloadOutlined style={{ fontSize: 11 }} />
+                  Download PDF
+                </button>
               </div>
-              <button
-                onClick={() => downloadCreditNotePdf(claim)}
-                className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg cursor-pointer text-white border-none"
-                style={{ backgroundColor: "#16A34A" }}
-              >
-                <DownloadOutlined style={{ fontSize: 12 }} />
-                Download PDF
-              </button>
             </div>
           )}
 
@@ -119,7 +161,7 @@ export default function ClaimDetailPage() {
           )}
 
           {/* Comments */}
-          <ClaimComments comments={claim.comments} />
+          <ClaimComments comments={claim.comments} showComposer={showComposer} />
         </div>
 
         {/* Right column — 30% */}

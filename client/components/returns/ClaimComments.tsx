@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { SendOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { ClaimComment } from "../../data/returns";
 
@@ -10,12 +12,14 @@ function formatTimestamp(iso: string): string {
 
 interface Props {
   comments: ClaimComment[];
+  showComposer?: boolean;
 }
 
-export default function ClaimComments({ comments }: Props) {
+export default function ClaimComments({ comments, showComposer = false }: Props) {
   const config = activeBrandConfig;
+  const [replyText, setReplyText] = useState("");
 
-  if (comments.length === 0) return null;
+  if (comments.length === 0 && !showComposer) return null;
 
   return (
     <div>
@@ -67,6 +71,39 @@ export default function ClaimComments({ comments }: Props) {
           );
         })}
       </div>
+
+      {/* Reply Composer */}
+      {showComposer && (
+        <div
+          className="rounded-xl mt-4 overflow-hidden"
+          style={{ border: `1px solid ${config.borderColor}` }}
+        >
+          <textarea
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            placeholder="Add a comment..."
+            rows={3}
+            className="w-full text-sm p-4 resize-none border-none outline-none"
+            style={{ color: config.primaryColor, backgroundColor: "#fff", boxSizing: "border-box" }}
+          />
+          <div
+            className="flex justify-end px-4 py-2.5"
+            style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: config.cardBg }}
+          >
+            <button
+              disabled={!replyText.trim()}
+              className="flex items-center gap-2 text-xs font-medium px-4 py-2 rounded-lg border-none cursor-pointer text-white"
+              style={{
+                backgroundColor: replyText.trim() ? config.primaryColor : config.borderColor,
+                cursor: replyText.trim() ? "pointer" : "not-allowed",
+              }}
+            >
+              <SendOutlined style={{ fontSize: 11 }} />
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
