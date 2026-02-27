@@ -17,9 +17,10 @@ function formatDate(iso: string): string {
 interface Props {
   claim: ReturnClaim;
   onInvoiceClick?: () => void;
+  onCreditNoteClick?: () => void;
 }
 
-export default function ClaimDetailsSidebar({ claim, onInvoiceClick }: Props) {
+export default function ClaimDetailsSidebar({ claim, onInvoiceClick, onCreditNoteClick }: Props) {
   const config = activeBrandConfig;
   const sts = statusStyles[claim.status] || statusStyles.Submitted;
 
@@ -59,9 +60,13 @@ export default function ClaimDetailsSidebar({ claim, onInvoiceClick }: Props) {
     fields.push({
       label: "Credit Note",
       value: (
-        <span className="text-sm font-medium" style={{ color: "#16A34A" }}>
+        <button
+          onClick={onCreditNoteClick}
+          className="bg-transparent border-none p-0 cursor-pointer hover:underline text-sm font-medium"
+          style={{ color: config.primaryColor }}
+        >
           {claim.creditNoteNumber}
-        </span>
+        </button>
       ),
     });
   }

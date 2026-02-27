@@ -7,6 +7,7 @@ import ClaimDetailsSidebar from "../components/returns/ClaimDetailsSidebar";
 import ClaimItemsTable from "../components/returns/ClaimItemsTable";
 import ClaimComments from "../components/returns/ClaimComments";
 import InvoiceOverlayPanel from "../components/returns/InvoiceOverlayPanel";
+import CreditNoteOverlayPanel from "../components/returns/CreditNoteOverlayPanel";
 import { downloadCreditNotePdf } from "../utils/creditNotePdf";
 
 
@@ -15,7 +16,9 @@ export default function ClaimDetailPage() {
   const navigate = useNavigate();
   const { claimId } = useParams<{ claimId: string }>();
   const [invoiceOverlayOpen, setInvoiceOverlayOpen] = useState(false);
-  const closeOverlay = useCallback(() => setInvoiceOverlayOpen(false), []);
+  const closeInvoiceOverlay = useCallback(() => setInvoiceOverlayOpen(false), []);
+  const [cnOverlayOpen, setCnOverlayOpen] = useState(false);
+  const closeCnOverlay = useCallback(() => setCnOverlayOpen(false), []);
 
   const claim = RETURN_CLAIMS.find((c) => c.claimId === claimId) || null;
 
@@ -134,7 +137,7 @@ export default function ClaimDetailPage() {
 
         {/* Right column — 30% */}
         <div style={{ flex: "0 0 28%", minWidth: 0 }}>
-          <ClaimDetailsSidebar claim={claim} onInvoiceClick={() => setInvoiceOverlayOpen(true)} />
+          <ClaimDetailsSidebar claim={claim} onInvoiceClick={() => setInvoiceOverlayOpen(true)} onCreditNoteClick={() => setCnOverlayOpen(true)} />
         </div>
       </div>
 
@@ -142,7 +145,14 @@ export default function ClaimDetailPage() {
       <InvoiceOverlayPanel
         invoiceNumber={claim.invoiceNumber}
         visible={invoiceOverlayOpen}
-        onClose={closeOverlay}
+        onClose={closeInvoiceOverlay}
+      />
+
+      {/* Credit Note Overlay */}
+      <CreditNoteOverlayPanel
+        claim={claim}
+        visible={cnOverlayOpen}
+        onClose={closeCnOverlay}
       />
     </div>
   );
