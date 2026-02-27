@@ -4,6 +4,7 @@ import { ArrowLeftOutlined, DownloadOutlined, FileTextOutlined, InfoCircleOutlin
 import { activeBrandConfig } from "../config/brandConfig";
 import { RETURN_CLAIMS } from "../data/returns";
 import ClaimDetailsSidebar from "../components/returns/ClaimDetailsSidebar";
+import ClaimAttachments from "../components/returns/ClaimAttachments";
 import ClaimItemsTable from "../components/returns/ClaimItemsTable";
 import ClaimComments from "../components/returns/ClaimComments";
 import InvoiceOverlayPanel from "../components/returns/InvoiceOverlayPanel";
@@ -117,20 +118,6 @@ export default function ClaimDetailPage() {
             </div>
           )}
 
-          {/* Attachments */}
-          {claim.attachments.length > 0 && (
-            <div className="mb-5">
-              <h3 className="text-sm font-semibold m-0 mb-3" style={{ color: config.primaryColor }}>Attachments</h3>
-              <div className="flex flex-wrap gap-2">
-                {claim.attachments.map((name, i) => (
-                  <span key={i} className="text-xs px-3 py-1.5 rounded-lg" style={{ backgroundColor: config.cardBg, color: config.primaryColor, border: `1px solid ${config.borderColor}` }}>
-                    {name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Comments */}
           <ClaimComments comments={claim.comments} showComposer={showComposer} />
         </div>
@@ -138,6 +125,7 @@ export default function ClaimDetailPage() {
         {/* Right column — 30% */}
         <div style={{ flex: "0 0 28%", minWidth: 0 }}>
           <ClaimDetailsSidebar claim={claim} onInvoiceClick={() => setInvoiceOverlayOpen(true)} onCreditNoteClick={() => setCnOverlayOpen(true)} />
+          <ClaimAttachments attachments={claim.attachments} />
         </div>
       </div>
 
