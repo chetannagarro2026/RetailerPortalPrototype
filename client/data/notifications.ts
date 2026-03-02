@@ -348,7 +348,17 @@ const INITIAL_NOTIFICATIONS: AppNotification[] = [
 let notifications = [...INITIAL_NOTIFICATIONS];
 let listeners: Array<() => void> = [];
 
+// Cached snapshots for useSyncExternalStore (must return stable references)
+let cachedFiltered: AppNotification[] | null = null;
+let cachedUnreadCount: number | null = null;
+
+function invalidateCache() {
+  cachedFiltered = null;
+  cachedUnreadCount = null;
+}
+
 function emit() {
+  invalidateCache();
   listeners.forEach((fn) => fn());
 }
 
@@ -360,14 +370,17 @@ export function subscribe(fn: () => void) {
 }
 
 export function getNotifications(): AppNotification[] {
-  // Only return last 60 days
+  if (cachedFiltered !== null) return cachedFiltered;
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 60);
-  return notifications.filter((n) => new Date(n.createdAt) >= cutoff);
+  cachedFiltered = notifications.filter((n) => new Date(n.createdAt) >= cutoff);
+  return cachedFiltered;
 }
 
 export function getUnreadCount(): number {
-  return getNotifications().filter((n) => !n.read).length;
+  if (cachedUnreadCount !== null) return cachedUnreadCount;
+  cachedUnreadCount = getNotifications().filter((n) => !n.read).length;
+  return cachedUnreadCount;
 }
 
 export function markAsRead(id: string) {
