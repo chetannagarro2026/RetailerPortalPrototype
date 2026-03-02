@@ -81,7 +81,7 @@ export default function NotificationItem({ notification, onClick }: Props) {
         {ctaLabel && (
           <span
             className="inline-block text-[11px] font-medium mt-1.5"
-            style={{ color: colors.fg }}
+            style={{ color: config.primaryColor }}
           >
             {ctaLabel} →
           </span>
