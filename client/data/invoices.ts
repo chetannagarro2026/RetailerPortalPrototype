@@ -171,7 +171,7 @@ export const INVOICES: Invoice[] = [
     amount: 12276, // computed: net 11160 + tax 1116
     paid: 0,
     status: "Upcoming",
-    linkedPO: "PO-10042",
+    linkedPO: "PO-2026-0121",
     orderDiscount: { type: "percentage", value: 5, label: "Trade Discount 5%" },
     items: [
       { id: "i1", productName: "Premium Cotton Polo – Navy", sku: "POL-NAV-L", quantity: 50, unitPrice: 124, taxRate: 0.1, discount: { type: "percentage", value: 5 } },
@@ -188,7 +188,7 @@ export const INVOICES: Invoice[] = [
     amount: 6853,
     paid: 6853,
     status: "Paid",
-    linkedPO: "PO-10041",
+    linkedPO: "PO-2026-0118",
     items: [
       { id: "i3", productName: "Slim Fit Chinos – Khaki", sku: "CHI-KHK-32", quantity: 40, unitPrice: 89, taxRate: 0.1 },
       { id: "i4", productName: "Slim Fit Chinos – Black", sku: "CHI-BLK-34", quantity: 30, unitPrice: 89, taxRate: 0.1 },
@@ -206,7 +206,7 @@ export const INVOICES: Invoice[] = [
     amount: 14751, // net 13410 + tax 1341
     paid: 8500,
     status: "Partially Paid",
-    linkedPO: "PO-10040",
+    linkedPO: "PO-2026-0112",
     items: [
       { id: "i5", productName: "Merino Wool Blazer – Charcoal", sku: "BLZ-CHR-42", quantity: 20, unitPrice: 450, taxRate: 0.1, discount: { type: "percentage", value: 10 } },
       { id: "i6", productName: "Oxford Dress Shirt – Light Blue", sku: "SHR-LBL-M", quantity: 60, unitPrice: 98, taxRate: 0.1, discount: { type: "fixed", value: 480 } },
@@ -224,7 +224,7 @@ export const INVOICES: Invoice[] = [
     amount: 27478, // computed with discounts
     paid: 20000,
     status: "Overdue",
-    linkedPO: "PO-10039",
+    linkedPO: "PO-2026-0105",
     orderDiscount: { type: "fixed", value: 1000, label: "Loyalty Rebate" },
     items: [
       { id: "i7", productName: "Cashmere Overcoat – Camel", sku: "COT-CML-L", quantity: 15, unitPrice: 1200, taxRate: 0.1 },
@@ -245,7 +245,7 @@ export const INVOICES: Invoice[] = [
     amount: 9130,
     paid: 9130,
     status: "Paid",
-    linkedPO: "PO-10038",
+    linkedPO: "PO-2026-0098",
     items: [
       { id: "i10", productName: "Performance Running Shoe – Black", sku: "SHO-BLK-10", quantity: 25, unitPrice: 220, taxRate: 0.1 },
       { id: "i11", productName: "Athletic Socks 3-Pack", sku: "SOC-MIX-M", quantity: 80, unitPrice: 35, taxRate: 0.1 },
@@ -263,7 +263,7 @@ export const INVOICES: Invoice[] = [
     amount: 13637, // net 12397.5 + tax ~1239.75
     paid: 13637,
     status: "Paid",
-    linkedPO: "PO-10037",
+    linkedPO: "PO-2026-0092",
     orderDiscount: { type: "percentage", value: 5, label: "Early Order Discount 5%" },
     items: [
       { id: "i12", productName: "Denim Jacket – Indigo Wash", sku: "JKT-IND-M", quantity: 30, unitPrice: 285, taxRate: 0.1 },
@@ -282,7 +282,7 @@ export const INVOICES: Invoice[] = [
     amount: 18216, // net 16560 + tax 1656
     paid: 10000,
     status: "Overdue",
-    linkedPO: "PO-10036",
+    linkedPO: "PO-2026-0085",
     items: [
       { id: "i14", productName: "Down Puffer Vest – Navy", sku: "VST-NAV-L", quantity: 40, unitPrice: 310, taxRate: 0.1, discount: { type: "percentage", value: 10 } },
       { id: "i15", productName: "Fleece Hoodie – Grey", sku: "HOD-GRY-XL", quantity: 50, unitPrice: 120, taxRate: 0.1 },
@@ -300,7 +300,7 @@ export const INVOICES: Invoice[] = [
     amount: 8855,
     paid: 8855,
     status: "Paid",
-    linkedPO: "PO-10035",
+    linkedPO: "PO-2026-0078",
     items: [
       { id: "i16", productName: "Linen Shorts – Olive", sku: "SHT-OLV-32", quantity: 60, unitPrice: 78, taxRate: 0.1 },
       { id: "i17", productName: "Canvas Sneaker – White", sku: "SNK-WHT-9", quantity: 25, unitPrice: 134, taxRate: 0.1 },

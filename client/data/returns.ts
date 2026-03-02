@@ -94,7 +94,7 @@ export function canRaiseReturn(invoiceDate: string): boolean {
 
 // ── ID Generation ───────────────────────────────────────────────────
 
-let _nextClaimId = 4;
+let _nextClaimId = 6;
 export function generateClaimId(): string {
   return `CL-${String(10000 + _nextClaimId++)}`;
 }
@@ -257,7 +257,7 @@ export const RETURN_CLAIMS: ReturnClaim[] = [
     returnType: "partial",
     items: [
       {
-        itemId: "i11",
+        itemId: "i3",
         productName: "Slim Fit Chinos – Khaki",
         sku: "CHI-KHK-32",
         deliveredQty: 40,
@@ -285,23 +285,23 @@ export const RETURN_CLAIMS: ReturnClaim[] = [
   {
     id: "5",
     claimId: "CL-10005",
-    invoiceNumber: "INV-44612",
+    invoiceNumber: "INV-44481",
     returnType: "partial",
     items: [
       {
-        itemId: "i12",
+        itemId: "i17",
         productName: "Canvas Sneaker – White",
         sku: "SNK-WHT-9",
-        deliveredQty: 30,
+        deliveredQty: 25,
         alreadyReturned: 0,
         returnQty: 8,
         approvedQty: 0,
-        unitPrice: 95,
+        unitPrice: 134,
         reason: "Other",
       },
     ],
     status: "Rejected",
-    claimedAmount: 760,
+    claimedAmount: 1072,
     approvedAmount: 0,
     comment: "Customers changed their minds after purchase. Requesting return of 8 units.",
     attachments: [],

@@ -33,8 +33,8 @@ export interface RiskCard {
 }
 
 export const riskCards: RiskCard[] = [
-  { key: "overdue", label: "Overdue Invoices", count: 3, amount: 12400, severity: "critical" },
-  { key: "partial", label: "Partially Paid", count: 2, amount: 8750, severity: "warning" },
+  { key: "overdue", label: "Overdue Invoices", count: 2, amount: 15694, severity: "critical" },
+  { key: "partial", label: "Partially Paid", count: 1, amount: 6251, severity: "warning" },
   { key: "pending-credit", label: "Pending Credit Approval", count: 4, amount: 20000, severity: "warning" },
   { key: "high-util", label: "High Utilization", count: 0, amount: 0, severity: "info" },
 ];
@@ -51,19 +51,17 @@ export interface RiskDetailRow {
 
 export const riskDetailData: Record<string, RiskDetailRow[]> = {
   overdue: [
-    { id: "1", reference: "INV-2026-0041", date: "2026-01-05", amount: 4200, status: "45 days overdue", daysOverdue: 45 },
-    { id: "2", reference: "INV-2026-0038", date: "2026-01-12", amount: 5100, status: "38 days overdue", daysOverdue: 38 },
-    { id: "3", reference: "INV-2026-0044", date: "2026-01-28", amount: 3100, status: "22 days overdue", daysOverdue: 22 },
+    { id: "1", reference: "INV-44690", date: "2026-01-28", amount: 7478, status: "Overdue", daysOverdue: 33 },
+    { id: "2", reference: "INV-44510", date: "2025-12-18", amount: 8216, status: "Overdue", daysOverdue: 74 },
   ],
   partial: [
-    { id: "1", reference: "INV-2026-0032", date: "2025-12-18", amount: 5250, status: "$2,500 remaining" },
-    { id: "2", reference: "INV-2026-0036", date: "2025-12-28", amount: 3500, status: "$1,200 remaining" },
+    { id: "1", reference: "INV-44756", date: "2026-02-12", amount: 6251, status: "$6,251 remaining" },
   ],
   "pending-credit": [
-    { id: "1", reference: "PO-2026-0112", date: "2026-02-18", amount: 6500, status: "Under Review" },
-    { id: "2", reference: "PO-2026-0115", date: "2026-02-19", amount: 4200, status: "Under Review" },
-    { id: "3", reference: "PO-2026-0118", date: "2026-02-20", amount: 5800, status: "Under Review" },
-    { id: "4", reference: "PO-2026-0121", date: "2026-02-21", amount: 3500, status: "Pending Documents" },
+    { id: "1", reference: "PO-2026-0121", date: "2026-02-21", amount: 12400, status: "Confirmed" },
+    { id: "2", reference: "PO-2026-0112", date: "2026-02-08", amount: 14880, status: "Under Review" },
+    { id: "3", reference: "PO-2026-0118", date: "2026-02-14", amount: 6230, status: "Under Review" },
+    { id: "4", reference: "PO-2026-0105", date: "2026-01-22", amount: 28250, status: "Under Review" },
   ],
   "high-util": [],
 };
@@ -93,11 +91,11 @@ export interface RecentOrder {
 }
 
 export const recentOrders: RecentOrder[] = [
-  { id: "1", poNumber: "PO-2026-0121", date: "2026-02-21", brand: "Arrow", amount: 3500, status: "Pending", statusColor: "#D97706" },
-  { id: "2", poNumber: "PO-2026-0118", date: "2026-02-20", brand: "Jessica Simpson", amount: 5800, status: "Pending", statusColor: "#D97706" },
-  { id: "3", poNumber: "PO-2026-0115", date: "2026-02-19", brand: "Buffalo", amount: 4200, status: "Approved", statusColor: "#16A34A" },
-  { id: "4", poNumber: "PO-2026-0110", date: "2026-02-17", brand: "Joe's Jeans", amount: 7100, status: "Shipped", statusColor: "#2563EB" },
-  { id: "5", poNumber: "PO-2026-0108", date: "2026-02-15", brand: "Herve Leger", amount: 9200, status: "Shipped", statusColor: "#2563EB" },
+  { id: "1", poNumber: "PO-2026-0121", date: "2026-02-21", brand: "Centric Brands", amount: 12400, status: "Confirmed", statusColor: "#16A34A" },
+  { id: "2", poNumber: "PO-2026-0118", date: "2026-02-14", brand: "Centric Brands", amount: 6230, status: "Delivered", statusColor: "#2563EB" },
+  { id: "3", poNumber: "PO-2026-0112", date: "2026-02-08", brand: "Centric Brands", amount: 14880, status: "Delivered", statusColor: "#2563EB" },
+  { id: "4", poNumber: "PO-2026-0105", date: "2026-01-22", brand: "Centric Brands", amount: 28250, status: "Delivered", statusColor: "#2563EB" },
+  { id: "5", poNumber: "PO-2026-0098", date: "2026-01-15", brand: "Centric Brands", amount: 8300, status: "Delivered", statusColor: "#2563EB" },
 ];
 
 // ─── Support ───
@@ -114,8 +112,8 @@ export const supportData = {
   openTickets: 2,
   slaAtRisk: 1,
   tickets: [
-    { id: "TK-4021", subject: "Missing items in shipment PO-2026-0098", status: "Open", priority: "High", created: "2026-02-18", lastUpdate: "2026-02-21" },
-    { id: "TK-4019", subject: "Invoice discrepancy on INV-2026-0038", status: "In Progress", priority: "Medium", created: "2026-02-15", lastUpdate: "2026-02-20" },
+    { id: "TK-10001", subject: "Wrong sizes received in last shipment PO-2026-0121", status: "Open", priority: "High", created: "2026-02-20", lastUpdate: "2026-02-24" },
+    { id: "TK-10002", subject: "Discrepancy in invoice amount INV-44690", status: "Open", priority: "Medium", created: "2026-02-18", lastUpdate: "2026-02-23" },
   ] as SupportTicket[],
 };
 
