@@ -55,7 +55,7 @@ export default function ExposureByAging() {
       {/* Oldest invoice callout */}
       <div className="mt-3 flex items-center gap-1.5">
         <span className="text-xs" style={{ color: config.secondaryColor }}>Oldest Invoice:</span>
-        <span className="text-xs font-medium" style={{ color: config.primaryColor }}>INV-44281</span>
+        <span className="text-xs font-medium" style={{ color: config.primaryColor }}>INV-44510</span>
         <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ color: "#DC2626", backgroundColor: "transparent", border: "1px solid #DC2626" }}>
           74 days overdue
         </span>

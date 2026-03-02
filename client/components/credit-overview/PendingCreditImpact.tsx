@@ -1,10 +1,10 @@
 import { activeBrandConfig } from "../../config/brandConfig";
 
 const pendingOrders = [
-  { po: "PO-2026-0145", amount: 6500 },
-  { po: "PO-2026-0148", amount: 4200 },
-  { po: "PO-2026-0151", amount: 5800 },
-  { po: "PO-2026-0153", amount: 3500 },
+  { po: "PO-2026-0121", amount: 12400 },
+  { po: "PO-2026-0118", amount: 6230 },
+  { po: "PO-2026-0112", amount: 14880 },
+  { po: "PO-2026-0105", amount: 28250 },
 ];
 
 function fmt(val: number): string {
