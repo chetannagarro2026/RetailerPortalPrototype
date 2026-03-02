@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useSyncExternalStore } from "react";
 import { Input, Badge } from "antd";
 import {
   SearchOutlined,
@@ -12,6 +12,8 @@ import { activeBrandConfig } from "../../config/brandConfig";
 import { searchCatalog, type SearchResult } from "../../data/skuIndex";
 import CartDropdown, { useCartCount } from "./CartDropdown";
 import { useAuth } from "../../context/AuthContext";
+import { getUnreadCount, subscribe } from "../../data/notifications";
+import NotificationDropdown from "../notifications/NotificationDropdown";
 
 export default function Header() {
   const config = activeBrandConfig;
@@ -19,6 +21,9 @@ export default function Header() {
   const cartCount = useCartCount();
   const { isAuthenticated } = useAuth();
   const [cartOpen, setCartOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const unreadCount = useSyncExternalStore(subscribe, getUnreadCount);
+  const notifRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Search state
@@ -140,11 +145,17 @@ export default function Header() {
           </button>
 
           {isAuthenticated && (
-            <Badge dot size="small" offset={[-2, 2]}>
-              <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50">
-                <BellOutlined className="text-lg" />
-              </button>
-            </Badge>
+            <div className="relative" ref={notifRef}>
+              <Badge count={unreadCount} size="small" offset={[-4, 4]} overflowCount={99}>
+                <button
+                  className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50 cursor-pointer border-none bg-transparent"
+                  onClick={() => setNotifOpen((p) => !p)}
+                >
+                  <BellOutlined className="text-lg" />
+                </button>
+              </Badge>
+              <NotificationDropdown open={notifOpen} onClose={() => setNotifOpen(false)} />
+            </div>
           )}
 
           {/* Cart Icon */}

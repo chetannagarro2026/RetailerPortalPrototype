@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { UserOutlined, LockOutlined, BellOutlined } from "@ant-design/icons";
+import { useSearchParams } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import ProfileTab from "../components/settings/ProfileTab";
 import SecurityTab from "../components/settings/SecurityTab";
@@ -16,7 +17,12 @@ type TabKey = (typeof tabs)[number]["key"];
 
 export default function SettingsPage() {
   const config = activeBrandConfig;
-  const [activeTab, setActiveTab] = useState<TabKey>("profile");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "notifications" || tab === "security" || tab === "profile") return tab;
+    return "profile";
+  });
   const [pendingTab, setPendingTab] = useState<TabKey | null>(null);
   const dirtyRef = useRef(false);
 

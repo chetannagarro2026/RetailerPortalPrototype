@@ -1,150 +1,350 @@
-import { useState, useEffect, useRef } from "react";
-import { LoadingOutlined } from "@ant-design/icons";
+import { useState, useEffect } from "react";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useToast } from "../toast/ToastProvider";
+import type { NotificationEventType } from "../../data/notifications";
 
 interface Props {
   setDirty: (v: boolean) => void;
 }
 
-interface Preferences {
-  orderSubmitted: boolean;
-  orderApproved: boolean;
-  orderShipped: boolean;
-  orderRejected: boolean;
-  creditApproval: boolean;
-  paymentReminder: boolean;
-  invoiceGenerated: boolean;
-  inApp: boolean;
-  emailNotifications: boolean;
+// ── Event definitions by category ───────────────────────────────────
+
+interface EventRow {
+  key: NotificationEventType;
+  label: string;
+  mandatory?: boolean; // cannot disable in-app
 }
 
-const INITIAL: Preferences = {
-  orderSubmitted: true,
-  orderApproved: true,
-  orderShipped: true,
-  orderRejected: true,
-  creditApproval: true,
-  paymentReminder: true,
-  invoiceGenerated: false,
-  inApp: true,
-  emailNotifications: true,
-};
+interface CategoryGroup {
+  title: string;
+  events: EventRow[];
+}
 
-const ORDER_ITEMS: { key: keyof Preferences; label: string }[] = [
-  { key: "orderSubmitted", label: "Order Submitted" },
-  { key: "orderApproved", label: "Order Approved" },
-  { key: "orderShipped", label: "Order Shipped" },
-  { key: "orderRejected", label: "Order Rejected" },
+const CATEGORIES: CategoryGroup[] = [
+  {
+    title: "Financial",
+    events: [
+      { key: "invoice_generated", label: "Invoice Generated" },
+      { key: "invoice_due", label: "Invoice Due Reminder" },
+      { key: "invoice_overdue", label: "Invoice Overdue", mandatory: true },
+      { key: "credit_note_issued", label: "Credit Note Issued" },
+      { key: "credit_note_reflected", label: "Credit Note Reflected in Ledger" },
+    ],
+  },
+  {
+    title: "Returns & Claims",
+    events: [
+      { key: "claim_submitted", label: "Claim Submitted" },
+      { key: "claim_approved", label: "Claim Approved" },
+      { key: "claim_rejected", label: "Claim Rejected", mandatory: true },
+      { key: "return_credit_generated", label: "Credit Note Generated" },
+      { key: "return_credit_reflected", label: "Credit Note Reflected" },
+    ],
+  },
+  {
+    title: "Support",
+    events: [
+      { key: "ticket_reply", label: "New Ticket Reply", mandatory: true },
+      { key: "ticket_closed", label: "Ticket Closed" },
+    ],
+  },
+  {
+    title: "Orders",
+    events: [
+      { key: "po_confirmed", label: "PO Confirmed" },
+      { key: "po_shipped", label: "PO Shipped" },
+      { key: "po_delayed", label: "PO Delayed" },
+    ],
+  },
 ];
 
-const FINANCIAL_ITEMS: { key: keyof Preferences; label: string }[] = [
-  { key: "creditApproval", label: "Credit Approval Required" },
-  { key: "paymentReminder", label: "Payment Reminder" },
-  { key: "invoiceGenerated", label: "Invoice Generated" },
-];
+// ── Default preferences ─────────────────────────────────────────────
 
-const CHANNEL_ITEMS: { key: keyof Preferences; label: string }[] = [
-  { key: "inApp", label: "In-App Notifications" },
-  { key: "emailNotifications", label: "Email Notifications" },
-];
+type ChannelPrefs = Record<NotificationEventType, { inApp: boolean; email: boolean }>;
+
+function buildDefaults(): ChannelPrefs {
+  const emailOnByDefault: NotificationEventType[] = [
+    "invoice_due",
+    "invoice_overdue",
+    "claim_approved",
+    "ticket_reply",
+  ];
+  const prefs = {} as ChannelPrefs;
+  for (const cat of CATEGORIES) {
+    for (const evt of cat.events) {
+      prefs[evt.key] = {
+        inApp: true,
+        email: emailOnByDefault.includes(evt.key),
+      };
+    }
+  }
+  return prefs;
+}
+
+// ── Component ───────────────────────────────────────────────────────
 
 export default function NotificationsTab({ setDirty }: Props) {
   const config = activeBrandConfig;
   const { showToast } = useToast();
-  const [prefs, setPrefs] = useState<Preferences>(INITIAL);
-  const lastSavedRef = useRef<Preferences>(INITIAL);
-  const [saving, setSaving] = useState(false);
+  const [prefs, setPrefs] = useState<ChannelPrefs>(buildDefaults);
+  const [masterEmail, setMasterEmail] = useState(true);
 
-  const toggle = (key: keyof Preferences) => {
-    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
-    setDirty(true);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setSaving(false);
-    setDirty(false);
-    lastSavedRef.current = { ...prefs };
-    showToast("success", "Notification preferences saved.");
-  };
-
+  // Keep parent dirty state in sync (not used for save button anymore)
   useEffect(() => () => setDirty(false), [setDirty]);
+
+  const toggleChannel = (
+    key: NotificationEventType,
+    channel: "inApp" | "email",
+    mandatory: boolean | undefined,
+  ) => {
+    if (mandatory && channel === "inApp") return; // can't disable mandatory in-app
+    setPrefs((prev) => {
+      const updated = {
+        ...prev,
+        [key]: { ...prev[key], [channel]: !prev[key][channel] },
+      };
+      return updated;
+    });
+    // Instant save with toast
+    showToast("success", "Preferences updated.");
+  };
+
+  const toggleMasterEmail = () => {
+    const next = !masterEmail;
+    setMasterEmail(next);
+    if (!next) {
+      // Turn off all emails
+      setPrefs((prev) => {
+        const updated = { ...prev };
+        for (const key of Object.keys(updated) as NotificationEventType[]) {
+          updated[key] = { ...updated[key], email: false };
+        }
+        return updated;
+      });
+    }
+    showToast("success", "Preferences updated.");
+  };
 
   return (
     <div>
-      {/* Section title */}
+      {/* Page title */}
       <div className="mb-6">
-        <h3 className="text-base font-semibold m-0" style={{ color: config.primaryColor }}>
+        <h3
+          className="text-base font-semibold m-0 mb-1"
+          style={{ color: config.primaryColor }}
+        >
           Notification Preferences
         </h3>
+        <p className="text-xs m-0" style={{ color: config.secondaryColor }}>
+          Settings apply to your entire business account. Changes save instantly.
+        </p>
       </div>
 
-      {/* Group 1 — Order Updates */}
-      <CheckboxGroup title="Order Updates" items={ORDER_ITEMS} values={prefs} onToggle={toggle} />
+      {/* Master email toggle */}
+      <MasterToggle
+        label="Email Notifications"
+        description="Enable or disable all email notifications"
+        checked={masterEmail}
+        onToggle={toggleMasterEmail}
+      />
 
-      {/* Group 2 — Financial Updates */}
-      <CheckboxGroup title="Financial Updates" items={FINANCIAL_ITEMS} values={prefs} onToggle={toggle} />
+      {/* Column headers */}
+      <div
+        className="flex items-center py-2 px-1 mb-2"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        <span className="flex-1 text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
+          Event
+        </span>
+        <span className="w-16 text-center text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
+          In-App
+        </span>
+        <span className="w-16 text-center text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
+          Email
+        </span>
+      </div>
 
-      {/* Group 3 — Channel Preferences */}
-      <CheckboxGroup title="Channel Preferences" items={CHANNEL_ITEMS} values={prefs} onToggle={toggle} />
+      {/* Category groups */}
+      {CATEGORIES.map((cat) => (
+        <div key={cat.title} className="mb-5">
+          <h4
+            className="text-xs font-semibold uppercase tracking-wider m-0 mb-2 px-1"
+            style={{ color: config.secondaryColor }}
+          >
+            {cat.title}
+          </h4>
+          <div
+            className="rounded-lg overflow-hidden"
+            style={{ border: `1px solid ${config.borderColor}` }}
+          >
+            {cat.events.map((evt, i) => (
+              <EventToggleRow
+                key={evt.key}
+                event={evt}
+                inApp={prefs[evt.key].inApp}
+                email={prefs[evt.key].email}
+                emailDisabled={!masterEmail}
+                onToggle={(channel) =>
+                  toggleChannel(evt.key, channel, evt.mandatory)
+                }
+                isLast={i === cat.events.length - 1}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-      {/* Save button */}
-      <div className="flex justify-end mt-6">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="text-sm font-medium px-6 py-2.5 rounded-lg text-white cursor-pointer border-none disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
-          style={{ backgroundColor: config.primaryColor }}
-        >
-          {saving && <LoadingOutlined style={{ fontSize: 14 }} />}
-          Save Preferences
-        </button>
+// ── Master Toggle ───────────────────────────────────────────────────
+
+function MasterToggle({
+  label,
+  description,
+  checked,
+  onToggle,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="flex items-center justify-between p-4 rounded-lg mb-5"
+      style={{
+        border: `1px solid ${config.borderColor}`,
+        backgroundColor: config.cardBg,
+      }}
+    >
+      <div>
+        <p className="text-sm font-medium m-0" style={{ color: config.primaryColor }}>
+          {label}
+        </p>
+        <p className="text-xs m-0 mt-0.5" style={{ color: config.secondaryColor }}>
+          {description}
+        </p>
+      </div>
+      <ToggleSwitch checked={checked} onChange={onToggle} />
+    </div>
+  );
+}
+
+// ── Event Toggle Row ────────────────────────────────────────────────
+
+function EventToggleRow({
+  event,
+  inApp,
+  email,
+  emailDisabled,
+  onToggle,
+  isLast,
+}: {
+  event: EventRow;
+  inApp: boolean;
+  email: boolean;
+  emailDisabled: boolean;
+  onToggle: (channel: "inApp" | "email") => void;
+  isLast: boolean;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="flex items-center px-4 py-3"
+      style={{
+        backgroundColor: "#fff",
+        borderBottom: isLast ? "none" : `1px solid ${config.borderColor}`,
+      }}
+    >
+      {/* Label */}
+      <div className="flex-1 min-w-0">
+        <span className="text-sm" style={{ color: config.primaryColor }}>
+          {event.label}
+        </span>
+        {event.mandatory && (
+          <span
+            className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-medium"
+            style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
+            title="Required notification"
+          >
+            Required
+          </span>
+        )}
+      </div>
+
+      {/* In-App toggle */}
+      <div className="w-16 flex justify-center" title={event.mandatory ? "Required notification" : ""}>
+        <ToggleSwitch
+          checked={inApp}
+          onChange={() => onToggle("inApp")}
+          disabled={event.mandatory}
+          size="small"
+        />
+      </div>
+
+      {/* Email toggle */}
+      <div className="w-16 flex justify-center">
+        <ToggleSwitch
+          checked={email}
+          onChange={() => onToggle("email")}
+          disabled={emailDisabled}
+          size="small"
+        />
       </div>
     </div>
   );
 }
 
-// ── Checkbox Group ──────────────────────────────────────────────────
+// ── Toggle Switch ───────────────────────────────────────────────────
 
-function CheckboxGroup({
-  title,
-  items,
-  values,
-  onToggle,
+function ToggleSwitch({
+  checked,
+  onChange,
+  disabled,
+  size = "default",
 }: {
-  title: string;
-  items: { key: keyof Preferences; label: string }[];
-  values: Preferences;
-  onToggle: (key: keyof Preferences) => void;
+  checked: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+  size?: "default" | "small";
 }) {
   const config = activeBrandConfig;
+  const w = size === "small" ? 36 : 44;
+  const h = size === "small" ? 20 : 24;
+  const dot = size === "small" ? 16 : 20;
+  const offset = checked ? w - dot - 2 : 2;
 
   return (
-    <div className="mb-6">
-      <h4 className="text-xs font-semibold uppercase tracking-wider m-0 mb-3" style={{ color: config.secondaryColor }}>
-        {title}
-      </h4>
-      <div className="space-y-2.5">
-        {items.map((item) => (
-          <label
-            key={item.key}
-            className="flex items-center gap-2.5 cursor-pointer select-none"
-          >
-            <input
-              type="checkbox"
-              checked={values[item.key]}
-              onChange={() => onToggle(item.key)}
-              className="w-4 h-4 rounded cursor-pointer"
-              style={{ accentColor: config.primaryColor }}
-            />
-            <span className="text-sm" style={{ color: config.primaryColor }}>
-              {item.label}
-            </span>
-          </label>
-        ))}
-      </div>
-    </div>
+    <button
+      role="switch"
+      aria-checked={checked}
+      onClick={disabled ? undefined : onChange}
+      className="relative rounded-full border-none p-0 transition-colors"
+      style={{
+        width: w,
+        height: h,
+        backgroundColor: disabled
+          ? "#E5E7EB"
+          : checked
+          ? config.primaryColor
+          : "#D1D5DB",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      <span
+        className="absolute rounded-full bg-white transition-all shadow-sm"
+        style={{
+          width: dot,
+          height: dot,
+          top: 2,
+          left: offset,
+        }}
+      />
+    </button>
   );
 }
