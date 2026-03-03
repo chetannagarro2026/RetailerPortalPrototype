@@ -24,7 +24,6 @@ export default function Header() {
   const [notifOpen, setNotifOpen] = useState(false);
   const unreadCount = useSyncExternalStore(subscribe, getUnreadCount);
   const notifRef = useRef<HTMLDivElement>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,22 +62,8 @@ export default function Header() {
     navigate(`/product/${result.product.id}`);
   };
 
-  const clearTimer = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-    }
-  }, []);
-
-  const handleCartEnter = useCallback(() => {
-    clearTimer();
-    setCartOpen(true);
-  }, [clearTimer]);
-
-  const handleCartLeave = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => {
-      setCartOpen(false);
-    }, 200);
+  const toggleCart = useCallback(() => {
+    setCartOpen((prev) => !prev);
   }, []);
 
   return (
@@ -159,15 +144,11 @@ export default function Header() {
           )}
 
           {/* Cart Icon */}
-          <div
-            className="relative"
-            onMouseEnter={handleCartEnter}
-            onMouseLeave={handleCartLeave}
-          >
+          <div className="relative">
             <Badge count={cartCount} size="small" offset={[-4, 4]}>
               <button
-                className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50 cursor-pointer"
-                onClick={() => navigate("/cart")}
+                className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50 cursor-pointer border-none bg-transparent"
+                onClick={toggleCart}
               >
                 <ShoppingCartOutlined className="text-lg" />
               </button>
