@@ -10,6 +10,7 @@ import {
   CheckCircleOutlined,
   LoginOutlined,
   IdcardOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -48,6 +49,7 @@ const authenticatedSections: DropdownSection[] = [
     items: [
       { key: "credit", label: "Credit Overview", icon: <CreditCardOutlined />, path: "/account/credit" },
       { key: "invoices", label: "Invoices", icon: <FileTextOutlined />, path: "/account/invoices" },
+      { key: "schemes", label: "Schemes & Promotions", icon: <GiftOutlined />, path: "/account/schemes" },
     ],
   },
   {

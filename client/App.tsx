@@ -32,6 +32,8 @@ import TicketDetailPage from "./pages/TicketDetailPage";
 import ReturnsPage from "./pages/ReturnsPage";
 import CreateReturnPage from "./pages/CreateReturnPage";
 import ClaimDetailPage from "./pages/ClaimDetailPage";
+import SchemesPage from "./pages/SchemesPage";
+import SchemeDetailPage from "./pages/SchemeDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +76,8 @@ export default function App() {
               <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />
               <Route path="/account/business-profile" element={<AuthGate message="Sign in to view your business profile."><BusinessProfilePage /></AuthGate>} />
               <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><SettingsPage /></AuthGate>} />
+              <Route path="/account/schemes" element={<AuthGate message="Sign in to view schemes and promotions."><SchemesPage /></AuthGate>} />
+              <Route path="/account/schemes/:schemeId" element={<AuthGate message="Sign in to view scheme details."><SchemeDetailPage /></AuthGate>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
