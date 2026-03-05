@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Pagination } from "antd";
+import { Pagination, Tooltip } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import type { CategoryTree } from "../../services/categoryService";
 import QuickAddPanel from "./QuickAddPanel";
@@ -52,6 +52,7 @@ export default function HybridFamilyTable({
       className="flex gap-0"
       style={panelOpen ? {
         height: "calc(100vh - var(--header-height) - var(--nav-height) - 200px)",
+        overflow: "hidden",
       } : undefined}
     >
       {/* Main table area */}
@@ -61,44 +62,44 @@ export default function HybridFamilyTable({
       >
         <div
           className="rounded-xl overflow-hidden"
-          style={{ border: `1px solid ${config.borderColor}`, minWidth: 500 }}
+          style={{ border: `1px solid ${config.borderColor}`, minWidth: panelOpen ? undefined : 900 }}
         >
-          <table className="w-full border-collapse text-xs">
+          <table className="w-full border-collapse text-xs" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr style={{ backgroundColor: config.cardBg }}>
                 <th
                   className="text-left px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "80px" }}
                 >
                   Image
                 </th>
                 <th
                   className="text-left px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "35%" }}
                 >
                   Product Name
                 </th>
                 <th
                   className="text-left px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "140px" }}
                 >
                   UPC
                 </th>
                 <th
                   className="text-right px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "120px" }}
                 >
                   Price
                 </th>
                 <th
                   className="text-center px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "100px" }}
                 >
                   Stock
                 </th>
                 <th
                   className="text-center px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "120px" }}
                 >
                   Actions
                 </th>
@@ -208,15 +209,17 @@ function ProductRow({
       {/* Product Name */}
       <td
         className="px-4 py-3"
-        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+        style={{ borderBottom: `1px solid ${config.borderColor}`, maxWidth: "300px", wordBreak: "break-word" }}
       >
-        <Link
-          to={productLink}
-          className="text-sm font-medium no-underline hover:underline block"
-          style={{ color: config.primaryColor }}
-        >
-          {product.name}
-        </Link>
+        <Tooltip title={product.name} placement="topLeft">
+          <Link
+            to={productLink}
+            className="text-sm font-medium no-underline hover:underline block line-clamp-2"
+            style={{ color: config.primaryColor }}
+          >
+            {product.name}
+          </Link>
+        </Tooltip>
         {product.brand && (
           <div className="text-[10px] mt-0.5" style={{ color: config.secondaryColor }}>
             {product.brand}
@@ -240,11 +243,11 @@ function ProductRow({
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-          ${product.price.toFixed(2)}
+          {formatPrice(product.price)}
         </span>
         {product.originalPrice && product.originalPrice > product.price && (
           <span className="text-[10px] line-through ml-1.5" style={{ color: config.secondaryColor }}>
-            ${product.originalPrice.toFixed(2)}
+            {formatPrice(product.originalPrice)}
           </span>
         )}
       </td>

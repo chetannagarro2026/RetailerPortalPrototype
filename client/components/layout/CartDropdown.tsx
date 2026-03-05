@@ -1,7 +1,7 @@
 import { Button, InputNumber } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
 
 interface CartDropdownProps {
@@ -70,7 +70,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                         {item.upc}{variantDesc ? ` · ${variantDesc}` : ""}
                       </p>
                       <p className="text-xs mt-1 text-gray-400">
-                        ${item.unitPrice.toFixed(2)} / unit
+                        {formatPrice(item.unitPrice)} / unit
                       </p>
                     </div>
 
@@ -129,7 +129,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
 
                   <div className="flex justify-end mt-1.5">
                     <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
-                      ${(item.quantity * item.unitPrice).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      {formatPrice(item.quantity * item.unitPrice)}
                     </span>
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-600">Estimated Total</span>
               <span className="text-base font-semibold" style={{ color: config.primaryColor }}>
-                ${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                {formatPrice(totalValue)}
               </span>
             </div>
             <Button

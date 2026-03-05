@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Input, Badge } from "antd";
+import { Input, Badge, Tooltip } from "antd";
 import {
   SearchOutlined,
   BellOutlined,
@@ -8,7 +8,7 @@ import {
   LoginOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import { searchCatalog, type SearchResult } from "../../data/skuIndex";
 import CartDropdown, { useCartCount } from "./CartDropdown";
 import { useAuth } from "../../context/AuthContext";
@@ -246,11 +246,13 @@ function SearchDropdown({
               className="w-10 h-10 rounded-lg object-cover shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: config.primaryColor }}>
-                {r.product.name}
-              </p>
+              <Tooltip title={r.product.name} placement="topLeft">
+                <p className="text-sm font-medium line-clamp-2" style={{ color: config.primaryColor }}>
+                  {r.product.name}
+                </p>
+              </Tooltip>
               <p className="text-[11px]" style={{ color: config.secondaryColor }}>
-                {r.product.upc} · ${r.product.price.toFixed(2)}
+                {r.product.upc} · {formatPrice(r.product.price)}
               </p>
             </div>
             <span

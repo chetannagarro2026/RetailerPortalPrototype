@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { InputNumber, Pagination } from "antd";
 import { ShoppingCartOutlined, CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 
@@ -270,7 +270,7 @@ export default function SpreadsheetView({
                     className="px-3 py-2 font-medium whitespace-nowrap"
                     style={{ color: config.primaryColor, borderBottom: `1px solid ${config.borderColor}` }}
                   >
-                    ${row.variant.price.toFixed(2)}
+                    {formatPrice(row.variant.price)}
                   </td>
                   <td
                     className="px-3 py-2 text-center sticky right-0"

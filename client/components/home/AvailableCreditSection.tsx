@@ -1,5 +1,5 @@
 import { RightOutlined, InfoCircleOutlined, DollarOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatCurrency } from "../../config/brandConfig";
 
 // Mock data — would come from API
 const creditData = {
@@ -27,9 +27,6 @@ export default function AvailableCreditSection() {
   const barColor = getBarColor(utilization);
   const utilizationColor = getUtilizationColor(utilization);
   const showAlert = utilization >= 85;
-
-  const formatCurrency = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 0 });
 
   return (
     <div

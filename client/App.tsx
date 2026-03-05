@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { App as AntApp } from "antd";
 import { AuthProvider } from "./context/AuthContext";
+import { CategoryProvider } from "./context/CategoryContext";
 import { OrderProvider } from "./context/OrderContext";
 import { OrderHistoryProvider } from "./context/OrderHistoryContext";
 import AuthGate from "./components/auth/AuthGate";
@@ -27,9 +28,10 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AntApp>
-          <OrderProvider>
-            <OrderHistoryProvider>
-              <BrowserRouter>
+          <CategoryProvider>
+            <OrderProvider>
+              <OrderHistoryProvider>
+                <BrowserRouter>
                 <ScrollToTop />
                 <Layout>
                   <Routes>
@@ -61,8 +63,9 @@ export default function App() {
                   </Routes>
                 </Layout>
               </BrowserRouter>
-            </OrderHistoryProvider>
-          </OrderProvider>
+              </OrderHistoryProvider>
+            </OrderProvider>
+          </CategoryProvider>
         </AntApp>
       </AuthProvider>
     </QueryClientProvider>

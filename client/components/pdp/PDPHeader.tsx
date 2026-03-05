@@ -1,4 +1,4 @@
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 
 interface PDPHeaderProps {
@@ -48,11 +48,11 @@ export default function PDPHeader({ product }: PDPHeaderProps) {
       {/* Base Price */}
       <div className="flex items-baseline gap-2 mb-4">
         <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-          ${product.price.toFixed(2)}
+          {formatPrice(product.price)}
         </span>
         {product.originalPrice && (
           <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-            ${product.originalPrice.toFixed(2)}
+            {formatPrice(product.originalPrice)}
           </span>
         )}
         {product.unitMeasure && (
@@ -79,7 +79,7 @@ export default function PDPHeader({ product }: PDPHeaderProps) {
                   border: `1px solid ${config.borderColor}`,
                 }}
               >
-                {tier.minQty}+ units: <span className="font-semibold">${tier.price.toFixed(2)}</span>
+                {tier.minQty}+ units: <span className="font-semibold">{formatPrice(tier.price)}</span>
               </span>
             ))}
           </div>

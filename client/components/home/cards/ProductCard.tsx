@@ -1,4 +1,5 @@
-import { activeBrandConfig } from "../../../config/brandConfig";
+import { Tooltip } from "antd";
+import { activeBrandConfig, formatPrice } from "../../../config/brandConfig";
 
 export interface Product {
   id: string;
@@ -50,17 +51,19 @@ export default function ProductCard({ data }: { data: Product }) {
         >
           {data.brandName}
         </p>
-        <p
-          className="text-sm font-medium leading-snug mb-1 line-clamp-2"
-          style={{ color: config.primaryColor }}
-        >
-          {data.productName}
-        </p>
+        <Tooltip title={data.productName} placement="top">
+          <p
+            className="text-sm font-medium leading-snug mb-1 line-clamp-2"
+            style={{ color: config.primaryColor }}
+          >
+            {data.productName}
+          </p>
+        </Tooltip>
         <p className="text-xs mb-3" style={{ color: config.secondaryColor }}>
           {data.itemCode}
         </p>
         <p className="text-sm font-semibold mb-2" style={{ color: config.primaryColor }}>
-          ${data.wholesalePrice.toFixed(2)}
+          {formatPrice(data.wholesalePrice)}
         </p>
 
         <button

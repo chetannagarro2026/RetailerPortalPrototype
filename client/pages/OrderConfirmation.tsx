@@ -1,6 +1,6 @@
 import { Link, useLocation, Navigate } from "react-router-dom";
 import { CheckCircleFilled } from "@ant-design/icons";
-import { activeBrandConfig } from "../config/brandConfig";
+import { activeBrandConfig, formatCurrency } from "../config/brandConfig";
 
 interface OrderSummaryState {
   orderNumber: string;
@@ -31,9 +31,6 @@ export default function OrderConfirmation() {
   if (!order) {
     return <Navigate to="/catalog" replace />;
   }
-
-  const fmt = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
@@ -67,7 +64,7 @@ export default function OrderConfirmation() {
               Order Total
             </p>
             <p className="text-lg font-semibold mt-0.5" style={{ color: config.primaryColor }}>
-              {fmt(order.totalValue)}
+              {formatCurrency(order.totalValue)}
             </p>
           </div>
         </div>
@@ -86,7 +83,7 @@ export default function OrderConfirmation() {
                   </span>
                 </span>
                 <span className="font-medium" style={{ color: config.primaryColor }}>
-                  {fmt(item.quantity * item.unitPrice)}
+                  {formatCurrency(item.quantity * item.unitPrice)}
                 </span>
               </div>
             ))}

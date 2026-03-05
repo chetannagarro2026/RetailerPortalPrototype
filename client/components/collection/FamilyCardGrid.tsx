@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Pagination } from "antd";
+import { Pagination, Tooltip } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import QuickAddPanel from "./QuickAddPanel";
 
@@ -183,13 +183,15 @@ function ProductCard({
           </p>
         )}
 
-        <Link
-          to={productLink}
-          className="text-xs font-medium leading-snug mb-1.5 line-clamp-2 no-underline hover:underline"
-          style={{ color: config.primaryColor }}
-        >
-          {product.name}
-        </Link>
+        <Tooltip title={product.name} placement="top">
+          <Link
+            to={productLink}
+            className="text-xs font-medium leading-snug mb-1.5 line-clamp-2 no-underline hover:underline block"
+            style={{ color: config.primaryColor }}
+          >
+            {product.name}
+          </Link>
+        </Tooltip>
 
         {/* UPC */}
         <p className="text-[9px] font-mono mb-2" style={{ color: config.secondaryColor }}>
@@ -199,11 +201,11 @@ function ProductCard({
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-base font-bold" style={{ color: config.primaryColor }}>
-            ${product.price.toFixed(2)}
+            {formatPrice(product.price)}
           </span>
           {product.originalPrice && product.originalPrice > product.price && (
             <span className="text-xs line-through" style={{ color: config.secondaryColor }}>
-              ${product.originalPrice.toFixed(2)}
+              {formatPrice(product.originalPrice)}
             </span>
           )}
         </div>

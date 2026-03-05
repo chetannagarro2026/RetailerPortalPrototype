@@ -22,10 +22,20 @@ const EXTERNAL_PO_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PO_API_PATH |
 const EXTERNAL_CONFIG_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_CONFIG_API_PATH || "/configuration/dev/api/v1"}`;
 const EXTERNAL_SALES_ORDER_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_SALES_ORDER_API_PATH || "/salesorder/dev/api/v1"}`;
 
+// Price API configuration
+const PRICE_CHANNEL_CODE = import.meta.env.VITE_PRICE_CHANNEL_CODE || "CENTRIC_USA_ECOM";
+const PRICE_ACCOUNT_ID = import.meta.env.VITE_PRICE_ACCOUNT_ID || 9028;
+
+// Catalog configuration
+const BRANDS_CATALOG_CODE = import.meta.env.VITE_BRANDS_CATALOG_CODE || "centric_brands_catalog";
+
 export const apiConfig = {
   base: BASE_URL,
   externalBase: EXTERNAL_API_BASE,
   imageBase: IMAGE_BASE_URL,
+  priceChannelCode: PRICE_CHANNEL_CODE,
+  priceAccountId: PRICE_ACCOUNT_ID,
+  brandsCatalogCode: BRANDS_CATALOG_CODE,
 
   // Endpoint paths
   endpoints: {
@@ -42,6 +52,9 @@ export const apiConfig = {
 
     // Categories (tree by parent)
     categoriesTreeByParent: (parentId: string) => `${EXTERNAL_API_BASE}/categories/treeByParent/${parentId}`,
+    
+    // Categories by parent code
+    categoriesByParentCode: (parentCode: string) => `${EXTERNAL_API_BASE}/categories/dtoListByParent/code/${parentCode}`,
 
     // Products by category
     productsByCategory: (categoryId: string, page = 0, size = 10) =>

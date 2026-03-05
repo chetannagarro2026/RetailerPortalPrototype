@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { InputNumber } from "antd";
+import { InputNumber, Tooltip } from "antd";
 import { CloseOutlined, WarningOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
 import { useCreditState } from "../../hooks/useCreditState";
 import type { CatalogProduct } from "../../data/catalogData";
@@ -116,12 +116,14 @@ export default function QuickAddPanel({
             }}
           />
           <div className="min-w-0 flex-1">
-            <h4
-              className="text-sm font-semibold mb-1 leading-snug"
-              style={{ color: config.primaryColor }}
-            >
-              {product.name}
-            </h4>
+            <Tooltip title={product.name} placement="topLeft">
+              <h4
+                className="text-sm font-semibold mb-1 leading-snug line-clamp-2"
+                style={{ color: config.primaryColor }}
+              >
+                {product.name}
+              </h4>
+            </Tooltip>
             {product.brand && (
               <p className="text-[10px] mb-2" style={{ color: config.secondaryColor }}>
                 {product.brand}
@@ -154,7 +156,7 @@ export default function QuickAddPanel({
               Unit Price
             </span>
             <span className="text-lg font-bold" style={{ color: config.primaryColor }}>
-              ${product.price.toFixed(2)}
+              {formatPrice(product.price)}
             </span>
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
@@ -163,7 +165,7 @@ export default function QuickAddPanel({
                 Original
               </span>
               <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-                ${product.originalPrice.toFixed(2)}
+                {formatPrice(product.originalPrice)}
               </span>
             </div>
           )}
@@ -241,7 +243,7 @@ export default function QuickAddPanel({
               Subtotal
             </span>
             <span className="text-xl font-bold" style={{ color: config.primaryColor }}>
-              ${subtotal.toFixed(2)}
+              {formatPrice(subtotal)}
             </span>
           </div>
         </div>

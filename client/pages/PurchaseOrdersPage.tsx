@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FileTextOutlined, EyeOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../config/brandConfig";
+import { activeBrandConfig, formatCurrency } from "../config/brandConfig";
 import { useOrderHistory, type PurchaseOrder } from "../context/OrderHistoryContext";
 
 // ── Status Badge ────────────────────────────────────────────────────
@@ -35,8 +35,6 @@ function OrderDetailPanel({
   onClose: () => void;
 }) {
   const config = activeBrandConfig;
-  const fmt = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   return (
     <div
@@ -87,7 +85,7 @@ function OrderDetailPanel({
             Total
           </p>
           <p className="text-sm font-semibold mt-0.5" style={{ color: config.primaryColor }}>
-            {fmt(order.totalValue)}
+            {formatCurrency(order.totalValue)}
           </p>
         </div>
       </div>
@@ -147,7 +145,7 @@ function OrderDetailPanel({
                   </div>
                 </div>
                 <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
-                  {fmt(item.quantity * item.unitPrice)}
+                  {formatCurrency(item.quantity * item.unitPrice)}
                 </span>
               </div>
             );
@@ -164,9 +162,6 @@ export default function PurchaseOrdersPage() {
   const config = activeBrandConfig;
   const { orders } = useOrderHistory();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
-
-  const fmt = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   const detail = selectedOrder ? orders.find((o) => o.orderNumber === selectedOrder) : null;
 
@@ -255,7 +250,7 @@ export default function PurchaseOrdersPage() {
               {order.shipping.address}, {order.shipping.city}, {order.shipping.state} {order.shipping.zip}
             </span>
             <span className="text-sm font-medium text-right" style={{ color: config.primaryColor }}>
-              {fmt(order.totalValue)}
+              {formatCurrency(order.totalValue)}
             </span>
             <span className="text-xs" style={{ color: config.secondaryColor }}>
               {order.paymentMethod}

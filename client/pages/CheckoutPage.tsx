@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { activeBrandConfig } from "../config/brandConfig";
+import { activeBrandConfig, formatCurrency } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
 import { useOrderHistory, type PurchaseOrder, type SavedAddress } from "../context/OrderHistoryContext";
 import { useAuth } from "../context/AuthContext";
@@ -303,7 +303,7 @@ function ShippingStep({
             <FormField label="Phone" value={newForm.phone} onChange={(v) => updateNew("phone", v)} />
           </div>
 
-          <div className="flex flex-col gap-2 mt-4">
+          {/* <div className="flex flex-col gap-2 mt-4">
             <Checkbox checked={saveToBook} onChange={(e) => setSaveToBook(e.target.checked)}>
               <span className="text-xs" style={{ color: config.secondaryColor }}>
                 Save to address book
@@ -316,19 +316,19 @@ function ShippingStep({
                 </span>
               </Checkbox>
             )}
-          </div>
+          </div> */}
         </div>
       )}
 
       {/* Order Notes (always visible) */}
-      <div className="mb-5">
+      {/* <div className="mb-5">
         <FormField
           label="Order Notes"
           value={shipping.notes}
           onChange={(v) => onChange({ ...shipping, notes: v })}
           textarea
         />
-      </div>
+      </div> */}
 
       <div className="flex justify-end">
         <Button
@@ -372,8 +372,6 @@ function ReviewStep({
   isSubmitting: boolean;
 }) {
   const config = activeBrandConfig;
-  const fmt = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   return (
     <div className="space-y-5">
@@ -426,7 +424,7 @@ function ReviewStep({
                   </p>
                 </div>
                 <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
-                  {fmt(item.quantity * item.unitPrice)}
+                  {formatCurrency(item.quantity * item.unitPrice)}
                 </span>
               </div>
             );
@@ -438,7 +436,7 @@ function ReviewStep({
               Total ({totalUnits} units)
             </span>
             <span className="text-base font-semibold" style={{ color: config.primaryColor }}>
-              {fmt(totalValue)}
+              {formatCurrency(totalValue)}
             </span>
           </div>
         </div>
@@ -503,9 +501,6 @@ export default function CheckoutPage() {
       </div>
     );
   }
-
-  const fmt = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   const isShippingValid =
     shipping.contactName.trim() &&
@@ -650,7 +645,7 @@ export default function CheckoutPage() {
             </h3>
             <div className="flex justify-between text-sm mb-2">
               <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
-              <span className="font-medium" style={{ color: config.primaryColor }}>{fmt(totalValue)}</span>
+              <span className="font-medium" style={{ color: config.primaryColor }}>{formatCurrency(totalValue)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span style={{ color: config.secondaryColor }}>Payment Method</span>

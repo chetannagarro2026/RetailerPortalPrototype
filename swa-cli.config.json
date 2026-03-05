@@ -1,0 +1,16 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "frontend-doms-react": {
+      "appLocation": ".",
+      "outputLocation": "dist",
+      "appBuildCommand": "npm run build:client",
+      "run": "npm run dev",
+      "appDevserverUrl": "http://localhost:5173",
+      "appName": "customer-portal-ndoms",
+      "resourceGroup": "ndoms-dev-rg",
+      "location": "East Asia",
+      "region": "eastasia"
+    }
+  }
+}

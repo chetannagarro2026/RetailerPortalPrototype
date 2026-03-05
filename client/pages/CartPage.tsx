@@ -1,7 +1,7 @@
 import { Button, InputNumber } from "antd";
 import { DeleteOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
-import { activeBrandConfig } from "../config/brandConfig";
+import { activeBrandConfig, formatPrice, formatCurrency } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
@@ -13,9 +13,6 @@ export default function CartPage() {
   const { items, totalUnits, totalValue, updateQuantity, removeItem, clearOrder } = useOrder();
   const { isAuthenticated, showSignInModal } = useAuth();
   const { isExceeded } = useCreditState();
-
-  const formatCurrency = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   if (items.length === 0) {
     return (
@@ -203,7 +200,7 @@ function CartItemList({
                   {item.upc}{variantDesc ? ` · ${variantDesc}` : ""}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-                  ${item.unitPrice.toFixed(2)} / unit
+                  {formatPrice(item.unitPrice)} / unit
                 </p>
               </div>
             </div>
@@ -222,7 +219,7 @@ function CartItemList({
             {/* Line Total */}
             <div className="text-right">
               <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
-                ${lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                {formatCurrency(lineTotal)}
               </span>
             </div>
 

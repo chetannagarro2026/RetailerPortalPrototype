@@ -29,6 +29,11 @@ export interface BrandConfig {
   // Typography
   fontFamily: string;
 
+  // Currency
+  currencySymbol: string;
+  currencyPosition: 'before' | 'after'; // e.g., '$100' or '100₹'
+  currencyCode: string; // e.g., 'USD', 'INR'
+
   // Search
   searchPlaceholder: string;
 
@@ -61,6 +66,10 @@ export const centricBrandsConfig: BrandConfig = {
 
   fontFamily: "'Inter', sans-serif",
 
+  currencySymbol: "₹",
+  currencyPosition: "before",
+  currencyCode: "INR",
+
   searchPlaceholder: "Search by Style Code, Collection, Brand...",
 
   categoryCardVariant: "hero",
@@ -81,3 +90,37 @@ export const centricBrandsConfig: BrandConfig = {
 
 // Active configuration — swap this import to change tenants
 export const activeBrandConfig = centricBrandsConfig;
+
+// ═══════════════════════════════════════════════════════════════════
+// CURRENCY FORMATTING UTILITY
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Format a price value according to the active brand configuration
+ * @param price - The numeric price value
+ * @param config - Optional brand config (defaults to activeBrandConfig)
+ * @returns Formatted price string
+ */
+export function formatPrice(price: number, config: BrandConfig = activeBrandConfig): string {
+  const formatted = price.toFixed(2);
+  return config.currencyPosition === 'before'
+    ? `${config.currencySymbol}${formatted}`
+    : `${formatted}${config.currencySymbol}`;
+}
+
+/**
+ * Format a currency value with locale formatting (thousands separators)
+ * @param value - The numeric value
+ * @param decimals - Number of decimal places (default: 2)
+ * @param config - Optional brand config (defaults to activeBrandConfig)
+ * @returns Formatted currency string with thousands separators
+ */
+export function formatCurrency(value: number, decimals: number = 2, config: BrandConfig = activeBrandConfig): string {
+  const formatted = value.toLocaleString("en-US", { 
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+  return config.currencyPosition === 'before'
+    ? `${config.currencySymbol}${formatted}`
+    : `${formatted}${config.currencySymbol}`;
+}

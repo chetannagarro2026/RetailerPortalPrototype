@@ -20,9 +20,11 @@ interface CategoryTreeProps {
   activeNodeId: string;
   rootNodeId: string;
   tree?: CategoryTreeType; // Optional tree from API, falls back to mock data
+  disableNavigation?: boolean; // If true, clicking nodes only expands/collapses them
+  onCategoryClick?: (categoryId: string) => void; // Callback when category is clicked in disableNavigation mode
 }
 
-export default function CategoryTree({ activeNodeId, rootNodeId, tree }: CategoryTreeProps) {
+export default function CategoryTree({ activeNodeId, rootNodeId, tree, disableNavigation, onCategoryClick }: CategoryTreeProps) {
   const config = activeBrandConfig;
   
   // Use tree-based functions if tree is provided, otherwise use mock functions
@@ -85,6 +87,8 @@ export default function CategoryTree({ activeNodeId, rootNodeId, tree }: Categor
           config={config}
           depth={0}
           tree={tree}
+          disableNavigation={disableNavigation}
+          onCategoryClick={onCategoryClick}
         />
       ))}
     </nav>
@@ -99,9 +103,11 @@ interface TreeNodeProps {
   config: typeof activeBrandConfig;
   depth: number;
   tree?: CategoryTreeType;
+  disableNavigation?: boolean;
+  onCategoryClick?: (categoryId: string) => void;
 }
 
-function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth, tree }: TreeNodeProps) {
+function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth, tree, disableNavigation, onCategoryClick }: TreeNodeProps) {
   // Use tree-based functions if tree is provided, otherwise use mock functions
   const getChildrenFn = useMemo(
     () => (tree ? (nodeId: string) => getChildren(tree, nodeId) : getMockChildren),
@@ -143,19 +149,42 @@ function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth, tree 
           <span className="w-6 shrink-0" />
         )}
 
-        <Link
-          to={href}
-          className="flex-1 py-2 pr-2 no-underline truncate text-xs transition-colors"
-          style={{
-            color: isActive ? config.primaryColor : "#4B5563",
-            fontWeight: isActive ? 600 : 400,
-          }}
-        >
-          {node.label}
-          {node.productCount > 0 && (
-            <span className="ml-1.5 opacity-50">({node.productCount})</span>
-          )}
-        </Link>
+        {disableNavigation ? (
+          <button
+            onClick={() => {
+              if (node.hasChildren && children.length > 0) {
+                onToggle(node.id);
+              }
+              if (onCategoryClick) {
+                onCategoryClick(node.id);
+              }
+            }}
+            className="flex-1 py-2 pr-2 truncate text-xs transition-colors text-left bg-transparent border-none cursor-pointer"
+            style={{
+              color: isActive ? config.primaryColor : "#4B5563",
+              fontWeight: isActive ? 600 : 400,
+            }}
+          >
+            {node.label}
+            {node.productCount > 0 && (
+              <span className="ml-1.5 opacity-50">({node.productCount})</span>
+            )}
+          </button>
+        ) : (
+          <Link
+            to={href}
+            className="flex-1 py-2 pr-2 no-underline truncate text-xs transition-colors"
+            style={{
+              color: isActive ? config.primaryColor : "#4B5563",
+              fontWeight: isActive ? 600 : 400,
+            }}
+          >
+            {node.label}
+            {node.productCount > 0 && (
+              <span className="ml-1.5 opacity-50">({node.productCount})</span>
+            )}
+          </Link>
+        )}
       </div>
 
       {/* Children */}
@@ -171,6 +200,8 @@ function TreeNode({ node, activeNodeId, expanded, onToggle, config, depth, tree 
               config={config}
               depth={depth + 1}
               tree={tree}
+              disableNavigation={disableNavigation}
+              onCategoryClick={onCategoryClick}
             />
           ))}
         </div>

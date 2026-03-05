@@ -40,7 +40,7 @@ export default function CollectionHeader({
           {title}
         </h1>
         <p className="text-xs" style={{ color: config.secondaryColor }}>
-          {familyCount} Product Famil{familyCount !== 1 ? "ies" : "y"}
+          {familyCount} Product{familyCount !== 1 ? "s" : ""}
           {hasActiveFilters && ` (filtered from ${totalFamilies})`}
           {subcategoryCount > 0 && ` · ${subcategoryCount} Subcategories`}
         </p>
@@ -59,8 +59,8 @@ export default function CollectionHeader({
             { value: "price-desc", label: "Price: High → Low" },
             { value: "alpha-asc", label: "Name: A → Z" },
             { value: "alpha-desc", label: "Name: Z → A" },
-            { value: "newest", label: "Newest First" },
-            { value: "bestselling", label: "Best Selling" },
+            // { value: "newest", label: "Newest First" },
+            // { value: "bestselling", label: "Best Selling" },
           ]}
         />
       </div>

@@ -82,7 +82,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       });
 
       const totalQty = valid.reduce((s, i) => s + i.quantity, 0);
-      message.success({ content: `${totalQty} units across ${valid.length} variants added to order`, duration: 2 });
+      message.success({ content: `${totalQty} units added to order`, duration: 2 });
     },
     [message],
   );

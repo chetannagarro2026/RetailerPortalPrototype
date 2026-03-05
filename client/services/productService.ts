@@ -56,7 +56,7 @@ export interface ProductByUpcResponse {
 export type PriceRequestItem = {
   upc: string;
   channelCode: string;
-  accoundId: string;
+  accoundId?: number;
 };
 
 export type BestPricesResponse = {

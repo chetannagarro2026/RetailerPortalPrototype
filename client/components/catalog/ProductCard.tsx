@@ -285,11 +285,11 @@ function PricingBlock({
           className={`${compact ? "text-xs" : "text-sm"} font-semibold`}
           style={{ color: config.primaryColor }}
         >
-          ${product.price.toFixed(2)}
+          {formatPrice(product.price)}
         </span>
         {product.originalPrice && (
           <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
-            ${product.originalPrice.toFixed(2)}
+            {formatPrice(product.originalPrice)}
           </span>
         )}
         {product.unitMeasure && (
@@ -311,7 +311,7 @@ function PricingBlock({
                 border: `1px solid ${config.borderColor}`,
               }}
             >
-              {tier.minQty}+: ${tier.price.toFixed(2)}
+              {tier.minQty}+: {formatPrice(tier.price)}
             </span>
           ))}
         </div>

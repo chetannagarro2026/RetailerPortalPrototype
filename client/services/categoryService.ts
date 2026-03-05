@@ -177,3 +177,20 @@ export function fetchCategoriesByParent(parentId: string) {
   const endpoint = apiConfig.endpoints.categoriesTreeByParent(parentId);
   return apiGet<CategoryItem[]>(endpoint);
 }
+
+/**
+ * Fetch categories by parent code (e.g., for fetching brands)
+ */
+export function fetchCategoriesByParentCode(parentCode: string) {
+  const endpoint = apiConfig.endpoints.categoriesByParentCode(parentCode);
+  return apiGet<CategoryItem[]>(endpoint);
+}
+
+/**
+ * Fetch a single category by code
+ */
+export function fetchCategoryByCode(id: string) {
+  // const endpoint = `${apiConfig.externalBase}/categories/${id}`;
+  const endpoint = `${apiConfig.externalBase}/categories/0d759ab1-8f28-420c-a15e-f79f2e97a1f3`;
+  return apiGet<CategoryItem>(endpoint);
+}

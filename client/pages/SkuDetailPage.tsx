@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
 import { useOrder } from "../context/OrderContext";
 import FulfillmentPanel from "../components/product-family/FulfillmentPanel";
@@ -134,7 +134,7 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
       {/* Price */}
       <div className="flex items-baseline gap-2 mb-3">
         <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-          ${variant.price.toFixed(2)}
+          {formatPrice(variant.price)}
         </span>
         {product.unitMeasure && (
           <span className="text-xs" style={{ color: config.secondaryColor }}>
@@ -160,7 +160,7 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
                   border: `1px solid ${config.borderColor}`,
                 }}
               >
-                {tier.minQty}+: <span className="font-semibold">${tier.price.toFixed(2)}</span>
+                {tier.minQty}+: <span className="font-semibold">{formatPrice(tier.price)}</span>
               </span>
             ))}
           </div>

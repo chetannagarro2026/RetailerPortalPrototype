@@ -1,5 +1,5 @@
 import { DownOutlined, RightOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 import SkuAccordionContent from "./SkuAccordionContent";
 
@@ -211,7 +211,7 @@ function SkuRow({
             borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}`,
           }}
         >
-          ${variant.price.toFixed(2)}
+          {formatPrice(variant.price)}
         </td>
       </tr>
 

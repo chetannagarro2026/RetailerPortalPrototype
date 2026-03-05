@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { InputNumber } from "antd";
 import { DownOutlined, RightOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant, VariantAttribute } from "../../data/catalogData";
 
 interface VariantMatrixProps {
@@ -354,7 +354,7 @@ function VariantRow({
           </span>
         )}
         <span className="text-[10px]" style={{ color: config.secondaryColor }}>
-          ${variant.price.toFixed(2)}
+          {formatPrice(variant.price)}
         </span>
       </div>
       <InputNumber

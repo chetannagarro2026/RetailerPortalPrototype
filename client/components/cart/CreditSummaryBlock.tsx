@@ -1,13 +1,10 @@
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { activeBrandConfig } from "../../config/brandConfig";
+import { activeBrandConfig, formatCurrency } from "../../config/brandConfig";
 import { useCreditState } from "../../hooks/useCreditState";
 
 export default function CreditSummaryBlock() {
   const config = activeBrandConfig;
   const credit = useCreditState();
-
-  const fmt = (val: number) =>
-    "$" + Math.abs(val).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   return (
     <div
@@ -22,15 +19,15 @@ export default function CreditSummaryBlock() {
       </h3>
 
       <div className="space-y-2.5">
-        <CreditRow label="Credit Limit" value={fmt(credit.creditLimit)} config={config} />
-        <CreditRow label="Credit Used" value={fmt(credit.creditUsed)} config={config} />
+        <CreditRow label="Credit Limit" value={formatCurrency(credit.creditLimit)} config={config} />
+        <CreditRow label="Credit Used" value={formatCurrency(credit.creditUsed)} config={config} />
         <div className="border-t" style={{ borderColor: config.borderColor }} />
-        <CreditRow label="Credit Remaining" value={fmt(credit.creditRemaining)} config={config} bold />
-        <CreditRow label="Cart Total" value={fmt(credit.cartTotal)} config={config} />
+        <CreditRow label="Credit Remaining" value={formatCurrency(credit.creditRemaining)} config={config} bold />
+        <CreditRow label="Cart Total" value={formatCurrency(credit.cartTotal)} config={config} />
         <div className="border-t" style={{ borderColor: config.borderColor }} />
         <CreditRow
           label="Remaining After Order"
-          value={`${credit.remainingAfterOrder < 0 ? "-" : ""}${fmt(credit.remainingAfterOrder)}`}
+          value={`${credit.remainingAfterOrder < 0 ? "-" : ""}${formatCurrency(Math.abs(credit.remainingAfterOrder))}`}
           config={config}
           bold
           negative={credit.isExceeded}

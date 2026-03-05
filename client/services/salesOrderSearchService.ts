@@ -71,7 +71,8 @@ export async function fetchSalesOrders(
     customerOrderId: null,
     duration: null,
     customerName: null,
-    retailerAccountId,
+    // retaileraccountId: retailerAccountId,
+    retailerAccountId: retailerAccountId,
   };
 
   const data = await apiPost<SalesOrderSearchResponse>(apiConfig.endpoints.salesOrderSearch, payload);

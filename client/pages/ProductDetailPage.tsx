@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
+import { apiConfig } from "../config/apiConfig";
 import { getProductById } from "../data/catalogData";
 import { GalleryMainImage, GalleryThumbnails } from "../components/catalog/ProductGallery";
 import PDPHeader from "../components/pdp/PDPHeader";
-import { fetchProductByUpc, transformProductResponse } from "../services/productService";
+import { fetchProductByUpc, transformProductResponse, fetchBestPrices, type PriceRequestItem } from "../services/productService";
 import { useOrder } from "../context/OrderContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { useAuth } from "../context/AuthContext";
 
 // ── Specifications ──────────────────────────────────────────────────
 
@@ -144,12 +146,17 @@ export default function ProductDetailPage() {
   const config = activeBrandConfig;
   const { productId } = useParams<{ productId: string }>();
   const { addItem } = useOrder();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   
   // API product state
   const [apiProduct, setApiProduct] = useState<ReturnType<typeof transformProductResponse> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  
+  // Price state
+  const [priceInfo, setPriceInfo] = useState<{ listPrice: number; basePrice: number } | null>(null);
   
   // Fallback to local data
   const localProduct = productId ? getProductById(decodeURIComponent(productId)) : null;
@@ -180,6 +187,38 @@ export default function ProductDetailPage() {
       });
   }, [productId]);
 
+  // Fetch price when we have a UPC
+  useEffect(() => {
+    const upc = apiProduct?.upcId || (productId ? decodeURIComponent(productId) : null);
+    if (!upc) return;
+
+    const priceItem: PriceRequestItem = {
+      upc,
+      channelCode: apiConfig.priceChannelCode,
+    };
+    
+    // Only include accoundId if user is authenticated
+    if (isAuthenticated && user?.accountId) {
+      priceItem.accoundId = parseInt(user.accountId, 10);
+    }
+
+    const payload: PriceRequestItem[] = [priceItem];
+
+    fetchBestPrices(payload)
+      .then((response) => {
+        const price = response.productPrice[upc];
+        if (price) {
+          setPriceInfo({
+            listPrice: Number(price.listPrice),
+            basePrice: Number(price.basePrice),
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch price:", err);
+      });
+  }, [apiProduct?.upcId, productId, isAuthenticated, user?.accountId]);
+
   // Use API product if available, otherwise fallback to local
   const product = apiProduct ? {
     ...localProduct,
@@ -191,7 +230,8 @@ export default function ProductDetailPage() {
     description: apiProduct.description,
     brand: apiProduct.brand,
     specifications: apiProduct.specifications,
-    price: 0, // Price not in this API response
+    price: priceInfo?.listPrice || 0,
+    originalPrice: priceInfo?.basePrice,
   } : localProduct;
 
   const handleAddToCart = () => {
@@ -212,7 +252,14 @@ export default function ProductDetailPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
+      <div className="max-w-content-wide mx-auto px-6 py-12 text-center" style={{ minHeight: "500px" }}>
+        <button
+          onClick={() => navigate(-1)}
+          className="text-xs no-underline mb-4 inline-block cursor-pointer bg-transparent border-0 p-0"
+          style={{ color: config.secondaryColor }}
+        >
+          &larr; Back
+        </button>
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-48 mx-auto mb-4"></div>
           <p className="text-sm" style={{ color: config.secondaryColor }}>
@@ -232,9 +279,13 @@ export default function ProductDetailPage() {
         <p className="text-sm mb-4" style={{ color: config.secondaryColor }}>
           The product you are looking for does not exist.
         </p>
-        <Link to="/catalog" className="text-sm font-medium no-underline" style={{ color: config.primaryColor }}>
-          &larr; Back to Catalog
-        </Link>
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm font-medium no-underline cursor-pointer bg-transparent border-0 p-0"
+          style={{ color: config.primaryColor }}
+        >
+          &larr; Back
+        </button>
       </div>
     );
   }
@@ -244,9 +295,13 @@ export default function ProductDetailPage() {
   return (
     <div className="max-w-content-wide mx-auto px-6 py-8">
       {/* Breadcrumb */}
-      <Link to="/catalog" className="text-xs no-underline mb-4 block" style={{ color: config.secondaryColor }}>
-        &larr; Back to Catalog
-      </Link>
+      <button
+        onClick={() => navigate(-1)}
+        className="text-xs no-underline mb-4 block cursor-pointer bg-transparent border-0 p-0"
+        style={{ color: config.secondaryColor }}
+      >
+        &larr; Back
+      </button>
 
       {/* Top Section: Gallery + Product Info + Add to Cart + Specifications + Thumbnails */}
       <ProductTopSection 

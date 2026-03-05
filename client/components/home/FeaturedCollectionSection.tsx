@@ -1,10 +1,12 @@
 import { Row, Col } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import { apiConfig } from "../../config/apiConfig";
 import ProductCard, { type Product } from "./cards/ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchFeaturedProducts, fetchBestPrices, PriceRequestItem } from "../../services/productService";
 import { ProductApiItem } from "@shared/api";
+import { useAuth } from "../../context/AuthContext";
 
 const collectionLabel = "Featured Products";
 
@@ -26,6 +28,7 @@ function mapApiProductToProduct(item: ProductApiItem): Product {
 
 export default function FeaturedCollectionSection() {
   const config = activeBrandConfig;
+  const { user, isAuthenticated } = useAuth();
 
   // Fetch products from API
   const { data, isLoading, error } = useQuery({
@@ -42,13 +45,19 @@ export default function FeaturedCollectionSection() {
   const upcs = products.map((p) => p.itemCode).filter(Boolean);
 
   const priceQuery = useQuery({
-    queryKey: ["bestPrices", upcs],
+    queryKey: ["bestPrices", upcs, isAuthenticated],
     queryFn: () => {
-      const payload: PriceRequestItem[] = upcs.map((u) => ({
-        upc: u,
-        channelCode: "QVC_TEST_ONE",
-        accoundId: "9002",
-      }));
+      const payload: PriceRequestItem[] = upcs.map((u) => {
+        const item: PriceRequestItem = {
+          upc: u,
+          channelCode: apiConfig.priceChannelCode,
+        };
+        // Only include accoundId if user is authenticated
+        if (isAuthenticated && user?.accountId) {
+          item.accoundId = parseInt(user.accountId, 10);
+        }
+        return item;
+      });
 
       return fetchBestPrices(payload);
     },

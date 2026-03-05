@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { InputNumber, Button } from "antd";
+import { InputNumber, Button, Tooltip } from "antd";
 import { ShoppingCartOutlined, RightOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -64,13 +64,15 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
         <div className="flex-1 min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Details Column */}
           <div>
-            <Link
-              to={skuPdpUrl}
-              className="text-sm font-semibold no-underline hover:underline block mb-1"
-              style={{ color: config.primaryColor }}
-            >
-              {product.name}
-            </Link>
+            <Tooltip title={product.name} placement="topLeft">
+              <Link
+                to={skuPdpUrl}
+                className="text-sm font-semibold no-underline hover:underline block mb-1 line-clamp-2"
+                style={{ color: config.primaryColor }}
+              >
+                {product.name}
+              </Link>
+            </Tooltip>
             <p className="text-[11px] font-mono mb-1" style={{ color: config.secondaryColor }}>
               {variant.upc}
             </p>
