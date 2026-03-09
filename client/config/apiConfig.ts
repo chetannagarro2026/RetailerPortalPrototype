@@ -66,10 +66,14 @@ export const apiConfig = {
     // Business Accounts (Configuration API)
     businessAccountsByIdList: (ids: string) => 
       `${EXTERNAL_CONFIG_BASE}/configuration/business-accounts/byIdList?ids=${ids}`,
+    businessAccountById: (accountId: number) => 
+      `${EXTERNAL_CONFIG_BASE}/configuration/business-accounts/${accountId}`,
 
     // Sales Order
     salesOrderCreate: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/`,
     salesOrderSearch: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/search/`,
+    salesOrderCountStatus: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/count-status`,
+    salesOrderById: (orderId: number) => `${EXTERNAL_SALES_ORDER_BASE}/sales-order/${orderId}`,
 
     // Product by UPC
     productByUpc: (upcId: string) => `${EXTERNAL_API_BASE}/products/upc/${upcId}`,

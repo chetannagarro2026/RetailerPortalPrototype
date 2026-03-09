@@ -20,6 +20,9 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 import SignInPage from "./pages/SignInPage";
 import Layout from "./components/layout/Layout";
+import DashboardPage from "./pages/DashboardPage";
+import BusinessProfilePage from "./pages/BusinessProfilePage";
+import PurchaseOrderDetailPage from "./pages/PurchaseOrderDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -50,13 +53,15 @@ export default function App() {
               <Route path="/checkout" element={<AuthGate message="To complete your purchase and use your credit account, please sign in."><CheckoutPage /></AuthGate>} />
               <Route path="/order-confirmation" element={<AuthGate><OrderConfirmation /></AuthGate>} />
               <Route path="/purchase-orders" element={<AuthGate message="Sign in to view your purchase orders and order history."><PurchaseOrdersPage /></AuthGate>} />
+              <Route path="/purchase-orders/:orderId" element={<AuthGate message="Sign in to view order details."><PurchaseOrderDetailPage /></AuthGate>} />
               <Route path="/account/credit" element={<AuthGate message="Sign in to view your credit history and financial details."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/invoices" element={<AuthGate message="Sign in to access your invoices."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/payments" element={<AuthGate message="Sign in to manage your payments."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/payment-history" element={<AuthGate message="Sign in to view your payment history."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/support" element={<AuthGate message="Sign in to access customer service."><PlaceholderPage /></AuthGate>} />
-              <Route path="/account/details" element={<AuthGate message="Sign in to view your account details."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />
+              <Route path="/account/business-profile" element={<AuthGate message="Sign in to view your business profile."><BusinessProfilePage /></AuthGate>} />
               <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><PlaceholderPage /></AuthGate>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

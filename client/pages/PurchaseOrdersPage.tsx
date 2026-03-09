@@ -1,179 +1,174 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { FileTextOutlined, EyeOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { activeBrandConfig, formatCurrency } from "../config/brandConfig";
-import { useOrderHistory, type PurchaseOrder } from "../context/OrderHistoryContext";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { FileTextOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
+import { activeBrandConfig } from "../config/brandConfig";
+import { useAuth } from "../context/AuthContext";
+import { fetchSalesOrderStatusCounts, fetchSalesOrdersWithPagination, type SalesOrder } from "../services/salesOrderSearchService";
+import StatusSegmentedFilter from "../components/purchase-orders/StatusSegmentedFilter";
 
-// ── Status Badge ────────────────────────────────────────────────────
+// ── Status mapping ──────────────────────────────────────────────────
 
-const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
-  Pending: { color: "#D97706", bg: "#FFF7ED" },
-  Confirmed: { color: "#2563EB", bg: "#EFF6FF" },
-  Shipped: { color: "#7C3AED", bg: "#F5F3FF" },
-  Delivered: { color: "#16A34A", bg: "#F0FDF4" },
+const FILTER_KEYS = ["All", "Pending", "Approved", "Shipped", "Rejected"] as const;
+type FilterKey = (typeof FILTER_KEYS)[number];
+
+// Map UI filter to API request states
+const filterToApiStates: Record<FilterKey, string[]> = {
+  All: [],
+  Pending: ["PROCESSING", "ON_HOLD", "UNPROCESSED"],
+  Approved: ["PROCESSED", "ACCEPTED", "RECEIVED"],
+  Shipped: ["COMPLETED", "PARTIALLY_COMPLETED"],
+  Rejected: ["CANCELLED", "REJECTED"],
 };
 
-function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status] || STATUS_STYLES.Pending;
-  return (
-    <span
-      className="text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-      style={{ color: style.color, backgroundColor: style.bg }}
-    >
-      {status}
-    </span>
-  );
-}
+// Map API status to UI display
+const mapStatusToLabel = (requestState: string): string => {
+  const processing = ["PROCESSING", "ON_HOLD", "UNPROCESSED"];
+  const approved = ["PROCESSED", "ACCEPTED", "RECEIVED"];
+  const shipped = ["COMPLETED", "PARTIALLY_COMPLETED"];
+  const rejected = ["CANCELLED", "REJECTED"];
 
-// ── Order Detail Panel ──────────────────────────────────────────────
+  if (processing.includes(requestState)) return "Pending";
+  if (approved.includes(requestState)) return "Approved";
+  if (shipped.includes(requestState)) return "Shipped";
+  if (rejected.includes(requestState)) return "Rejected";
+  return "Pending";
+};
 
-function OrderDetailPanel({
-  order,
-  onClose,
-}: {
-  order: PurchaseOrder;
-  onClose: () => void;
-}) {
-  const config = activeBrandConfig;
+const STATUS_COLORS: Record<string, string> = {
+  Pending: "#D97706",
+  Approved: "#2563EB",
+  Shipped: "#16A34A",
+  Rejected: "#DC2626",
+};
 
-  return (
-    <div
-      className="rounded-xl p-6"
-      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
-    >
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-base font-semibold" style={{ color: config.primaryColor }}>
-          Order {order.orderNumber}
-        </h2>
-        <button
-          onClick={onClose}
-          className="text-xs font-medium cursor-pointer bg-transparent border-none"
-          style={{ color: config.secondaryColor }}
-        >
-          Close
-        </button>
-      </div>
+// ── Helpers ─────────────────────────────────────────────────────────
 
-      {/* Meta */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
-            Date
-          </p>
-          <p className="text-sm mt-0.5" style={{ color: config.primaryColor }}>
-            {new Date(order.submittedAt).toLocaleDateString()}
-          </p>
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
-            Status
-          </p>
-          <div className="mt-1">
-            <StatusBadge status={order.status} />
-          </div>
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
-            Payment
-          </p>
-          <p className="text-sm mt-0.5" style={{ color: config.primaryColor }}>
-            {order.paymentMethod}
-          </p>
-        </div>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: config.secondaryColor }}>
-            Total
-          </p>
-          <p className="text-sm font-semibold mt-0.5" style={{ color: config.primaryColor }}>
-            {formatCurrency(order.totalValue)}
-          </p>
-        </div>
-      </div>
-
-      {/* Ship To */}
-      <div
-        className="rounded-lg p-4 mb-5"
-        style={{ backgroundColor: config.cardBg, border: `1px solid ${config.borderColor}` }}
-      >
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: config.secondaryColor }}>
-          Ship To
-        </p>
-        <p className="text-sm" style={{ color: config.primaryColor }}>
-          {order.shipping.contactName}
-          {order.shipping.companyName && ` — ${order.shipping.companyName}`}
-        </p>
-        <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-          {order.shipping.address}, {order.shipping.city}, {order.shipping.state} {order.shipping.zip}
-        </p>
-        {order.shipping.phone && (
-          <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-            {order.shipping.phone}
-          </p>
-        )}
-      </div>
-
-      {/* Items */}
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: config.secondaryColor }}>
-          Items ({order.items.length})
-        </p>
-        <div
-          className="rounded-lg overflow-hidden"
-          style={{ border: `1px solid ${config.borderColor}` }}
-        >
-          {order.items.map((item, idx) => {
-            const variantDesc = Object.values(item.variantAttributes || {}).join(" · ");
-            return (
-              <div
-                key={item.id}
-                className="flex items-center justify-between px-4 py-3"
-                style={{
-                  borderBottom: idx < order.items.length - 1 ? `1px solid ${config.borderColor}` : "none",
-                }}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  {item.imageUrl && (
-                    <img src={item.imageUrl} alt={item.productName} className="w-10 h-10 rounded-md object-cover shrink-0" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: config.primaryColor }}>
-                      {item.productName}
-                    </p>
-                    <p className="text-xs" style={{ color: config.secondaryColor }}>
-                      {item.upc}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
-                  {formatCurrency(item.quantity * item.unitPrice)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 // ── Main Page ───────────────────────────────────────────────────────
 
+const PAGE_SIZE = 10;
+
 export default function PurchaseOrdersPage() {
   const config = activeBrandConfig;
-  const { orders } = useOrderHistory();
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("All");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [accumulatedOrders, setAccumulatedOrders] = useState<SalesOrder[]>([]);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  const detail = selectedOrder ? orders.find((o) => o.orderNumber === selectedOrder) : null;
+  // Fetch status counts
+  const { data: statusCounts, isLoading: countsLoading } = useQuery({
+    queryKey: ["salesOrderStatusCounts", user?.accountId],
+    queryFn: () => fetchSalesOrderStatusCounts(user?.accountId || null),
+    enabled: !!user?.accountId,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  if (orders.length === 0) {
+  // Fetch orders based on active filter
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["salesOrders", user?.accountId, activeFilter, currentPage],
+    queryFn: () =>
+      fetchSalesOrdersWithPagination(
+        currentPage,
+        PAGE_SIZE,
+        user?.accountId || null,
+        filterToApiStates[activeFilter]
+      ),
+    enabled: !!user?.accountId,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Calculate counts per filter
+  const counts = useMemo(() => {
+    if (!statusCounts) {
+      return { All: 0, Pending: 0, Approved: 0, Shipped: 0, Rejected: 0 };
+    }
+    return {
+      All: statusCounts.ALL || 0,
+      Pending: (statusCounts.PROCESSING || 0) + (statusCounts.ON_HOLD || 0) + (statusCounts.UNPROCESSED || 0),
+      Approved: (statusCounts.PROCESSED || 0) + (statusCounts.ACCEPTED || 0) + (statusCounts.RECEIVED || 0),
+      Shipped: (statusCounts.COMPLETED || 0) + (statusCounts.PARTIALLY_COMPLETED || 0),
+      Rejected: (statusCounts.CANCELLED || 0) + (statusCounts.REJECTED || 0),
+    };
+  }, [statusCounts]);
+
+  // Transform orders for display
+  const orders = ordersData?.orders || [];
+  const totalRecords = ordersData?.totalRecords || 0;
+  const totalPages = Math.ceil(totalRecords / PAGE_SIZE);
+  const hasMore = currentPage < totalPages - 1;
+
+  // Append new orders to accumulated list
+  useEffect(() => {
+    if (orders.length > 0) {
+      setAccumulatedOrders((prev) => {
+        if (currentPage === 0) {
+          return orders;
+        }
+        // Avoid duplicates
+        const existingIds = new Set(prev.map(o => o.salesOrderId));
+        const newOrders = orders.filter(o => !existingIds.has(o.salesOrderId));
+        return [...prev, ...newOrders];
+      });
+    }
+  }, [orders, currentPage]);
+
+  // Reset when filter changes
+  useEffect(() => {
+    setCurrentPage(0);
+    setAccumulatedOrders([]);
+  }, [activeFilter]);
+
+  // Intersection observer for infinite scroll
+  useEffect(() => {
+    const currentTarget = observerTarget.current;
+    if (!currentTarget) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !ordersLoading && hasMore) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.5, rootMargin: "100px" }
+    );
+
+    observer.observe(currentTarget);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [ordersLoading, hasMore]);
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter as FilterKey);
+  };
+
+  const handleRowClick = (order: SalesOrder) => {
+    navigate(`/purchase-orders/${order.salesOrderId}`);
+  };
+
+  // ── Empty state ─────────────────────────────────────────────────
+
+  if (!ordersLoading && !countsLoading && counts.All === 0) {
     return (
-      <div className="max-w-content mx-auto px-6 py-16 text-center">
+      <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", padding: "64px 24px", boxSizing: "border-box" }} className="text-center">
         <FileTextOutlined className="text-5xl mb-4" style={{ color: config.secondaryColor }} />
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
-          No Purchase Orders
+          No Purchase Orders Yet
         </h1>
         <p className="text-sm mb-6" style={{ color: config.secondaryColor }}>
-          Your submitted orders will appear here.
+          Orders you place will appear here.
         </p>
         <Link
           to="/catalog"
@@ -181,98 +176,185 @@ export default function PurchaseOrdersPage() {
           style={{ backgroundColor: config.primaryColor }}
         >
           <ShoppingOutlined className="mr-1.5" />
-          Browse Catalog
+          Place Order
         </Link>
       </div>
     );
   }
 
+  // ── Main render ─────────────────────────────────────────────────
+
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", padding: "24px 24px", boxSizing: "border-box" }}>
+      {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
           Purchase Orders
         </h1>
         <p className="text-sm" style={{ color: config.secondaryColor }}>
-          {orders.length} order{orders.length !== 1 ? "s" : ""}
+          {countsLoading ? "Loading..." : `${counts.All} order${counts.All !== 1 ? "s" : ""}`}
         </p>
       </div>
 
-      {/* Detail Panel (above table when open) */}
-      {detail && (
-        <div className="mb-6">
-          <OrderDetailPanel order={detail} onClose={() => setSelectedOrder(null)} />
+      {/* Status Segmented Filter */}
+      <div className="mb-6">
+        {countsLoading ? (
+          <div className="flex justify-center py-4">
+            <Spin size="small" />
+          </div>
+        ) : (
+          <StatusSegmentedFilter
+            filters={FILTER_KEYS as unknown as string[]}
+            counts={counts}
+            active={activeFilter}
+            onSelect={handleFilterChange}
+          />
+        )}
+      </div>
+
+      {/* Orders Table */}
+      <OrdersTable
+        orders={accumulatedOrders}
+        isLoading={ordersLoading && currentPage === 0}
+        onRowClick={handleRowClick}
+      />
+
+      {/* Loading indicator for infinite scroll */}
+      {ordersLoading && currentPage > 0 && (
+        <div className="py-8 text-center">
+          <Spin size="default" />
+          <p className="text-sm mt-4" style={{ color: config.secondaryColor }}>
+            Loading more orders...
+          </p>
         </div>
       )}
 
-      {/* Orders Table */}
+      {/* Intersection observer target - always rendered but conditionally visible */}
+      <div 
+        ref={observerTarget} 
+        style={{ 
+          height: hasMore ? "100px" : "0px",
+          visibility: hasMore ? "visible" : "hidden"
+        }} 
+      />
+
+      {/* End of results message */}
+      {!ordersLoading && !hasMore && accumulatedOrders.length > 0 && (
+        <div className="py-8 text-center text-sm" style={{ color: config.secondaryColor }}>
+          All orders loaded ({accumulatedOrders.length} total)
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Orders Table (API-compatible) ───────────────────────────────────
+
+function OrdersTable({
+  orders,
+  isLoading,
+  onRowClick,
+}: {
+  orders: SalesOrder[];
+  isLoading: boolean;
+  onRowClick: (order: SalesOrder) => void;
+}) {
+  const config = activeBrandConfig;
+  const columns = "minmax(140px,1.5fr) minmax(100px,1fr) minmax(150px,2fr) minmax(80px,1fr) minmax(120px,1.2fr)";
+
+  if (isLoading) {
+    return (
       <div
-        className="rounded-xl overflow-hidden"
+        className="rounded-xl text-center py-16"
+        style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+      >
+        <Spin size="default" />
+        <p className="text-sm mt-4" style={{ color: config.secondaryColor }}>
+          Loading orders...
+        </p>
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div
+        className="rounded-xl text-center py-16"
         style={{ border: `1px solid ${config.borderColor}` }}
       >
-        {/* Header */}
-        <div
-          className="grid gap-4 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider"
-          style={{
-            gridTemplateColumns: "140px 100px 1fr 120px 130px 100px 80px",
-            backgroundColor: config.cardBg,
-            color: config.secondaryColor,
-            borderBottom: `1px solid ${config.borderColor}`,
-          }}
-        >
-          <span>Order #</span>
-          <span>Date</span>
-          <span>Shipping Address</span>
-          <span className="text-right">Total</span>
-          <span>Payment</span>
-          <span>Status</span>
-          <span className="text-center">Actions</span>
-        </div>
+        <p className="text-sm" style={{ color: config.secondaryColor }}>
+          No orders match this filter.
+        </p>
+      </div>
+    );
+  }
 
-        {/* Rows */}
-        {orders.map((order, idx) => (
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{ border: `1px solid ${config.borderColor}` }}
+    >
+      {/* Header */}
+      <div
+        className="grid gap-4 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider"
+        style={{
+          gridTemplateColumns: columns,
+          backgroundColor: config.cardBg,
+          color: config.secondaryColor,
+          borderBottom: `1px solid ${config.borderColor}`,
+        }}
+      >
+        <span>Order ID</span>
+        <span>Date</span>
+        <span>Channel</span>
+        <span className="text-right">Items</span>
+        <span className="text-right">Status</span>
+      </div>
+
+      {/* Rows */}
+      {orders.map((order, idx) => {
+        const status = mapStatusToLabel(order.requestState);
+        const statusColor = STATUS_COLORS[status] || "#D97706";
+        const totalItems = order.lineItemInfo.reduce((sum, item) => sum + item.requestedQuantity, 0);
+
+        return (
           <div
-            key={order.orderNumber}
-            className="grid gap-4 px-5 py-4 items-center transition-colors"
+            key={order.salesOrderId}
+            onClick={() => onRowClick(order)}
+            className="grid gap-4 px-5 py-4 items-center transition-colors cursor-pointer"
             style={{
-              gridTemplateColumns: "140px 100px 1fr 120px 130px 100px 80px",
+              gridTemplateColumns: columns,
               borderBottom: idx < orders.length - 1 ? `1px solid ${config.borderColor}` : "none",
-              backgroundColor: selectedOrder === order.orderNumber ? config.cardBg : "#fff",
+              backgroundColor: "#fff",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = config.cardBg;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#fff";
             }}
           >
-            <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
-              {order.orderNumber}
+            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+              {order.applicationOrderId || `SO-${order.salesOrderId}`}
             </span>
             <span className="text-xs" style={{ color: config.secondaryColor }}>
-              {new Date(order.submittedAt).toLocaleDateString()}
+              {formatDate(order.orderDate)}
             </span>
             <span className="text-xs truncate" style={{ color: config.secondaryColor }}>
-              {order.shipping.address}, {order.shipping.city}, {order.shipping.state} {order.shipping.zip}
+              {order.channelCode || "—"}
             </span>
             <span className="text-sm font-medium text-right" style={{ color: config.primaryColor }}>
-              {formatCurrency(order.totalValue)}
+              {totalItems}
             </span>
-            <span className="text-xs" style={{ color: config.secondaryColor }}>
-              {order.paymentMethod}
+            <span
+              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-block w-fit ml-auto"
+              style={{ color: statusColor, backgroundColor: "transparent", border: `1px solid ${statusColor}` }}
+            >
+              {status}
             </span>
-            <StatusBadge status={order.status} />
-            <div className="flex justify-center">
-              <button
-                onClick={() =>
-                  setSelectedOrder(
-                    selectedOrder === order.orderNumber ? null : order.orderNumber,
-                  )
-                }
-                className="p-1.5 rounded-md cursor-pointer transition-colors"
-                style={{ color: config.primaryColor, border: "none", background: "none" }}
-                title="View Details"
-              >
-                <EyeOutlined className="text-sm" />
-              </button>
-            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

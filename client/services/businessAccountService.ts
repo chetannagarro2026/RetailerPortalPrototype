@@ -38,6 +38,98 @@ export interface BusinessAccountType {
   level: number;
 }
 
+export interface BankDetail {
+  id: number;
+  bankName: string;
+  bankAccNum: string;
+  iban: string | null;
+  swiftBic: string | null;
+  bankAccType: string | null;
+  bankAccHolderName: string | null;
+  bankAccHolderAddress: string | null;
+  ifsc: string | null;
+  branchAddress: string | null;
+  country: string | null;
+  currencyCode: string | null;
+  isPrimary: boolean;
+}
+
+export interface TaxIdentification {
+  taxId: number;
+  taxType: {
+    taxTypeId: number;
+    type: string;
+    description: string;
+    countryCode: string;
+    format: string;
+  };
+  taxIdentifier: string;
+  state: string;
+  validFrom: string;
+  validTo: string;
+  isPrimary: boolean;
+  status: string;
+  taxCertificateNumber: string | null;
+  registrationDate: string | null;
+  taxPayerType: string | null;
+  panNumber: string;
+  einvoiceEnabled: boolean | null;
+}
+
+export interface Contract {
+  contractId: number;
+  contractNumber: string;
+  contractTitle: string;
+  contractType: string;
+  description: string;
+  customerTier: string;
+  creationDate: string | null;
+  effectiveDate: string | null;
+  expiryDate: string | null;
+  status: string;
+  renewalType: string;
+  renewalPeriod: number;
+  lastRenewalDate: string | null;
+  signedDate: string | null;
+  signedBy: string;
+  governingLawCountry: string | null;
+  additionalClauses: string | null;
+  currency: string;
+  pmtFreq: string;
+  pmtTerms: string;
+}
+
+export interface AccountUser {
+  id: number;
+  userId: number;
+  userName: string;
+  userFirstName: string;
+  userLastName: string;
+  userType: string;
+  userRole: string[];
+  userDesignation: string | null;
+}
+
+export interface LinkedAccount {
+  mappingId: number;
+  parentAccountId: number;
+  parentAccountType: string;
+  childAccountId: number;
+  childAccountType: string;
+  active: boolean;
+}
+
+export interface StatusTimeLine {
+  accountId: number;
+  status: string;
+  changeDateTime: string;
+  reason: string | null;
+  fromDate: string;
+  toDate: string | null;
+  createdBy: string;
+  modifiedBy: string;
+}
+
 export interface BusinessAccount {
   accountId: number;
   accountType: BusinessAccountType;
@@ -62,14 +154,14 @@ export interface BusinessAccount {
   isActive: boolean;
   caseId: string | null;
   documents: any[];
-  bankDetails: any[];
+  bankDetails: BankDetail[];
   addresses: BusinessAccountAddress[];
-  contracts: any[];
-  taxIdentifications: any[];
+  contracts: Contract[];
+  taxIdentifications: TaxIdentification[];
   attributeMappings: any[];
-  accountUsers: any[];
-  statusTimeLine: any[];
-  linkedAccounts: any[];
+  accountUsers: AccountUser[];
+  statusTimeLine: StatusTimeLine[];
+  linkedAccounts: LinkedAccount[];
   readOnlyAttributes: any;
 }
 
@@ -83,4 +175,26 @@ export function fetchBusinessAccountsByIdList(
   return fetchAPI<BusinessAccount[]>(
     apiConfig.endpoints.businessAccountsByIdList(ids)
   );
+}
+
+/**
+ * Fetch business account by ID directly
+ * @param accountId - Account ID
+ */
+export function fetchBusinessAccountById(
+  accountId: number
+): Promise<BusinessAccount> {
+  return fetchAPI<BusinessAccount>(
+    apiConfig.endpoints.businessAccountById(accountId)
+  );
+}
+
+/**
+ * Fetch current user's business account by account ID
+ * @param accountId - Account ID from user context
+ */
+export function getCurrentBusinessAccount(
+  accountId: number
+): Promise<BusinessAccount> {
+  return fetchBusinessAccountById(accountId);
 }
