@@ -116,7 +116,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
   const isBrandMode = modeInfo.mode === "brand";
 
   return (
-    <div className="max-w-content-wide mx-auto px-6 py-8">
+    <div className="w-full px-6 py-8">
       {/* Breadcrumb */}
       <GlobalBreadcrumb modeInfo={modeInfo} />
 
@@ -452,7 +452,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
   }, []);
 
   return (
-    <div className="max-w-content-wide mx-auto px-6 py-8">
+    <div className="w-full px-6 py-8">
       <CatalogBreadcrumb node={node} />
 
       <div className="flex gap-6">
@@ -565,7 +565,7 @@ export default function CatalogNodePage() {
 
   if (!node) {
     return (
-      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
+      <div className="w-full px-6 py-12 text-center">
         <h1
           className="text-xl font-semibold mb-2"
           style={{ color: config.primaryColor }}
@@ -584,7 +584,7 @@ export default function CatalogNodePage() {
 
   if (isSubcategoryLanding) {
     return (
-      <div className="max-w-content-wide mx-auto px-6 py-8">
+      <div className="w-full px-6 py-8">
         {node.level > 0 && <CatalogBreadcrumb node={node} />}
         <div className="mb-6">
           <h1
