@@ -29,7 +29,7 @@ export default function FamilyRowExpansion({
       onClick={(e) => e.stopPropagation()}
     >
       {/* Details */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 mx-2">
         {product.description && (
           <p
             className="text-[11px] leading-relaxed mb-2 line-clamp-2"
