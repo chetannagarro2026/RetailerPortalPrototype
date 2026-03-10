@@ -13,6 +13,14 @@ export interface OrderLineItem {
   variantAttributes: Record<string, string>;
   quantity: number;
   unitPrice: number;
+  /** Original list price before any discounts */
+  listPrice?: number;
+  /** Negotiated special price (before promotion) */
+  specialPrice?: number;
+  /** Promotion label applied to this item */
+  promotionLabel?: string;
+  /** Whether this is a free item from a BOGO promotion */
+  isFreeItem?: boolean;
   imageUrl?: string;
 }
 

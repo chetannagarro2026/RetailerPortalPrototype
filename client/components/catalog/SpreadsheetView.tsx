@@ -3,6 +3,7 @@ import { InputNumber, Pagination } from "antd";
 import { ShoppingCartOutlined, CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
+import { useAuth } from "../../context/AuthContext";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 
 interface SpreadsheetViewProps {
@@ -136,19 +137,26 @@ export default function SpreadsheetView({
   );
   const totalUnits = filledEntries.reduce((s, [, q]) => s + q, 0);
 
+  const { isAuthenticated } = useAuth();
+
   const handleBulkAdd = () => {
     if (filledEntries.length === 0) return;
     const items = filledEntries.map(([vid, qty]) => {
       const row = rows.find((r) => r.variant.id === vid);
       if (!row) return null;
+      const v = row.variant;
+      const unitPrice = isAuthenticated ? (v.finalPrice ?? v.specialPrice ?? v.price) : v.price;
       return {
-        id: row.variant.id,
+        id: v.id,
         productId: row.product.id,
         productName: row.product.name,
-        sku: row.variant.sku,
-        variantAttributes: row.variant.attributes,
+        sku: v.sku,
+        variantAttributes: v.attributes,
         quantity: qty,
-        unitPrice: row.variant.price,
+        unitPrice,
+        listPrice: v.price,
+        specialPrice: isAuthenticated ? v.specialPrice : undefined,
+        promotionLabel: isAuthenticated ? (v.promotionLabel ?? row.product.promotionLabel) : undefined,
         imageUrl: row.product.imageUrl,
       };
     }).filter(Boolean) as Parameters<typeof addItems>[0];

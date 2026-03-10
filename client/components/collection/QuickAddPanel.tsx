@@ -4,6 +4,7 @@ import { InputNumber, Pagination } from "antd";
 import { CloseOutlined, WarningOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
+import { useAuth } from "../../context/AuthContext";
 import { useCreditState } from "../../hooks/useCreditState";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 
@@ -77,12 +78,15 @@ export default function QuickAddPanel({
     [],
   );
 
+  const { isAuthenticated } = useAuth();
+
   const handleAddSelected = () => {
     if (selectedEntries.length === 0 || wouldExceedCredit) return;
     const items = selectedEntries
       .map(([vid, qty]) => {
         const v = variants.find((vr) => vr.id === vid);
         if (!v) return null;
+        const unitPrice = isAuthenticated ? (v.finalPrice ?? v.specialPrice ?? v.price) : v.price;
         return {
           id: v.id,
           productId: product.id,
@@ -90,7 +94,10 @@ export default function QuickAddPanel({
           sku: v.sku,
           variantAttributes: v.attributes,
           quantity: qty,
-          unitPrice: v.price,
+          unitPrice,
+          listPrice: v.price,
+          specialPrice: isAuthenticated ? v.specialPrice : undefined,
+          promotionLabel: isAuthenticated ? (v.promotionLabel ?? product.promotionLabel) : undefined,
           imageUrl: product.imageUrl,
         };
       })

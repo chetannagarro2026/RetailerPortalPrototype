@@ -1,10 +1,12 @@
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
-import { ShoppingCartOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, DownOutlined, RightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
 import { useOrder } from "../context/OrderContext";
+import { useAuth } from "../context/AuthContext";
+import { resolveVariantPricing, getEffectiveTierPricing } from "../utils/pricing";
 import FulfillmentPanel from "../components/product-family/FulfillmentPanel";
 
 export default function SkuDetailPage() {
@@ -33,11 +35,9 @@ export default function SkuDetailPage() {
 
   return (
     <div className="max-w-content-wide mx-auto px-6 py-8">
-      {/* Breadcrumb */}
       <SkuBreadcrumb product={product} variant={variant} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
-        {/* Left: Image */}
         <div>
           <div
             className="w-full rounded-xl overflow-hidden"
@@ -51,10 +51,10 @@ export default function SkuDetailPage() {
           </div>
         </div>
 
-        {/* Right: SKU Details */}
         <div>
           <SkuHeader product={product} variant={variant} />
           <SkuOrderSection product={product} variant={variant} addItem={addItem} />
+          <OfferDetailsSection product={product} variant={variant} />
           <FulfillmentSection variant={variant} />
           {product.specifications && product.specifications.length > 0 && (
             <SkuSpecifications specifications={product.specifications} />
@@ -95,6 +95,8 @@ function SkuBreadcrumb({ product, variant }: { product: CatalogProduct; variant:
 
 function SkuHeader({ product, variant }: { product: CatalogProduct; variant: ProductVariant }) {
   const config = activeBrandConfig;
+  const { isAuthenticated, showSignInModal } = useAuth();
+  const pricing = resolveVariantPricing(variant, product);
   const variantDesc = Object.entries(variant.attributes)
     .map(([k, v]) => `${k}: ${v}`)
     .join(" · ");
@@ -116,7 +118,6 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
         {variantDesc}
       </p>
 
-      {/* Badges */}
       {product.badges && product.badges.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {product.badges.map((b) => (
@@ -131,20 +132,96 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
         </div>
       )}
 
-      {/* Price */}
-      <div className="flex items-baseline gap-2 mb-3">
-        <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-          ${variant.price.toFixed(2)}
-        </span>
-        {product.unitMeasure && (
-          <span className="text-xs" style={{ color: config.secondaryColor }}>
-            {product.unitMeasure}
-          </span>
-        )}
-      </div>
+      {/* Pricing */}
+      {!isAuthenticated ? (
+        <div className="mb-3">
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
+              ${pricing.listPrice.toFixed(2)}
+            </span>
+            {product.unitMeasure && (
+              <span className="text-xs" style={{ color: config.secondaryColor }}>{product.unitMeasure}</span>
+            )}
+          </div>
+          <button
+            onClick={() => showSignInModal("Sign in to view Special Price and promotions.")}
+            className="text-xs mt-1 cursor-pointer bg-transparent border-none p-0 underline"
+            style={{ color: "#2563EB" }}
+          >
+            Login to view Special Price
+          </button>
+        </div>
+      ) : (
+        <div className="mb-3">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
+              ${pricing.finalPrice.toFixed(2)}
+            </span>
+            <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
+              ${pricing.listPrice.toFixed(2)}
+            </span>
+            {product.unitMeasure && (
+              <span className="text-xs" style={{ color: config.secondaryColor }}>
+                {product.unitMeasure}
+              </span>
+            )}
+          </div>
 
-      {/* Tier pricing */}
-      {product.tierPricing && product.tierPricing.length > 1 && (
+          {pricing.hasPromotion ? (
+            <span
+              className="inline-block text-[11px] font-semibold mt-1.5 px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
+            >
+              {pricing.promotionLabel} Applied
+            </span>
+          ) : (
+            <span className="block text-[11px] mt-1" style={{ color: "#16A34A" }}>
+              Special Price
+            </span>
+          )}
+
+          {pricing.savings > 0 && (
+            <p className="text-xs mt-1.5" style={{ color: "#16A34A" }}>
+              You Save ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Volume pricing (reflects final effective price) */}
+      {isAuthenticated && (() => {
+        const effectiveTiers = getEffectiveTierPricing(
+          product.tierPricing,
+          pricing.hasSpecialPrice ? pricing.specialPrice! / pricing.listPrice : undefined,
+          pricing.promotionInfo?.discountPercent,
+        );
+        if (!effectiveTiers || effectiveTiers.length <= 1) return null;
+        return (
+          <div className="mb-3">
+            <p className="text-[11px] font-semibold mb-1.5" style={{ color: config.secondaryColor }}>
+              Volume Pricing
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {effectiveTiers.map((tier) => (
+                <span
+                  key={tier.minQty}
+                  className="text-[11px] px-2.5 py-1 rounded-lg"
+                  style={{
+                    backgroundColor: config.cardBg,
+                    color: config.primaryColor,
+                    border: `1px solid ${config.borderColor}`,
+                  }}
+                >
+                  {tier.minQty}+: <span className="font-semibold">${tier.price.toFixed(2)}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Guest tier pricing (list prices) */}
+      {!isAuthenticated && product.tierPricing && product.tierPricing.length > 1 && (
         <div className="mb-3">
           <p className="text-[11px] font-semibold mb-1.5" style={{ color: config.secondaryColor }}>
             Volume Pricing
@@ -167,12 +244,65 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
         </div>
       )}
 
-      {/* Description */}
       {product.description && (
         <p className="text-xs leading-relaxed" style={{ color: config.secondaryColor }}>
           {product.description}
         </p>
       )}
+    </div>
+  );
+}
+
+// ── Offer Details Section ───────────────────────────────────────────
+
+function OfferDetailsSection({ product, variant }: { product: CatalogProduct; variant: ProductVariant }) {
+  const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
+  const [expanded, setExpanded] = useState(false);
+
+  const promoInfo = variant.promotionInfo ?? product.promotionInfo;
+  if (!isAuthenticated || !promoInfo) return null;
+
+  return (
+    <div
+      className="rounded-xl mb-5 overflow-hidden"
+      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+    >
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between px-5 py-3.5 cursor-pointer bg-transparent border-none text-left"
+        style={{ color: config.primaryColor }}
+      >
+        <span className="text-sm font-semibold">View Offer Details</span>
+        {expanded
+          ? <DownOutlined className="text-[10px]" style={{ color: config.secondaryColor }} />
+          : <RightOutlined className="text-[10px]" style={{ color: config.secondaryColor }} />}
+      </button>
+
+      {expanded && (
+        <div className="px-5 pb-4 space-y-2.5">
+          <DetailRow label="Offer Type" value={promoInfo.label} />
+          {promoInfo.minQty !== undefined && promoInfo.minQty > 1 && (
+            <DetailRow label="Minimum Quantity" value={`${promoInfo.minQty} units`} />
+          )}
+          {promoInfo.validFrom && promoInfo.validTo && (
+            <DetailRow label="Validity" value={`${promoInfo.validFrom} – ${promoInfo.validTo}`} />
+          )}
+          {promoInfo.scope && (
+            <DetailRow label="Scope" value={promoInfo.scope === "sku" ? "SKU Level" : "Product Family"} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  const config = activeBrandConfig;
+  return (
+    <div className="flex items-center text-xs" style={{ borderTop: `1px solid ${config.borderColor}`, paddingTop: 8 }}>
+      <span className="w-36 shrink-0 font-medium" style={{ color: config.secondaryColor }}>{label}</span>
+      <span style={{ color: config.primaryColor }}>{value}</span>
     </div>
   );
 }
@@ -189,6 +319,8 @@ function SkuOrderSection({
   addItem: ReturnType<typeof useOrder>["addItem"];
 }) {
   const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
+  const pricing = resolveVariantPricing(variant, product);
   const minQty = product.minOrderQty || 1;
   const step = product.casePackQty || 1;
   const [qty, setQty] = useState(minQty);
@@ -202,6 +334,7 @@ function SkuOrderSection({
   );
 
   const handleAdd = useCallback(() => {
+    const unitPrice = isAuthenticated ? pricing.finalPrice : pricing.listPrice;
     addItem({
       id: variant.id,
       productId: product.id,
@@ -209,10 +342,13 @@ function SkuOrderSection({
       sku: variant.sku,
       variantAttributes: variant.attributes,
       quantity: qty,
-      unitPrice: variant.price,
+      unitPrice,
+      listPrice: pricing.listPrice,
+      specialPrice: isAuthenticated ? pricing.specialPrice : undefined,
+      promotionLabel: isAuthenticated ? pricing.promotionLabel : undefined,
       imageUrl: product.imageUrl,
     });
-  }, [variant, product, qty, addItem]);
+  }, [variant, product, qty, addItem, isAuthenticated, pricing]);
 
   const disabled = variant.availabilityStatus === "out-of-stock";
 
@@ -221,7 +357,6 @@ function SkuOrderSection({
       className="rounded-xl p-5 mb-5"
       style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
     >
-      {/* Constraints */}
       {(minQty > 1 || step > 1) && (
         <div className="text-[11px] mb-3" style={{ color: config.secondaryColor }}>
           {minQty > 1 && <span>Min order: {minQty} units</span>}

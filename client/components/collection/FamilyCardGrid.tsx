@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Pagination } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
+import { useAuth } from "../../context/AuthContext";
+import { getFinalPriceRange } from "../../utils/pricing";
 
 const PAGE_SIZE = 20;
 
@@ -60,8 +62,9 @@ export default function FamilyCardGrid({
 
 function FamilyCard({ product }: { product: CatalogProduct }) {
   const config = activeBrandConfig;
+  const { isAuthenticated, showSignInModal } = useAuth();
   const familyLink = `/product/${product.id}`;
-  const meta = useMemo(() => computeCardMeta(product), [product]);
+  const meta = useMemo(() => computeCardMeta(product, isAuthenticated), [product, isAuthenticated]);
 
   return (
     <Link
@@ -100,9 +103,37 @@ function FamilyCard({ product }: { product: CatalogProduct }) {
         </p>
 
         {/* Price Range */}
-        <p className="text-sm font-semibold mb-1.5" style={{ color: config.primaryColor }}>
-          {meta.priceLabel}
-        </p>
+        <div className="mb-1.5">
+          {isAuthenticated && meta.listPriceLabel && (
+            <p className="text-[10px] line-through mb-0" style={{ color: config.secondaryColor }}>
+              {meta.listPriceLabel}
+            </p>
+          )}
+          <p className="text-sm font-semibold mb-0" style={{ color: config.primaryColor }}>
+            {meta.priceLabel}
+          </p>
+          {isAuthenticated && meta.hasOffers && (
+            <span
+              className="inline-block text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
+            >
+              Offers Available
+            </span>
+          )}
+          {!isAuthenticated && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showSignInModal("Sign in to view Special Price and promotions.");
+              }}
+              className="block text-[10px] mt-0.5 cursor-pointer bg-transparent border-none p-0 underline"
+              style={{ color: "#2563EB" }}
+            >
+              Login to view Special Price
+            </button>
+          )}
+        </div>
 
         {/* Attribute Summary */}
         {meta.attrSummary && (
@@ -176,25 +207,37 @@ function AvailabilityBadge({ status }: { status: string }) {
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
-function computeCardMeta(product: CatalogProduct) {
+function computeCardMeta(product: CatalogProduct, isAuthenticated: boolean) {
   const variants = product.variants || [];
   const skuCount = variants.length || 1;
 
-  // Price range
-  let minPrice = Infinity;
-  let maxPrice = -Infinity;
-  for (const v of variants) {
-    if (v.price < minPrice) minPrice = v.price;
-    if (v.price > maxPrice) maxPrice = v.price;
+  // Price range (use final prices when authenticated)
+  const range = getFinalPriceRange(product, isAuthenticated);
+  let priceLabel: string;
+  if (range.min === range.max) {
+    priceLabel = `$${range.min.toFixed(2)}`;
+  } else {
+    priceLabel = `$${range.min.toFixed(2)} – $${range.max.toFixed(2)}`;
   }
 
-  let priceLabel: string;
-  if (variants.length === 0) {
-    priceLabel = `$${product.price.toFixed(2)}`;
-  } else if (minPrice === maxPrice) {
-    priceLabel = `$${minPrice.toFixed(2)}`;
-  } else {
-    priceLabel = `$${minPrice.toFixed(2)} – $${maxPrice.toFixed(2)}`;
+  // List price range for strikethrough
+  let listPriceLabel: string | null = null;
+  if (isAuthenticated) {
+    let minList = Infinity;
+    let maxList = -Infinity;
+    if (variants.length === 0) {
+      minList = maxList = product.price;
+    } else {
+      for (const v of variants) {
+        if (v.price < minList) minList = v.price;
+        if (v.price > maxList) maxList = v.price;
+      }
+    }
+    if (minList !== range.min || maxList !== range.max) {
+      listPriceLabel = minList === maxList
+        ? `$${minList.toFixed(2)}`
+        : `$${minList.toFixed(2)} – $${maxList.toFixed(2)}`;
+    }
   }
 
   // Key attribute summary
@@ -218,5 +261,5 @@ function computeCardMeta(product: CatalogProduct) {
     aggregatedStatus = product.availabilityStatus;
   }
 
-  return { priceLabel, skuCount, attrSummary, aggregatedStatus };
+  return { priceLabel, listPriceLabel, skuCount, attrSummary, aggregatedStatus, hasOffers: range.hasOffers };
 }

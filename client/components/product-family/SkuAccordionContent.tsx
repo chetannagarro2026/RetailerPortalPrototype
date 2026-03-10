@@ -4,7 +4,9 @@ import { ShoppingCartOutlined, RightOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
+import { useAuth } from "../../context/AuthContext";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
+import { resolveVariantPricing } from "../../utils/pricing";
 import FulfillmentPanel from "./FulfillmentPanel";
 
 interface SkuAccordionContentProps {
@@ -27,7 +29,11 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
     [minQty, step],
   );
 
+  const { isAuthenticated } = useAuth();
+  const pricing = resolveVariantPricing(variant, product);
+
   const handleAdd = useCallback(() => {
+    const unitPrice = isAuthenticated ? pricing.finalPrice : pricing.listPrice;
     addItem({
       id: variant.id,
       productId: product.id,
@@ -35,10 +41,13 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
       sku: variant.sku,
       variantAttributes: variant.attributes,
       quantity: qty,
-      unitPrice: variant.price,
+      unitPrice,
+      listPrice: pricing.listPrice,
+      specialPrice: isAuthenticated ? pricing.specialPrice : undefined,
+      promotionLabel: isAuthenticated ? pricing.promotionLabel : undefined,
       imageUrl: product.imageUrl,
     });
-  }, [variant, product, qty, addItem]);
+  }, [variant, product, qty, addItem, isAuthenticated, pricing]);
 
   const disabled = variant.availabilityStatus === "out-of-stock";
   const variantDesc = Object.entries(variant.attributes)

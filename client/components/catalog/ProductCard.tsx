@@ -5,14 +5,14 @@ import { ShoppingCartOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
+import { useAuth } from "../../context/AuthContext";
+import { resolveProductPricing, hasMixedPromotions, getEffectiveTierPricing } from "../../utils/pricing";
 import QuickMatrix from "./QuickMatrix";
 
 interface ProductCardProps {
   product: CatalogProduct;
   variant: ProductCardVariant;
-  /** ID of the currently expanded quick-matrix card (only one at a time) */
   expandedCardId?: string | null;
-  /** Callback to expand/collapse quick matrix */
   onToggleExpand?: (productId: string | null) => void;
 }
 
@@ -277,21 +277,64 @@ function PricingBlock({
   showTiers?: boolean;
 }) {
   const config = activeBrandConfig;
+  const { isAuthenticated, showSignInModal } = useAuth();
+  const pricing = resolveProductPricing(product);
+  const mixed = hasMixedPromotions(product);
 
-  return (
-    <div className={`${compact ? "mb-2" : "mb-3"}`}>
-      <div className="flex items-baseline gap-2">
+  // Guest user: show list price + login nudge
+  if (!isAuthenticated) {
+    return (
+      <div className={`${compact ? "mb-2" : "mb-3"}`}>
         <span
           className={`${compact ? "text-xs" : "text-sm"} font-semibold`}
           style={{ color: config.primaryColor }}
         >
-          ${product.price.toFixed(2)}
+          ${pricing.listPrice.toFixed(2)}
         </span>
-        {product.originalPrice && (
-          <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
-            ${product.originalPrice.toFixed(2)}
+        {product.unitMeasure && (
+          <span className="text-[10px] ml-1" style={{ color: config.secondaryColor }}>
+            {product.unitMeasure}
           </span>
         )}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showSignInModal("Sign in to view Special Price and promotions.");
+          }}
+          className="block text-[10px] mt-0.5 cursor-pointer bg-transparent border-none p-0 underline"
+          style={{ color: "#2563EB" }}
+        >
+          Login to view Special Price
+        </button>
+      </div>
+    );
+  }
+
+  // Logged-in: show special price + promotion
+  const hasPromo = pricing.hasPromotion;
+  const effectiveTiers = showTiers
+    ? getEffectiveTierPricing(
+        product.tierPricing,
+        pricing.hasSpecialPrice ? pricing.specialPrice! / pricing.listPrice : undefined,
+        pricing.promotionInfo?.discountPercent,
+      )
+    : undefined;
+
+  return (
+    <div className={`${compact ? "mb-2" : "mb-3"}`}>
+      <div className="flex items-baseline gap-2 flex-wrap">
+        {/* Final price (dominant) */}
+        <span
+          className={`${compact ? "text-xs" : "text-sm"} font-semibold`}
+          style={{ color: config.primaryColor }}
+        >
+          ${pricing.finalPrice.toFixed(2)}
+        </span>
+        {/* List price struck through */}
+        <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
+          ${pricing.listPrice.toFixed(2)}
+        </span>
         {product.unitMeasure && (
           <span className="text-[10px]" style={{ color: config.secondaryColor }}>
             {product.unitMeasure}
@@ -299,9 +342,34 @@ function PricingBlock({
         )}
       </div>
 
-      {showTiers && product.tierPricing && product.tierPricing.length > 1 && (
+      {/* Promotion pill OR Special Price label */}
+      {hasPromo ? (
+        <span
+          className="inline-block text-[10px] font-semibold mt-1 px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
+        >
+          {pricing.promotionLabel}
+        </span>
+      ) : (
+        <span className="block text-[10px] mt-0.5" style={{ color: "#16A34A" }}>
+          Special Price
+        </span>
+      )}
+
+      {/* Mixed SKU scenario */}
+      {mixed && !hasPromo && (
+        <span
+          className="inline-block text-[10px] font-medium mt-1 px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: "#FFF7ED", color: "#9A3412" }}
+        >
+          Offers Available
+        </span>
+      )}
+
+      {/* Volume pricing (reflects final effective price) */}
+      {showTiers && effectiveTiers && effectiveTiers.length > 1 && (
         <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {product.tierPricing.map((tier) => (
+          {effectiveTiers.map((tier) => (
             <span
               key={tier.minQty}
               className="text-[10px] px-1.5 py-0.5 rounded"
@@ -331,6 +399,7 @@ function QuantityAddBlock({
 }) {
   const config = activeBrandConfig;
   const { addItem } = useOrder();
+  const { isAuthenticated } = useAuth();
   const minQty = product.minOrderQty || 1;
   const step = product.casePackQty || 1;
   const [qty, setQty] = useState<number>(minQty);
@@ -346,6 +415,9 @@ function QuantityAddBlock({
 
   const handleAdd = useCallback(() => {
     const firstVariant = product.variants?.[0];
+    const unitPrice = isAuthenticated
+      ? (firstVariant?.finalPrice ?? firstVariant?.specialPrice ?? firstVariant?.price ?? product.finalPrice ?? product.specialPrice ?? product.price)
+      : (firstVariant?.price ?? product.price);
     addItem({
       id: firstVariant?.id || product.id,
       productId: product.id,
@@ -353,10 +425,13 @@ function QuantityAddBlock({
       sku: firstVariant?.sku || product.sku,
       variantAttributes: firstVariant?.attributes || {},
       quantity: qty,
-      unitPrice: firstVariant?.price || product.price,
+      unitPrice,
+      listPrice: firstVariant?.price ?? product.price,
+      specialPrice: isAuthenticated ? (firstVariant?.specialPrice ?? product.specialPrice) : undefined,
+      promotionLabel: isAuthenticated ? (firstVariant?.promotionLabel ?? product.promotionLabel) : undefined,
       imageUrl: product.imageUrl,
     });
-  }, [qty, product, addItem]);
+  }, [qty, product, addItem, isAuthenticated]);
 
   const disabled = product.availabilityStatus === "out-of-stock";
 

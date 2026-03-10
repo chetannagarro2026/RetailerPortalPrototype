@@ -2,7 +2,7 @@ import { Button, InputNumber } from "antd";
 import { DeleteOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
-import { useOrder } from "../context/OrderContext";
+import { useOrder, type OrderLineItem } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
@@ -16,6 +16,13 @@ export default function CartPage() {
 
   const formatCurrency = (val: number) =>
     "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
+
+  // Calculate total savings across all items
+  const totalSavings = items.reduce((sum, item) => {
+    if (item.isFreeItem) return sum;
+    const listPrice = item.listPrice ?? item.unitPrice;
+    return sum + (listPrice - item.unitPrice) * item.quantity;
+  }, 0);
 
   if (items.length === 0) {
     return (
@@ -85,13 +92,21 @@ export default function CartPage() {
                 <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
                 <span className="font-medium" style={{ color: config.primaryColor }}>{formatCurrency(totalValue)}</span>
               </div>
+              {totalSavings > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#16A34A" }}>Total Savings</span>
+                  <span className="font-semibold" style={{ color: "#16A34A" }}>
+                    -{formatCurrency(totalSavings)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span style={{ color: config.secondaryColor }}>Estimated Shipping</span>
                 <span className="text-xs font-medium" style={{ color: "#16A34A" }}>Calculated at checkout</span>
               </div>
               <div className="border-t pt-3" style={{ borderColor: config.borderColor }}>
                 <div className="flex justify-between">
-                  <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>Estimated Total</span>
+                  <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>Grand Total</span>
                   <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
                     {formatCurrency(totalValue)}
                   </span>
@@ -147,7 +162,7 @@ function CartItemList({
   onUpdateQuantity,
   onRemove,
 }: {
-  items: ReturnType<typeof useOrder>["items"];
+  items: OrderLineItem[];
   onUpdateQuantity: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
 }) {
@@ -171,82 +186,154 @@ function CartItemList({
 
       {/* Items */}
       {items.map((item, idx) => {
-        const variantDesc = Object.values(item.variantAttributes || {}).join(" · ");
-        const lineTotal = item.quantity * item.unitPrice;
-
+        const isFree = item.isFreeItem;
         return (
-          <div
+          <CartLineItem
             key={item.id}
-            className="grid grid-cols-[1fr_120px_100px_40px] gap-4 px-5 py-4 items-center"
-            style={{
-              borderBottom: idx < items.length - 1 ? `1px solid ${config.borderColor}` : "none",
-            }}
-          >
-            {/* Product Info */}
-            <div className="flex items-center gap-3 min-w-0">
-              {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
-                  alt={item.productName}
-                  className="w-12 h-12 rounded-lg object-cover shrink-0"
-                />
-              )}
-              <div className="min-w-0">
-                <Link
-                  to={`/product/${encodeURIComponent(item.productId)}/sku/${encodeURIComponent(item.id)}`}
-                  className="text-sm font-medium truncate block no-underline hover:underline"
-                  style={{ color: config.primaryColor }}
-                >
-                  {item.productName}
-                </Link>
-                <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-                  {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-                  ${item.unitPrice.toFixed(2)} / unit
-                </p>
-              </div>
-            </div>
-
-            {/* Quantity */}
-            <div className="flex justify-center">
-              <InputNumber
-                size="small"
-                min={1}
-                value={item.quantity}
-                onChange={(val) => val && onUpdateQuantity(item.id, val)}
-                style={{ width: 80 }}
-              />
-            </div>
-
-            {/* Line Total */}
-            <div className="text-right">
-              <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
-                ${lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-
-            {/* Remove */}
-            <div className="flex justify-center">
-              <button
-                onClick={() => onRemove(item.id)}
-                className="p-1.5 rounded-md transition-colors cursor-pointer"
-                style={{ color: config.secondaryColor, border: "none", background: "none" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#DC2626";
-                  e.currentTarget.style.backgroundColor = "#FEF2F2";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = config.secondaryColor;
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                <DeleteOutlined className="text-sm" />
-              </button>
-            </div>
-          </div>
+            item={item}
+            isFree={!!isFree}
+            isLast={idx === items.length - 1}
+            onUpdateQuantity={onUpdateQuantity}
+            onRemove={onRemove}
+          />
         );
       })}
+    </div>
+  );
+}
+
+// ── Cart Line Item ──────────────────────────────────────────────────
+
+function CartLineItem({
+  item,
+  isFree,
+  isLast,
+  onUpdateQuantity,
+  onRemove,
+}: {
+  item: OrderLineItem;
+  isFree: boolean;
+  isLast: boolean;
+  onUpdateQuantity: (id: string, qty: number) => void;
+  onRemove: (id: string) => void;
+}) {
+  const config = activeBrandConfig;
+  const variantDesc = Object.values(item.variantAttributes || {}).join(" · ");
+  const lineTotal = isFree ? 0 : item.quantity * item.unitPrice;
+  const lineSavings = isFree ? 0 : (item.listPrice && item.listPrice > item.unitPrice)
+    ? (item.listPrice - item.unitPrice) * item.quantity
+    : 0;
+
+  return (
+    <div
+      className="grid grid-cols-[1fr_120px_100px_40px] gap-4 px-5 py-4 items-center"
+      style={{
+        borderBottom: !isLast ? `1px solid ${config.borderColor}` : "none",
+        backgroundColor: isFree ? "#F0FDF4" : "transparent",
+      }}
+    >
+      {/* Product Info */}
+      <div className="flex items-center gap-3 min-w-0">
+        {item.imageUrl && (
+          <img
+            src={item.imageUrl}
+            alt={item.productName}
+            className="w-12 h-12 rounded-lg object-cover shrink-0"
+          />
+        )}
+        <div className="min-w-0">
+          <Link
+            to={`/product/${encodeURIComponent(item.productId)}/sku/${encodeURIComponent(item.id)}`}
+            className="text-sm font-medium truncate block no-underline hover:underline"
+            style={{ color: config.primaryColor }}
+          >
+            {item.productName}
+            {isFree && (
+              <span className="text-[10px] ml-1.5 font-semibold" style={{ color: "#16A34A" }}>
+                (Promo – Free Item)
+              </span>
+            )}
+          </Link>
+          <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
+            {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
+          </p>
+
+          {/* Pricing transparency */}
+          {isFree ? (
+            <p className="text-xs mt-0.5 font-medium" style={{ color: "#16A34A" }}>
+              Free Item (Promotion)
+            </p>
+          ) : (
+            <div className="mt-1 space-y-0.5">
+              {item.listPrice && item.listPrice > item.unitPrice && (
+                <p className="text-[10px]" style={{ color: config.secondaryColor }}>
+                  List Price: <span className="line-through">${item.listPrice.toFixed(2)}</span>
+                </p>
+              )}
+              {item.specialPrice && item.specialPrice < (item.listPrice ?? item.unitPrice) && !item.promotionLabel && (
+                <p className="text-[10px]" style={{ color: config.secondaryColor }}>
+                  Special Price: <span className="font-medium">${item.specialPrice.toFixed(2)}</span>
+                </p>
+              )}
+              {item.promotionLabel && (
+                <p className="text-[10px]" style={{ color: config.secondaryColor }}>
+                  Promotion: <span className="font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>{item.promotionLabel}</span>
+                </p>
+              )}
+              <p className="text-xs" style={{ color: config.secondaryColor }}>
+                Final Unit Price: <span className="font-medium" style={{ color: config.primaryColor }}>${item.unitPrice.toFixed(2)}</span>
+                {" · "}Qty: {item.quantity}
+              </p>
+              {lineSavings > 0 && (
+                <p className="text-[10px] font-medium" style={{ color: "#16A34A" }}>
+                  Savings: ${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quantity */}
+      <div className="flex justify-center">
+        {isFree ? (
+          <span className="text-xs font-medium" style={{ color: "#16A34A" }}>{item.quantity}</span>
+        ) : (
+          <InputNumber
+            size="small"
+            min={1}
+            value={item.quantity}
+            onChange={(val) => val && onUpdateQuantity(item.id, val)}
+            style={{ width: 80 }}
+          />
+        )}
+      </div>
+
+      {/* Line Total */}
+      <div className="text-right">
+        <span className="text-sm font-medium" style={{ color: isFree ? "#16A34A" : config.primaryColor }}>
+          {isFree ? "$0.00" : `$${lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+        </span>
+      </div>
+
+      {/* Remove */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => onRemove(item.id)}
+          className="p-1.5 rounded-md transition-colors cursor-pointer"
+          style={{ color: config.secondaryColor, border: "none", background: "none" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#DC2626";
+            e.currentTarget.style.backgroundColor = "#FEF2F2";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = config.secondaryColor;
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+        >
+          <DeleteOutlined className="text-sm" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { DownOutlined, RightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
+import { useAuth } from "../../context/AuthContext";
+import { resolveVariantPricing } from "../../utils/pricing";
 import SkuAccordionContent from "./SkuAccordionContent";
 
 interface SkuTableGroupProps {
@@ -87,7 +89,25 @@ export default function SkuTableGroup({
                 className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
               >
-                Price
+                List Price
+              </th>
+              <th
+                className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+              >
+                Special Price
+              </th>
+              <th
+                className="text-center px-3 py-2.5 font-semibold whitespace-nowrap"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+              >
+                Promotion
+              </th>
+              <th
+                className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+              >
+                Final Price
               </th>
             </tr>
           </thead>
@@ -203,29 +223,86 @@ function SkuRow({
           )}
         </td>
 
-        {/* Price */}
-        <td
-          className="px-3 py-2.5 text-right font-medium whitespace-nowrap"
-          style={{
-            color: config.primaryColor,
-            borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}`,
-          }}
-        >
-          ${variant.price.toFixed(2)}
-        </td>
+        {/* List Price / Special Price / Promotion / Final Price */}
+        <SkuPricingCells variant={variant} product={product} isExpanded={isExpanded} />
       </tr>
 
       {/* Expanded Accordion Content — lazy rendered */}
       {isExpanded && (
         <tr>
           <td
-            colSpan={columns.length + 4}
+            colSpan={columns.length + 7}
             style={{ padding: 0, borderBottom: `1px solid ${config.borderColor}` }}
           >
             <SkuAccordionContent product={product} variant={variant} />
           </td>
         </tr>
       )}
+    </>
+  );
+}
+
+// ── SKU Pricing Cells ───────────────────────────────────────────────
+
+function SkuPricingCells({
+  variant,
+  product,
+  isExpanded,
+}: {
+  variant: ProductVariant;
+  product: CatalogProduct;
+  isExpanded: boolean;
+}) {
+  const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
+  const pricing = resolveVariantPricing(variant, product);
+  const borderStyle = isExpanded ? "none" : `1px solid ${config.borderColor}`;
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
+          ${pricing.listPrice.toFixed(2)}
+        </td>
+        <td className="px-3 py-2.5 text-right text-[10px] whitespace-nowrap" style={{ color: "#2563EB", borderBottom: borderStyle }}>
+          Login to view
+        </td>
+        <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ color: config.secondaryColor, borderBottom: borderStyle }}>
+          —
+        </td>
+        <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
+          ${pricing.listPrice.toFixed(2)}
+        </td>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* List Price */}
+      <td className="px-3 py-2.5 text-right whitespace-nowrap" style={{ borderBottom: borderStyle }}>
+        <span className={pricing.hasSpecialPrice ? "line-through" : "font-medium"} style={{ color: pricing.hasSpecialPrice ? config.secondaryColor : config.primaryColor }}>
+          ${pricing.listPrice.toFixed(2)}
+        </span>
+      </td>
+      {/* Special Price */}
+      <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: pricing.hasSpecialPrice ? config.primaryColor : config.secondaryColor, borderBottom: borderStyle }}>
+        {pricing.hasSpecialPrice ? `$${pricing.specialPrice!.toFixed(2)}` : "—"}
+      </td>
+      {/* Promotion */}
+      <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
+        {pricing.hasPromotion ? (
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>
+            {pricing.promotionLabel}
+          </span>
+        ) : (
+          <span style={{ color: config.secondaryColor }}>—</span>
+        )}
+      </td>
+      {/* Final Price */}
+      <td className="px-3 py-2.5 text-right font-semibold whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
+        ${pricing.finalPrice.toFixed(2)}
+      </td>
     </>
   );
 }

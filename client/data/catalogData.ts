@@ -43,6 +43,18 @@ export interface VariantAttribute {
   values: string[];    // e.g. ["S", "M", "L", "XL"]
 }
 
+/** Promotion metadata */
+export interface PromotionInfo {
+  label: string;
+  discountPercent?: number;
+  freeQty?: number;
+  qualifyingQty?: number;
+  minQty?: number;
+  validFrom?: string;
+  validTo?: string;
+  scope?: "sku" | "family";
+}
+
 /** A single purchasable variant (one cell in the matrix) */
 export interface ProductVariant {
   id: string;
@@ -50,6 +62,14 @@ export interface ProductVariant {
   /** Map of attribute name → value for this variant */
   attributes: Record<string, string>;
   price: number;
+  /** Negotiated distributor–retailer price (visible only when logged in) */
+  specialPrice?: number;
+  /** Final price after best promotion applied on special price */
+  finalPrice?: number;
+  /** Promotion label e.g. "10% OFF", "Buy 1 Get 1" */
+  promotionLabel?: string;
+  /** Full promotion details */
+  promotionInfo?: PromotionInfo;
   availabilityStatus: "in-stock" | "low-stock" | "out-of-stock" | "pre-order";
   stockQty: number;
 }
@@ -62,6 +82,14 @@ export interface CatalogProduct {
   price: number;
   /** Optional strike-through original price */
   originalPrice?: number;
+  /** Negotiated distributor–retailer price (visible only when logged in) */
+  specialPrice?: number;
+  /** Final price after best promotion applied on special price */
+  finalPrice?: number;
+  /** Promotion label e.g. "10% OFF", "Buy 1 Get 1" */
+  promotionLabel?: string;
+  /** Full promotion details */
+  promotionInfo?: PromotionInfo;
   /** Dynamic badges — not hardcoded to specific types */
   badges?: Array<{ label: string; color?: string; bg?: string }>;
   /** Dynamic display attributes chosen per taxonomy config */
@@ -510,12 +538,42 @@ const specPools: Array<Array<{ label: string; value: string }>> = [
   ],
 ];
 
+// ── Promotion Pools ─────────────────────────────────────────────────
+// Deterministic promotion assignment based on product index
+const promotionPool: (PromotionInfo | undefined)[] = [
+  undefined, // no promotion
+  { label: "10% OFF", discountPercent: 10, minQty: 1, validFrom: "2026-01-01", validTo: "2026-06-30", scope: "family" },
+  undefined,
+  { label: "15% OFF", discountPercent: 15, minQty: 3, validFrom: "2026-02-01", validTo: "2026-04-30", scope: "sku" },
+  undefined,
+  undefined,
+  { label: "Buy 10 Get 2 Free", freeQty: 2, qualifyingQty: 10, minQty: 10, validFrom: "2026-01-15", validTo: "2026-05-31", scope: "family" },
+  undefined,
+  { label: "Buy 1 Get 1", freeQty: 1, qualifyingQty: 1, minQty: 1, validFrom: "2026-03-01", validTo: "2026-07-31", scope: "sku" },
+  undefined,
+];
+
+/** Compute special price as ~80% of list price (deterministic per index) */
+function computeSpecialPrice(listPrice: number, idx: number): number {
+  const discountRatios = [0.80, 0.78, 0.82, 0.75, 0.85, 0.80, 0.77, 0.83];
+  const ratio = discountRatios[idx % discountRatios.length];
+  return Math.round(listPrice * ratio * 100) / 100;
+}
+
+/** Compute final price after applying promotion on special price */
+function computeFinalPrice(specialPrice: number, promo: PromotionInfo | undefined): number {
+  if (!promo || !promo.discountPercent) return specialPrice;
+  return Math.round(specialPrice * (1 - promo.discountPercent / 100) * 100) / 100;
+}
+
 /** Generate variants for a product based on its variant attributes */
 function generateVariants(
   productId: string,
   skuPrefix: string,
   basePrice: number,
   attrs: VariantAttribute[],
+  productPromo: PromotionInfo | undefined,
+  productIdx: number,
 ): ProductVariant[] {
   const variants: ProductVariant[] = [];
   const dimensions = attrs.map((a) => a.values);
@@ -527,11 +585,19 @@ function generateVariants(
       const stockVal = ((idx * 37 + 11) % 200);
       const status: ProductVariant["availabilityStatus"] =
         stockVal === 0 ? "out-of-stock" : stockVal < 15 ? "low-stock" : "in-stock";
+      const variantListPrice = Math.round(basePrice * priceMod * 100) / 100;
+      const variantSpecialPrice = computeSpecialPrice(variantListPrice, productIdx + idx);
+      const variantPromo = productPromo;
+      const variantFinalPrice = computeFinalPrice(variantSpecialPrice, variantPromo);
       variants.push({
         id: `${productId}-v${idx}`,
         sku: `${skuPrefix}-${Object.values(combo).map((v) => v.replace(/\s+/g, "").slice(0, 3).toUpperCase()).join("-")}`,
         attributes: { ...combo },
-        price: Math.round(basePrice * priceMod * 100) / 100,
+        price: variantListPrice,
+        specialPrice: variantSpecialPrice,
+        finalPrice: variantFinalPrice,
+        promotionLabel: variantPromo?.label,
+        promotionInfo: variantPromo,
         availabilityStatus: status,
         stockQty: stockVal,
       });
@@ -661,12 +727,19 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
     const brand = brandNames[idx % brandNames.length];
     const basePrice = 28 + ((idx * 17) % 120);
     const badge = badges[idx % badges.length];
+    const promo = promotionPool[idx % promotionPool.length];
+    const specialPrice = computeSpecialPrice(basePrice, idx);
+    const finalPrice = computeFinalPrice(specialPrice, promo);
     return {
       id: `${nodeId}-p${idx}`,
       name: `${node.label} Style ${idx + 1}`,
       sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
+      specialPrice,
+      finalPrice,
+      promotionLabel: promo?.label,
+      promotionInfo: promo,
       imageUrl: images[idx % images.length],
       badges: badge ? [badge] : undefined,
       brand,
@@ -687,6 +760,8 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
         `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
         basePrice,
         variantAttrPools[idx % variantAttrPools.length],
+        promo,
+        idx,
       ),
       galleryImages: [
         images[idx % images.length],
@@ -833,12 +908,19 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
     const brand = brandNames[idx % brandNames.length];
     const basePrice = 28 + ((idx * 17) % 120);
     const badge = badges[idx % badges.length];
+    const promo = promotionPool[idx % promotionPool.length];
+    const specialPrice = computeSpecialPrice(basePrice, idx);
+    const finalPrice = computeFinalPrice(specialPrice, promo);
     return {
       id: `${nodeId}-p${idx}`,
       name: `${node.label} Style ${idx + 1}`,
       sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
+      specialPrice,
+      finalPrice,
+      promotionLabel: promo?.label,
+      promotionInfo: promo,
       imageUrl: images[idx % images.length],
       badges: badge ? [badge] : undefined,
       brand,
@@ -857,6 +939,8 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
         `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
         basePrice,
         variantAttrPools[idx % variantAttrPools.length],
+        promo,
+        idx,
       ),
       galleryImages: [
         images[idx % images.length],
