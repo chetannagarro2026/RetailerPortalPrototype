@@ -90,8 +90,8 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                           )}
                           <span className="text-xs text-gray-500">${item.unitPrice.toFixed(2)} / unit</span>
                           {item.promotionLabel && (
-                            <span className="text-[9px] font-semibold ml-1.5 px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>
-                              {item.promotionLabel}
+                            <span className="text-[9px] font-medium ml-1.5 px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}>
+                              {item.promotionLabel} applied
                             </span>
                           )}
                         </div>

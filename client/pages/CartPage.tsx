@@ -258,36 +258,33 @@ function CartLineItem({
             {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
           </p>
 
-          {/* Pricing transparency */}
+          {/* Pricing — matches PDP pattern */}
           {isFree ? (
             <p className="text-xs mt-0.5 font-medium" style={{ color: "#16A34A" }}>
               Free Item (Promotion)
             </p>
           ) : (
-            <div className="mt-1 space-y-0.5">
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+                ${item.unitPrice.toFixed(2)}
+              </span>
               {item.listPrice && item.listPrice > item.unitPrice && (
-                <p className="text-[10px]" style={{ color: config.secondaryColor }}>
-                  List Price: <span className="line-through">${item.listPrice.toFixed(2)}</span>
-                </p>
+                <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
+                  ${item.listPrice.toFixed(2)}
+                </span>
               )}
-              {item.specialPrice && item.specialPrice < (item.listPrice ?? item.unitPrice) && !item.promotionLabel && (
-                <p className="text-[10px]" style={{ color: config.secondaryColor }}>
-                  Special Price: <span className="font-medium">${item.specialPrice.toFixed(2)}</span>
-                </p>
+              {lineSavings > 0 && (
+                <span className="text-[10px]" style={{ color: "#16A34A" }}>
+                  Save ${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
               )}
               {item.promotionLabel && (
-                <p className="text-[10px]" style={{ color: config.secondaryColor }}>
-                  Promotion: <span className="font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>{item.promotionLabel}</span>
-                </p>
-              )}
-              <p className="text-xs" style={{ color: config.secondaryColor }}>
-                Final Unit Price: <span className="font-medium" style={{ color: config.primaryColor }}>${item.unitPrice.toFixed(2)}</span>
-                {" · "}Qty: {item.quantity}
-              </p>
-              {lineSavings > 0 && (
-                <p className="text-[10px] font-medium" style={{ color: "#16A34A" }}>
-                  Savings: ${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </p>
+                <span
+                  className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}
+                >
+                  {item.promotionLabel} applied
+                </span>
               )}
             </div>
           )}
