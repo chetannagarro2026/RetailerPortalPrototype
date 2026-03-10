@@ -85,53 +85,53 @@ export default function HybridFamilyTable({
           <table className="w-full border-collapse text-xs">
             <thead>
               <tr style={{ backgroundColor: config.cardBg }}>
-                <th className="w-8 px-3 py-2.5" style={{ borderBottom: `2px solid ${config.borderColor}` }} />
+                <th className="w-6 px-1.5 py-2" style={{ borderBottom: `2px solid ${config.borderColor}` }} />
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-2 py-2 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Image
                 </th>
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-2 py-2 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Family Name
                 </th>
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-2 py-2 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Brand
                 </th>
                 {showCategory && (
                   <th
-                    className="text-left px-3 py-2.5 font-semibold"
+                    className="text-left px-2 py-2 font-semibold"
                     style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                   >
                     Category
                   </th>
                 )}
                 <th
-                  className="text-left px-3 py-2.5 font-semibold"
+                  className="text-left px-2 py-2 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Key Attributes
                 </th>
                 <th
-                  className="text-right px-3 py-2.5 font-semibold"
+                  className="text-right px-2 py-2 font-semibold whitespace-nowrap"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Price Range
                 </th>
                 <th
-                  className="text-center px-3 py-2.5 font-semibold"
+                  className="text-center px-2 py-2 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   SKUs
                 </th>
                 <th
-                  className="text-center px-3 py-2.5 font-semibold"
+                  className="text-center px-2 py-2 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Actions
@@ -233,7 +233,7 @@ function FamilyRow({
       >
         {/* Chevron */}
         <td
-          className="px-3 py-3 text-center"
+          className="px-1.5 py-2 text-center"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           {isExpanded ? (
@@ -245,7 +245,7 @@ function FamilyRow({
 
         {/* Image */}
         <td
-          className="px-3 py-2"
+          className="px-2 py-2"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           <img
@@ -258,7 +258,7 @@ function FamilyRow({
 
         {/* Family Name */}
         <td
-          className="px-3 py-2"
+          className="px-2 py-2"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           <Link
@@ -276,7 +276,7 @@ function FamilyRow({
 
         {/* Brand */}
         <td
-          className="px-3 py-2 text-[11px]"
+          className="px-2 py-2 text-[11px]"
           style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           {product.brand || "—"}
@@ -285,7 +285,7 @@ function FamilyRow({
         {/* Category (global/brand mode) */}
         {showCategory && (
           <td
-            className="px-3 py-2 text-[11px]"
+            className="px-2 py-2 text-[11px]"
             style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
           >
             {product.attributes?.category || "—"}
@@ -294,7 +294,7 @@ function FamilyRow({
 
         {/* Key Attributes */}
         <td
-          className="px-3 py-2 text-[11px]"
+          className="px-2 py-2 text-[11px]"
           style={{ color: config.secondaryColor, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           {attrSummary}
@@ -302,7 +302,7 @@ function FamilyRow({
 
         {/* Price Range */}
         <td
-          className="px-3 py-2 text-right text-[11px] whitespace-nowrap"
+          className="px-2 py-2 text-right text-[11px] whitespace-nowrap"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           {isAuthenticated && listPriceRange && (
@@ -333,7 +333,7 @@ function FamilyRow({
 
         {/* SKU Count */}
         <td
-          className="px-3 py-2 text-center"
+          className="px-2 py-2 text-center"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           <span
@@ -346,7 +346,7 @@ function FamilyRow({
 
         {/* Actions */}
         <td
-          className="px-3 py-2 text-center"
+          className="px-2 py-2 text-center"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           {!isExpanded && (
@@ -355,7 +355,7 @@ function FamilyRow({
                 e.stopPropagation();
                 onQuickAdd(product);
               }}
-              className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors"
+              className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors whitespace-nowrap"
               style={{
                 backgroundColor: config.primaryColor,
                 color: "#fff",
@@ -363,7 +363,7 @@ function FamilyRow({
               }}
             >
               <ShoppingCartOutlined className="text-[9px]" />
-              Quick Add
+              Quick&nbsp;Add
             </button>
           )}
         </td>
