@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Pagination } from "antd";
 import {
@@ -66,17 +66,52 @@ export default function HybridFamilyTable({
 
   const panelOpen = !!quickAddProduct;
 
+  // ── Drag-to-resize state ──
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [panelWidth, setPanelWidth] = useState(420);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startW = useRef(0);
+
+  const onDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startW.current = panelWidth;
+
+    const onMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      const delta = startX.current - ev.clientX;
+      const containerW = containerRef.current?.offsetWidth || 1200;
+      const minPanel = 280;
+      const maxPanel = containerW - 400; // leave at least 400px for left table
+      setPanelWidth(Math.max(minPanel, Math.min(maxPanel, startW.current + delta)));
+    };
+    const onUp = () => {
+      dragging.current = false;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, [panelWidth]);
+
   return (
     <div
-      className="flex gap-0"
+      ref={containerRef}
+      className="flex"
       style={panelOpen ? {
         height: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
       } : undefined}
     >
       {/* Main table area */}
       <div
-        className="flex-1 min-w-0"
-        style={panelOpen ? { overflow: "auto" } : undefined}
+        className="min-w-0"
+        style={panelOpen ? { overflow: "auto", flex: 1 } : { flex: 1 }}
       >
         <div
           className="rounded-xl overflow-hidden"
@@ -170,12 +205,27 @@ export default function HybridFamilyTable({
         )}
       </div>
 
+      {/* Drag handle */}
+      {quickAddProduct && (
+        <div
+          onMouseDown={onDragStart}
+          className="shrink-0 flex items-center justify-center cursor-col-resize group"
+          style={{ width: 8 }}
+          title="Drag to resize"
+        >
+          <div
+            className="w-1 h-10 rounded-full transition-colors group-hover:h-16"
+            style={{ backgroundColor: config.borderColor }}
+          />
+        </div>
+      )}
+
       {/* Quick Add Panel — in-flow, scrolls independently */}
       {quickAddProduct && (
         <div
-          className="shrink-0 ml-4 flex flex-col shadow-lg rounded-xl overflow-hidden"
+          className="shrink-0 flex flex-col shadow-lg rounded-xl overflow-hidden"
           style={{
-            width: 400,
+            width: panelWidth,
             height: "100%",
             border: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",

@@ -145,12 +145,12 @@ export default function QuickAddPanel({
       </div>
 
       {/* SKU Table */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <table className="w-full border-collapse text-xs table-fixed">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full border-collapse text-xs">
           <thead>
             <tr style={{ backgroundColor: config.cardBg }}>
               <th
-                className="text-left px-1.5 py-2 font-semibold whitespace-nowrap sticky top-0 text-[10px]"
+                className="text-left px-2 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
                 SKU
@@ -158,35 +158,35 @@ export default function QuickAddPanel({
               {attrColumns.map((col) => (
                 <th
                   key={col}
-                  className="text-left px-1.5 py-2 font-semibold whitespace-nowrap sticky top-0 text-[10px] truncate"
+                  className="text-left px-2 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
                 >
                   {col}
                 </th>
               ))}
               <th
-                className="text-center px-1.5 py-2 font-semibold whitespace-nowrap sticky top-0 text-[10px]"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1, width: 42 }}
+                className="text-center px-2 py-2.5 font-semibold whitespace-nowrap sticky top-0"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
                 Stock
               </th>
               <th
-                className="text-right px-1.5 py-2 font-semibold whitespace-nowrap sticky top-0 text-[10px]"
+                className="text-right px-2 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
                 {isAuthenticated ? "Special Price" : "Price"}
               </th>
               {isAuthenticated && (
                 <th
-                  className="text-right px-1.5 py-2 font-semibold whitespace-nowrap sticky top-0 text-[10px]"
+                  className="text-right px-2 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
                 >
                   Savings
                 </th>
               )}
               <th
-                className="text-center px-1 py-2 font-semibold whitespace-nowrap sticky top-0 text-[10px]"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1, width: 54 }}
+                className="text-center px-2 py-2.5 font-semibold whitespace-nowrap sticky top-0"
+                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
                 Qty
               </th>
@@ -308,36 +308,34 @@ function SkuRow({
       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
     >
       <td
-        className="px-1.5 py-1.5 font-mono text-[9px] truncate"
+        className="px-2 py-2 font-mono text-[10px] whitespace-nowrap"
         style={{ color: config.secondaryColor, borderBottom: `1px solid ${config.borderColor}` }}
-        title={variant.sku}
       >
         {variant.sku}
       </td>
       {attrColumns.map((col) => (
         <td
           key={col}
-          className="px-1.5 py-1.5 text-[10px] truncate"
+          className="px-2 py-2 text-[11px] whitespace-nowrap"
           style={{ color: config.primaryColor, borderBottom: `1px solid ${config.borderColor}` }}
-          title={variant.attributes[col] || "—"}
         >
           {variant.attributes[col] || "—"}
         </td>
       ))}
       <td
-        className="px-1.5 py-1.5 text-center"
+        className="px-2 py-2 text-center"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         <StockBadge status={variant.availabilityStatus} qty={variant.stockQty} />
       </td>
       {/* Special Price (or list price for guests) */}
       <td
-        className="px-1.5 py-1.5 text-right whitespace-nowrap"
+        className="px-2 py-2 text-right whitespace-nowrap"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         {isAuthenticated ? (
           <>
-            <span className="text-[10px] font-semibold" style={{ color: config.primaryColor }}>
+            <span className="text-[11px] font-semibold" style={{ color: config.primaryColor }}>
               ${pricing.finalPrice.toFixed(2)}
             </span>
             {pricing.hasSpecialPrice && (
@@ -350,7 +348,7 @@ function SkuRow({
             )}
           </>
         ) : (
-          <span className="text-[10px] font-medium" style={{ color: config.primaryColor }}>
+          <span className="text-[11px] font-medium" style={{ color: config.primaryColor }}>
             ${pricing.listPrice.toFixed(2)}
           </span>
         )}
@@ -358,11 +356,11 @@ function SkuRow({
       {/* Savings (auth only) */}
       {isAuthenticated && (
         <td
-          className="px-1.5 py-1.5 text-right whitespace-nowrap"
+          className="px-2 py-2 text-right whitespace-nowrap"
           style={{ borderBottom: `1px solid ${config.borderColor}` }}
         >
           {pricing.savings > 0 ? (
-            <span className="text-[9px]" style={{ color: "#16A34A" }}>
+            <span className="text-[10px]" style={{ color: "#16A34A" }}>
               ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
             </span>
           ) : (
@@ -371,7 +369,7 @@ function SkuRow({
         </td>
       )}
       <td
-        className="px-1 py-1.5 text-center"
+        className="px-2 py-2 text-center"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         <InputNumber
@@ -382,7 +380,7 @@ function SkuRow({
           placeholder="0"
           onChange={(v) => onQtyChange(variant.id, v, minQty, step)}
           disabled={disabled}
-          className="w-[50px]"
+          className="w-[60px]"
           controls={false}
         />
       </td>
