@@ -7,6 +7,7 @@ import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
 import { useCreditState } from "../../hooks/useCreditState";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
+import { resolveVariantPricing } from "../../utils/pricing";
 
 const PAGE_SIZE = 20;
 
@@ -173,8 +174,16 @@ export default function QuickAddPanel({
                 className="text-right px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
-                Price
+                {isAuthenticated ? "Final Price" : "Price"}
               </th>
+              {isAuthenticated && (
+                <th
+                  className="text-right px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
+                >
+                  Savings
+                </th>
+              )}
               <th
                 className="text-center px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
@@ -188,11 +197,13 @@ export default function QuickAddPanel({
               <SkuRow
                 key={v.id}
                 variant={v}
+                product={product}
                 attrColumns={attrColumns}
                 qty={quantities[v.id] || 0}
                 minQty={minQty}
                 step={step}
                 onQtyChange={handleQtyChange}
+                isAuthenticated={isAuthenticated}
               />
             ))}
           </tbody>
@@ -268,21 +279,26 @@ export default function QuickAddPanel({
 
 function SkuRow({
   variant,
+  product,
   attrColumns,
   qty,
   minQty,
   step,
   onQtyChange,
+  isAuthenticated,
 }: {
   variant: ProductVariant;
+  product: CatalogProduct;
   attrColumns: string[];
   qty: number;
   minQty: number;
   step: number;
   onQtyChange: (id: string, val: number | null, minQty: number, step: number) => void;
+  isAuthenticated: boolean;
 }) {
   const config = activeBrandConfig;
   const disabled = variant.availabilityStatus === "out-of-stock";
+  const pricing = resolveVariantPricing(variant, product);
 
   return (
     <tr
@@ -312,12 +328,46 @@ function SkuRow({
       >
         <StockBadge status={variant.availabilityStatus} qty={variant.stockQty} />
       </td>
+      {/* Final Price (or list price for guests) */}
       <td
-        className="px-3 py-2 text-right text-[11px] font-medium whitespace-nowrap"
-        style={{ color: config.primaryColor, borderBottom: `1px solid ${config.borderColor}` }}
+        className="px-3 py-2 text-right whitespace-nowrap"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
-        ${variant.price.toFixed(2)}
+        {isAuthenticated ? (
+          <>
+            <span className="text-[11px] font-semibold" style={{ color: config.primaryColor }}>
+              ${pricing.finalPrice.toFixed(2)}
+            </span>
+            {pricing.hasSpecialPrice && (
+              <>
+                <br />
+                <span className="text-[9px] line-through" style={{ color: config.secondaryColor }}>
+                  Was ${pricing.listPrice.toFixed(2)}
+                </span>
+              </>
+            )}
+          </>
+        ) : (
+          <span className="text-[11px] font-medium" style={{ color: config.primaryColor }}>
+            ${pricing.listPrice.toFixed(2)}
+          </span>
+        )}
       </td>
+      {/* Savings (auth only) */}
+      {isAuthenticated && (
+        <td
+          className="px-3 py-2 text-right whitespace-nowrap"
+          style={{ borderBottom: `1px solid ${config.borderColor}` }}
+        >
+          {pricing.savings > 0 ? (
+            <span className="text-[9px]" style={{ color: "#16A34A" }}>
+              ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
+            </span>
+          ) : (
+            <span style={{ color: config.secondaryColor }}>—</span>
+          )}
+        </td>
+      )}
       <td
         className="px-3 py-2 text-center"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
