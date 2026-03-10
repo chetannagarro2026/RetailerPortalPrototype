@@ -28,14 +28,6 @@ export default function FamilyRowExpansion({
       style={{ backgroundColor: config.cardBg }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Thumbnail */}
-      <img
-        src={product.imageUrl}
-        alt={product.name}
-        loading="lazy"
-        className="w-16 h-16 object-cover rounded-lg shrink-0"
-      />
-
       {/* Details */}
       <div className="flex-1 min-w-0">
         {product.description && (
