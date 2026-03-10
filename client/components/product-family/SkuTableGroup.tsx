@@ -31,6 +31,7 @@ export default function SkuTableGroup({
   onToggleExpand,
 }: SkuTableGroupProps) {
   const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
 
   if (variants.length === 0) return null;
 
@@ -89,26 +90,16 @@ export default function SkuTableGroup({
                 className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
               >
-                List Price
+                {isAuthenticated ? "Final Price" : "Price"}
               </th>
-              <th
-                className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
-              >
-                Special Price
-              </th>
-              <th
-                className="text-center px-3 py-2.5 font-semibold whitespace-nowrap"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
-              >
-                Promotion
-              </th>
-              <th
-                className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
-                style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
-              >
-                Final Price
-              </th>
+              {isAuthenticated && (
+                <th
+                  className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                >
+                  Savings
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -148,6 +139,7 @@ function SkuRow({
   onToggle: () => void;
 }) {
   const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
   const disabled = variant.availabilityStatus === "out-of-stock";
   const stock = STOCK_BADGE[variant.availabilityStatus] || STOCK_BADGE["in-stock"];
 
@@ -231,7 +223,7 @@ function SkuRow({
       {isExpanded && (
         <tr>
           <td
-            colSpan={columns.length + 7}
+            colSpan={columns.length + (isAuthenticated ? 5 : 4)}
             style={{ padding: 0, borderBottom: `1px solid ${config.borderColor}` }}
           >
             <SkuAccordionContent product={product} variant={variant} />
@@ -260,48 +252,37 @@ function SkuPricingCells({
 
   if (!isAuthenticated) {
     return (
-      <>
-        <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
-          ${pricing.listPrice.toFixed(2)}
-        </td>
-        <td className="px-3 py-2.5 text-right text-[10px] whitespace-nowrap" style={{ color: "#2563EB", borderBottom: borderStyle }}>
-          Login to view
-        </td>
-        <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ color: config.secondaryColor, borderBottom: borderStyle }}>
-          —
-        </td>
-        <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
-          ${pricing.listPrice.toFixed(2)}
-        </td>
-      </>
+      <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
+        ${pricing.listPrice.toFixed(2)}
+      </td>
     );
   }
 
   return (
     <>
-      {/* List Price */}
+      {/* Final Price + struck-through list price */}
       <td className="px-3 py-2.5 text-right whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-        <span className={pricing.hasSpecialPrice ? "line-through" : "font-medium"} style={{ color: pricing.hasSpecialPrice ? config.secondaryColor : config.primaryColor }}>
-          ${pricing.listPrice.toFixed(2)}
+        <span className="font-semibold" style={{ color: config.primaryColor }}>
+          ${pricing.finalPrice.toFixed(2)}
         </span>
+        {pricing.hasSpecialPrice && (
+          <>
+            <br />
+            <span className="text-[10px] line-through" style={{ color: config.secondaryColor }}>
+              Was ${pricing.listPrice.toFixed(2)}
+            </span>
+          </>
+        )}
       </td>
-      {/* Special Price */}
-      <td className="px-3 py-2.5 text-right font-medium whitespace-nowrap" style={{ color: pricing.hasSpecialPrice ? config.primaryColor : config.secondaryColor, borderBottom: borderStyle }}>
-        {pricing.hasSpecialPrice ? `$${pricing.specialPrice!.toFixed(2)}` : "—"}
-      </td>
-      {/* Promotion */}
-      <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-        {pricing.hasPromotion ? (
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>
-            {pricing.promotionLabel}
+      {/* Savings */}
+      <td className="px-3 py-2.5 text-right whitespace-nowrap" style={{ borderBottom: borderStyle }}>
+        {pricing.savings > 0 ? (
+          <span className="text-[10px]" style={{ color: "#16A34A" }}>
+            ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
           </span>
         ) : (
           <span style={{ color: config.secondaryColor }}>—</span>
         )}
-      </td>
-      {/* Final Price */}
-      <td className="px-3 py-2.5 text-right font-semibold whitespace-nowrap" style={{ color: config.primaryColor, borderBottom: borderStyle }}>
-        ${pricing.finalPrice.toFixed(2)}
       </td>
     </>
   );

@@ -108,29 +108,30 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
           {product.brand}
         </p>
       )}
-      <h1 className="text-xl font-semibold mb-1" style={{ color: config.primaryColor }}>
-        {product.name}
-      </h1>
+      <div className="flex items-center gap-1.5 mb-1">
+        <h1 className="text-xl font-semibold" style={{ color: config.primaryColor }}>
+          {product.name}
+        </h1>
+        {(() => {
+          const allowedBadges = ["NEW", "LIMITED", "OFFER"];
+          const badge = product.badges?.find((b) => allowedBadges.includes(b.label.toUpperCase()));
+          if (!badge) return null;
+          return (
+            <span
+              className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: badge.bg || "#EEF2FF", color: badge.color || "#4338CA" }}
+            >
+              {badge.label}
+            </span>
+          );
+        })()}
+      </div>
       <p className="text-xs font-mono mb-2" style={{ color: config.secondaryColor }}>
         SKU: {variant.sku}
       </p>
       <p className="text-sm mb-3" style={{ color: config.primaryColor }}>
         {variantDesc}
       </p>
-
-      {product.badges && product.badges.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {product.badges.map((b) => (
-            <span
-              key={b.label}
-              className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: b.bg || "#EEF2FF", color: b.color || "#4338CA" }}
-            >
-              {b.label}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Pricing */}
       {!isAuthenticated ? (
@@ -153,12 +154,10 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
         </div>
       ) : (
         <div className="mb-3">
+          {/* Final Price — visually dominant */}
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
+            <span className="text-xl font-bold" style={{ color: config.primaryColor }}>
               ${pricing.finalPrice.toFixed(2)}
-            </span>
-            <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-              ${pricing.listPrice.toFixed(2)}
             </span>
             {product.unitMeasure && (
               <span className="text-xs" style={{ color: config.secondaryColor }}>
@@ -167,23 +166,28 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
             )}
           </div>
 
-          {pricing.hasPromotion ? (
-            <span
-              className="inline-block text-[11px] font-semibold mt-1.5 px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
-            >
-              {pricing.promotionLabel} Applied
-            </span>
-          ) : (
-            <span className="block text-[11px] mt-1" style={{ color: "#16A34A" }}>
-              Special Price
+          {/* Struck-through list price */}
+          {pricing.hasSpecialPrice && (
+            <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
+              ${pricing.listPrice.toFixed(2)}
             </span>
           )}
 
+          {/* Savings */}
           {pricing.savings > 0 && (
-            <p className="text-xs mt-1.5" style={{ color: "#16A34A" }}>
+            <p className="text-xs mt-1" style={{ color: "#16A34A" }}>
               You Save ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
             </p>
+          )}
+
+          {/* Compact inline promotion pill */}
+          {pricing.hasPromotion && (
+            <span
+              className="inline-block text-[10px] font-medium mt-1.5 px-2.5 py-0.5 rounded-full"
+              style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}
+            >
+              {pricing.promotionLabel} applied
+            </span>
           )}
         </div>
       )}
