@@ -90,7 +90,7 @@ export default function SkuTableGroup({
                 className="text-right px-3 py-2.5 font-semibold whitespace-nowrap"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
               >
-                {isAuthenticated ? "Final Price" : "Price"}
+                {isAuthenticated ? "Special Price" : "Price"}
               </th>
               {isAuthenticated && (
                 <th

@@ -174,7 +174,7 @@ export default function QuickAddPanel({
                 className="text-right px-3 py-2.5 font-semibold whitespace-nowrap sticky top-0"
                 style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, backgroundColor: config.cardBg, zIndex: 1 }}
               >
-                {isAuthenticated ? "Final Price" : "Price"}
+                {isAuthenticated ? "Special Price" : "Price"}
               </th>
               {isAuthenticated && (
                 <th
