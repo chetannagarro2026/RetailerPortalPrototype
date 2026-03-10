@@ -62,7 +62,7 @@ export default function FamilyRowExpansion({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex flex-col items-stretch gap-2 shrink-0">
         <Link
           to={familyLink}
           className="flex items-center gap-1.5 text-[11px] font-medium px-3.5 py-1.5 rounded-lg no-underline transition-colors"
