@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { apiConfig } from "../../config/apiConfig";
 import { fetchCategoriesByParentCode, type CategoryItem } from "../../services/categoryService";
-import { getAllBrands, type BrandInfo } from "../../data/catalogData";
 
 /** First-letter avatar for brands without logos */
 function BrandInitial({ name }: { name: string }) {
@@ -44,7 +43,7 @@ function BrandCard({ brand }: { brand: Brand }) {
 
   return (
     <Link
-      to={`/catalog?brand=${encodeURIComponent(brand.code)}`}
+      to={`/catalog?brand=${encodeURIComponent(brand.id)}`}
       className="block no-underline rounded-xl bg-white transition-shadow hover:shadow-md"
       style={{ border: `1px solid ${config.borderColor}` }}
     >

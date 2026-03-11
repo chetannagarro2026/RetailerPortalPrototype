@@ -9,6 +9,7 @@ import MegaMenu from "./MegaMenu";
 import AccountDropdown from "./AccountDropdown";
 import MobileNav from "./MobileNav";
 import { fetchCategoriesByParent, type CategoryItem } from "../../services/categoryService";
+import { apiConfig } from "@/config/apiConfig";
 
 type OpenPanel = "collections" | "my-account" | null;
 
@@ -20,7 +21,7 @@ export default function Navigation() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Fetch categories on page load
-  const parentId = "08d6ff04-11c5-4e5b-a1c8-11ac167e849b";
+  const parentId = apiConfig.rootCategoryId;
   const { data: categoriesData } = useQuery({
     queryKey: ["categories", parentId],
     queryFn: () => fetchCategoriesByParent(parentId),

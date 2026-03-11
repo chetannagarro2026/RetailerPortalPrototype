@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { CatalogNode } from "../data/catalogData";
+import { apiConfig } from "../config/apiConfig";
 import {
   fetchCategoriesByParent,
   buildCategoryTree,
@@ -9,9 +10,6 @@ import {
   getSlugPath as getSlugPathUtil,
   type CategoryTree,
 } from "../services/categoryService";
-
-// Root category ID - could be moved to config
-const ROOT_CATEGORY_ID = "08d6ff04-11c5-4e5b-a1c8-11ac167e849b";
 
 // ── Enriched Node Type ─────────────────────────────────────────────
 export interface EnrichedCatalogNode extends CatalogNode {
@@ -152,14 +150,14 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      const categories = await fetchCategoriesByParent(ROOT_CATEGORY_ID);
+      const categories = await fetchCategoriesByParent(apiConfig.rootCategoryId);
       
       if (!categories || categories.length === 0) {
         throw new Error("No categories found");
       }
 
       // Build the base tree
-      const baseTree = buildCategoryTree(categories, ROOT_CATEGORY_ID);
+      const baseTree = buildCategoryTree(categories, apiConfig.rootCategoryId);
       console.log("basetree", baseTree);
       
       

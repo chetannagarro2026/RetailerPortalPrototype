@@ -1,14 +1,15 @@
 // ── Support Ticket Types ────────────────────────────────────────────
 
 export type TicketStatus = "Open" | "Closed";
-export type TicketPriority = "Low" | "Medium" | "High";
+export type TicketPriority = "Low" | "Medium" | "High" | "Not specified";
 export type TicketCategory =
   | "Order Issue"
   | "Missing Items"
   | "Invoice Query"
   | "Payment Query"
   | "Product Issue"
-  | "Other";
+  | "Other"
+  | "Not specified";
 
 export interface TicketAttachment {
   id: string;

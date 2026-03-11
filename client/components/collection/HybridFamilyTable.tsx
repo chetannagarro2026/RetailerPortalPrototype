@@ -51,7 +51,7 @@ export default function HybridFamilyTable({
     <div
       className="flex gap-0"
       style={panelOpen ? {
-        height: "calc(100vh - var(--header-height) - var(--nav-height) - 200px)",
+        // height: "calc(100vh - var(--header-height) - var(--nav-height) - 200px)",
         overflow: "hidden",
       } : undefined}
     >
@@ -75,13 +75,13 @@ export default function HybridFamilyTable({
                 </th>
                 <th
                   className="text-left px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "35%" }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "140px" }}
                 >
                   Product Name
                 </th>
                 <th
                   className="text-left px-4 py-3 font-semibold"
-                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "140px" }}
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "100px" }}
                 >
                   UPC
                 </th>
@@ -137,7 +137,7 @@ export default function HybridFamilyTable({
         <div
           className="shrink-0 ml-4 flex flex-col shadow-lg rounded-xl overflow-hidden"
           style={{
-            width: 420,
+            width: 360,
             height: "100%",
             border: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",

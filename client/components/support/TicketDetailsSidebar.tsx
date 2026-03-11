@@ -12,6 +12,7 @@ const priorityColors: Record<string, string> = {
   Low: "#6B7B99",
   Medium: "#D97706",
   High: "#B91C1C",
+  "Not specified": "#8c8c8c",
 };
 
 function formatDate(iso: string): string {

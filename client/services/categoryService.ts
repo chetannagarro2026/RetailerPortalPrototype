@@ -191,6 +191,6 @@ export function fetchCategoriesByParentCode(parentCode: string) {
  */
 export function fetchCategoryByCode(id: string) {
   // const endpoint = `${apiConfig.externalBase}/categories/${id}`;
-  const endpoint = `${apiConfig.externalBase}/categories/0d759ab1-8f28-420c-a15e-f79f2e97a1f3`;
+  const endpoint = `${apiConfig.externalBase}/categories/${id}`;
   return apiGet<CategoryItem>(endpoint);
 }

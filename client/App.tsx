@@ -23,6 +23,10 @@ import Layout from "./components/layout/Layout";
 import DashboardPage from "./pages/DashboardPage";
 import BusinessProfilePage from "./pages/BusinessProfilePage";
 import PurchaseOrderDetailPage from "./pages/PurchaseOrderDetailPage";
+import SettingsPage from "./pages/SettingsPage";
+import ToastProvider from "./components/toast/ToastProvider";
+import SupportPageWrapper from "./pages/SupportPageWrapper";
+import TicketDetailPage from "./pages/TicketDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +37,7 @@ export default function App() {
         <AntApp>
           <CategoryProvider>
             <OrderProvider>
+              <ToastProvider>
               <OrderHistoryProvider>
                 <BrowserRouter>
                 <ScrollToTop />
@@ -59,16 +64,18 @@ export default function App() {
               <Route path="/account/payments" element={<AuthGate message="Sign in to manage your payments."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/payment-history" element={<AuthGate message="Sign in to view your payment history."><PlaceholderPage /></AuthGate>} />
               <Route path="/account/returns" element={<AuthGate message="Sign in to manage returns and claims."><PlaceholderPage /></AuthGate>} />
-              <Route path="/account/support" element={<AuthGate message="Sign in to access customer service."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/support" element={<AuthGate message="Sign in to access customer support."><SupportPageWrapper /></AuthGate>} />
+              <Route path="/account/support/:ticketId" element={<AuthGate message="Sign in to view ticket details."><TicketDetailPage /></AuthGate>} />
               <Route path="/account/details" element={<AuthGate message="Sign in to access your account."><DashboardPage /></AuthGate>} />
               <Route path="/account/business-profile" element={<AuthGate message="Sign in to view your business profile."><BusinessProfilePage /></AuthGate>} />
-              <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><PlaceholderPage /></AuthGate>} />
+              <Route path="/account/settings" element={<AuthGate message="Sign in to access your account settings."><SettingsPage /></AuthGate>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Layout>
               </BrowserRouter>
               </OrderHistoryProvider>
+              </ToastProvider>
             </OrderProvider>
           </CategoryProvider>
         </AntApp>

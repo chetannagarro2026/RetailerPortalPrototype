@@ -88,8 +88,45 @@ export const centricBrandsConfig: BrandConfig = {
   ],
 };
 
+
+export const jnjVisionConfig: BrandConfig = {
+  brandName: "Johnson & Johnson Vision",
+  portalTitle: "Wholesale Portal",
+  logoUrl: undefined,
+  partnerName: "Macy's Buying Team",
+
+  primaryColor: "#1B2A4A",
+  secondaryColor: "#6B7B99",
+  headerBg: "#FFFFFF",
+  navActiveBorder: "#1B2A4A",
+  cardBg: "#FAFAFA",
+  borderColor: "#F0F0F0",
+
+  fontFamily: "'Inter', sans-serif",
+
+  currencySymbol: "₹",
+  currencyPosition: "before",
+  currencyCode: "INR",
+
+  searchPlaceholder: "Search by Style Code, Collection, Brand...",
+
+  categoryCardVariant: "hero",
+  productCardVariant: "standard",
+
+  enableMatrixOnPDP: true,
+  enableQuickMatrixInGrid: true,
+  enableSpreadsheetMode: true,
+  quickMatrixVariantLimit: 12,
+
+  navItems: [
+    { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },
+    { key: "purchase-orders", label: "Purchase Orders", path: "/purchase-orders" },
+    { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
+    { key: "my-account", label: "My Account", path: "/account", hasDropdown: true },
+  ],
+};
 // Active configuration — swap this import to change tenants
-export const activeBrandConfig = centricBrandsConfig;
+export const activeBrandConfig = jnjVisionConfig;
 
 // ═══════════════════════════════════════════════════════════════════
 // CURRENCY FORMATTING UTILITY

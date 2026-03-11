@@ -1,30 +1,19 @@
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
-import type { SupportTicket } from "../../data/support";
+import { getCurrentStatus, formatStatus, getStatusColor, type Case } from "../../services/caseManagementService";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-const statusStyles: Record<string, { color: string }> = {
-  Open: { color: "#D97706" },
-  Closed: { color: "#16A34A" },
-};
-
-const priorityStyles: Record<string, { color: string }> = {
-  Low: { color: "#6B7B99" },
-  Medium: { color: "#D97706" },
-  High: { color: "#B91C1C" },
-};
-
 interface Props {
-  tickets: SupportTicket[];
+  tickets: Case[];
 }
 
 export default function SupportTicketsTable({ tickets }: Props) {
   const config = activeBrandConfig;
-  const columns = "1.2fr 2fr 1.2fr 0.8fr 0.8fr 1fr";
+  const columns = "1fr 3fr 1fr 1.2fr";
 
   if (tickets.length === 0) {
     return (
@@ -55,17 +44,17 @@ export default function SupportTicketsTable({ tickets }: Props) {
         }}
       >
         <span>Ticket ID</span>
-        <span>Subject</span>
-        <span>Related Document</span>
+        <span>Description</span>
         <span>Status</span>
-        <span>Priority</span>
-        <span className="text-center">Last Updated</span>
+        <span className="text-center">Updated Date</span>
       </div>
 
       {/* Rows */}
       {tickets.map((ticket, idx) => {
-        const sts = statusStyles[ticket.status] || statusStyles.Open;
-        const pri = priorityStyles[ticket.priority] || priorityStyles.Low;
+        const status = getCurrentStatus(ticket.caseStatuses);
+        const statusColor = getStatusColor(status);
+        const statusLabel = formatStatus(status);
+        
         return (
           <div
             key={ticket.id}
@@ -76,67 +65,44 @@ export default function SupportTicketsTable({ tickets }: Props) {
               backgroundColor: "#fff",
             }}
           >
-            {/* Ticket ID with unread dot */}
+            {/* Ticket ID */}
             <div className="flex items-center gap-2">
-              {ticket.unread && (
-                <span
-                  className="inline-block rounded-full flex-shrink-0"
-                  style={{ width: 6, height: 6, backgroundColor: "#DC2626" }}
-                />
-              )}
               <Link
-                to={`/account/support/${ticket.ticketId}`}
+                to={`/account/support/${ticket.id}`}
                 className="text-sm font-semibold no-underline hover:underline"
                 style={{ color: config.primaryColor }}
               >
-                {ticket.ticketId}
+                {ticket.id}
               </Link>
             </div>
 
-            {/* Subject — bold if unread */}
+            {/* Description */}
             <span
-              className="text-sm truncate"
+              className="text-sm"
               style={{
                 color: config.primaryColor,
-                fontWeight: ticket.unread ? 600 : 400,
               }}
-              title={ticket.subject}
             >
-              {ticket.subject}
+              {ticket.caseDescription || "—"}
             </span>
 
-            {/* Related Document */}
-            <span className="text-xs" style={{ color: ticket.relatedDocument ? config.primaryColor : config.secondaryColor }}>
-              {ticket.relatedDocument || "—"}
-            </span>
-
-            {/* Status */}
+            {/* Status Badge */}
             <div>
               <span
-                className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-flex"
+                className="inline-block px-3 py-1 text-xs font-medium rounded-full"
                 style={{
-                  color: sts.color,
-                  backgroundColor: "transparent",
-                  border: `1px solid ${sts.color}`,
+                  backgroundColor: `${statusColor}20`,
+                  color: statusColor,
                 }}
               >
-                {ticket.status}
+                {statusLabel}
               </span>
             </div>
 
-            {/* Priority */}
-            <span
-              className="text-xs"
-              style={{ color: pri.color }}
-            >
-              {ticket.priority}
+            {/* Updated Date */}
+            <span className="text-sm text-center" style={{ color: config.secondaryColor }}>
+              {formatDate(ticket.modifiedOn)}
             </span>
-
-            {/* Last Updated */}
-            <span className="text-xs text-center" style={{ color: config.secondaryColor }}>
-              {formatDate(ticket.lastUpdated)}
-            </span>
-
           </div>
         );
       })}

@@ -21,13 +21,17 @@ const EXTERNAL_PRICE_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PRICE_API_
 const EXTERNAL_PO_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_PO_API_PATH || "/purchase-order/dev/api/v1"}`;
 const EXTERNAL_CONFIG_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_CONFIG_API_PATH || "/configuration/dev/api/v1"}`;
 const EXTERNAL_SALES_ORDER_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_SALES_ORDER_API_PATH || "/salesorder/dev/api/v1"}`;
+const EXTERNAL_USER_MANAGEMENT_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_USER_MANAGEMENT_PATH || "/user-management/dev/api/v1"}`;
+const EXTERNAL_NOTIFICATION_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_NOTIFICATION_API_PATH || "/notification/dev/v1"}`;
+const EXTERNAL_CASE_MANAGEMENT_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_CASE_MANAGEMENT_PATH || "/casemanagement/dev/api/v1"}`;
 
 // Price API configuration
 const PRICE_CHANNEL_CODE = import.meta.env.VITE_PRICE_CHANNEL_CODE || "CENTRIC_USA_ECOM";
 const PRICE_ACCOUNT_ID = import.meta.env.VITE_PRICE_ACCOUNT_ID || 9028;
 
 // Catalog configuration
-const BRANDS_CATALOG_CODE = import.meta.env.VITE_BRANDS_CATALOG_CODE || "centric_brands_catalog";
+const BRANDS_CATALOG_CODE = import.meta.env.VITE_BRANDS_CATALOG_CODE; 
+const ROOT_CATEGORY_ID = import.meta.env.VITE_MAIN_CATALOG;
 
 export const apiConfig = {
   base: BASE_URL,
@@ -36,6 +40,7 @@ export const apiConfig = {
   priceChannelCode: PRICE_CHANNEL_CODE,
   priceAccountId: PRICE_ACCOUNT_ID,
   brandsCatalogCode: BRANDS_CATALOG_CODE,
+  rootCategoryId: ROOT_CATEGORY_ID,
 
   // Endpoint paths
   endpoints: {
@@ -74,6 +79,19 @@ export const apiConfig = {
     salesOrderSearch: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/search/`,
     salesOrderCountStatus: `${EXTERNAL_SALES_ORDER_BASE}/sales-order/count-status`,
     salesOrderById: (orderId: number) => `${EXTERNAL_SALES_ORDER_BASE}/sales-order/${orderId}`,
+
+    // User Management
+    resetPassword: `${EXTERNAL_USER_MANAGEMENT_BASE}/user-management/reset-password`,
+    userSearch: `${EXTERNAL_USER_MANAGEMENT_BASE}/user-management/user/search`,
+    userUpdate: `${EXTERNAL_USER_MANAGEMENT_BASE}/user-management/user/`,
+
+    // Notifications
+    notificationEventsSearch: `${EXTERNAL_NOTIFICATION_BASE}/events/search`,
+
+    // Case Management
+    caseSearch: `${EXTERNAL_CASE_MANAGEMENT_BASE}/cases/search`,
+    caseById: (caseId: number) => `${EXTERNAL_CASE_MANAGEMENT_BASE}/cases/id/${caseId}`,
+    caseUpdateNotes: `${EXTERNAL_CASE_MANAGEMENT_BASE}/cases/update/notes`,
 
     // Product by UPC
     productByUpc: (upcId: string) => `${EXTERNAL_API_BASE}/products/upc/${upcId}`,

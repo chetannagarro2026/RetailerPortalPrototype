@@ -4,14 +4,16 @@ import {
   CloseOutlined,
   SendOutlined,
   InboxOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 
 interface Props {
   onSubmit: (message: string, attachments: File[]) => void;
+  isSubmitting?: boolean;
 }
 
-export default function ReplyComposer({ onSubmit }: Props) {
+export default function ReplyComposer({ onSubmit, isSubmitting = false }: Props) {
   const config = activeBrandConfig;
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -145,16 +147,25 @@ export default function ReplyComposer({ onSubmit }: Props) {
           />
           <button
             onClick={handleSubmit}
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
             className="flex items-center gap-1.5 text-xs font-medium px-4 py-1.5 rounded-md text-white border-none cursor-pointer transition-opacity"
             style={{
               backgroundColor: config.primaryColor,
-              opacity: canSubmit ? 1 : 0.4,
-              cursor: canSubmit ? "pointer" : "not-allowed",
+              opacity: canSubmit && !isSubmitting ? 1 : 0.4,
+              cursor: canSubmit && !isSubmitting ? "pointer" : "not-allowed",
             }}
           >
-            <SendOutlined style={{ fontSize: 11 }} />
-            Send Reply
+            {isSubmitting ? (
+              <>
+                <LoadingOutlined style={{ fontSize: 11 }} />
+                Sending...
+              </>
+            ) : (
+              <>
+                <SendOutlined style={{ fontSize: 11 }} />
+                Send Reply
+              </>
+            )}
           </button>
         </div>
       </div>

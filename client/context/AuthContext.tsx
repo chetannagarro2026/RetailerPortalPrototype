@@ -6,6 +6,7 @@ import {
   storeAuthData,
   getStoredAuthData,
   clearAuthData,
+  refreshAccessToken,
   type UserInfo,
 } from "../services/authService";
 
@@ -38,10 +39,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkAuth = async () => {
       try {
         const stored = getStoredAuthData();
-        if (stored.accessToken && stored.userInfo && !stored.isExpired) {
+        
+        // If no tokens found, user is not authenticated
+        if (!stored.accessToken || !stored.userInfo) {
+          setIsLoading(false);
+          return;
+        }
+
+        // If access token is valid, restore session
+        if (!stored.isExpired) {
           setAccessToken(stored.accessToken);
           setUser(stored.userInfo);
           setIsAuthenticated(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // If access token expired but refresh token exists, try to refresh
+        if (stored.refreshToken) {
+          try {
+            const newTokens = await refreshAccessToken(stored.refreshToken);
+            storeAuthData(newTokens, stored.userInfo);
+            setAccessToken(newTokens.access_token);
+            setUser(stored.userInfo);
+            setIsAuthenticated(true);
+          } catch (refreshError) {
+            console.error("Failed to refresh token:", refreshError);
+            clearAuthData();
+          }
+        } else {
+          // No refresh token available, clear auth
+          clearAuthData();
         }
       } catch (error) {
         console.error("Failed to restore auth session:", error);
@@ -52,6 +80,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     checkAuth();
   }, []);
+
+  // Auto-refresh token before it expires
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) return;
+
+    // Refresh token 5 minutes before expiry
+    const stored = getStoredAuthData();
+    const expiresAt = localStorage.getItem("token_expires_at");
+    
+    if (!expiresAt || !stored.refreshToken) return;
+
+    const expiryTime = parseInt(expiresAt);
+    const refreshTime = expiryTime - 5 * 60 * 1000; // 5 minutes before
+    const timeUntilRefresh = refreshTime - Date.now();
+
+    if (timeUntilRefresh <= 0) {
+      // Token should be refreshed immediately
+      refreshAccessToken(stored.refreshToken)
+        .then((newTokens) => {
+          storeAuthData(newTokens, user!);
+          setAccessToken(newTokens.access_token);
+        })
+        .catch((error) => {
+          console.error("Failed to refresh token:", error);
+          // Log out on refresh failure
+          clearAuthData();
+          setAccessToken(null);
+          setUser(null);
+          setIsAuthenticated(false);
+        });
+      return;
+    }
+
+    // Set timeout to refresh token before expiry
+    const refreshTimer = setTimeout(() => {
+      const currentStored = getStoredAuthData();
+      if (currentStored.refreshToken) {
+        refreshAccessToken(currentStored.refreshToken)
+          .then((newTokens) => {
+            storeAuthData(newTokens, user!);
+            setAccessToken(newTokens.access_token);
+          })
+          .catch((error) => {
+            console.error("Failed to refresh token:", error);
+            // Log out on refresh failure
+            clearAuthData();
+            setAccessToken(null);
+            setUser(null);
+            setIsAuthenticated(false);
+          });
+      }
+    }, timeUntilRefresh);
+
+    return () => clearTimeout(refreshTimer);
+  }, [isAuthenticated, accessToken, user]);
 
   const signIn = useCallback(async (username: string, password: string) => {
     try {

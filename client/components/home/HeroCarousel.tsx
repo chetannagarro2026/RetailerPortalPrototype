@@ -13,28 +13,54 @@ interface Slide {
   backgroundImage: string;
 }
 
+// for centric brands
+// const slides: Slide[] = [
+//   {
+//     id: 1,
+//     tagline: "FALL 2026 WHOLESALE BOOKING",
+//     headline: "Pre-Book Fall 2026 Inventory",
+//     supporting:
+//       "Secure high-demand outerwear and seasonal essentials early. Plan assortments, manage allocations, and place bulk orders ahead of peak demand.",
+//     ctaLabel: "View Fall Outerwear",
+//     ctaRoute: "/catalog/women/outerwear?season=fall-2026&view=table",
+//     backgroundImage:
+//       "https://images.pexels.com/photos/1488470/pexels-photo-1488470.jpeg?auto=compress&cs=tinysrgb&w=1600",
+//   },
+//   {
+//     id: 2,
+//     tagline: "REPLENISHMENT MADE EASY",
+//     headline: "Quick Reorder. Faster Turnaround.",
+//     supporting:
+//       "Access your frequently purchased styles, check live stock availability, and reorder in bulk with just a few clicks. Designed for high-volume retail buyers.",
+//     ctaLabel: "Reorder Best Sellers",
+//     ctaRoute: "/catalog?purchased=true&availability=in-stock&view=table",
+//     backgroundImage:
+//       "https://images.pexels.com/photos/1884581/pexels-photo-1884581.jpeg?auto=compress&cs=tinysrgb&w=1600",
+//   },
+// ];
+
 const slides: Slide[] = [
   {
     id: 1,
-    tagline: "FALL 2026 WHOLESALE BOOKING",
-    headline: "Pre-Book Fall 2026 Inventory",
+    tagline: "MYOPIA MANAGEMENT",
+    headline: "Myopia is growing. You can help.",
     supporting:
-      "Secure high-demand outerwear and seasonal essentials early. Plan assortments, manage allocations, and place bulk orders ahead of peak demand.",
-    ctaLabel: "View Fall Outerwear",
-    ctaRoute: "/catalog/women/outerwear?season=fall-2026&view=table",
+      "Half the world's population may be myopic by 2050, increasing the risk of serious eye complications—but early intervention can help protect patients' vision.",
+    ctaLabel: "Explore Myopia Solutions",
+    ctaRoute: "/catalog/myopia_management_jnj",
     backgroundImage:
-      "https://images.pexels.com/photos/1488470/pexels-photo-1488470.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://brand.jjvision.com/transform/eaadeedc-404a-448c-b43e-6ada2b7b9402/Abiliti-Young-Girl-at-School?io=transform:fill,height:480",
   },
   {
     id: 2,
-    tagline: "REPLENISHMENT MADE EASY",
-    headline: "Quick Reorder. Faster Turnaround.",
+    tagline: "CATARACT SURGERY",
+    headline: "Advanced Techniques for Better Outcomes",
     supporting:
-      "Access your frequently purchased styles, check live stock availability, and reorder in bulk with just a few clicks. Designed for high-volume retail buyers.",
-    ctaLabel: "Reorder Best Sellers",
-    ctaRoute: "/catalog?purchased=true&availability=in-stock&view=table",
+      "Explore the latest advancements in cataract surgery, from innovative techniques to state-of-the-art equipment. Enhance patient outcomes and streamline your surgical workflow.",
+    ctaLabel: "Explore Cataract Surgery Solutions",
+    ctaRoute: "/catalog/cataract_surgery",
     backgroundImage:
-      "https://images.pexels.com/photos/1884581/pexels-photo-1884581.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "https://brand.jjvision.com/transform/a1da95b9-eb71-4a06-86e7-d2b7977377bc/elderly_woman_holding_yoga_mat?io=transform:fill,width:624,height:351",
   },
 ];
 
