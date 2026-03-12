@@ -14,6 +14,7 @@ interface SkuGroupedTablesProps {
   onClearAll: () => void;
   expandedId: string | null;
   onToggleExpand: (id: string | null) => void;
+  onOpenPromoPanel?: (variantId: string) => void;
 }
 
 interface VariantGroup {
@@ -37,6 +38,7 @@ export default function SkuGroupedTables({
   onClearAll,
   expandedId,
   onToggleExpand,
+  onOpenPromoPanel,
 }: SkuGroupedTablesProps) {
   const config = activeBrandConfig;
 
@@ -151,6 +153,7 @@ export default function SkuGroupedTables({
             product={product}
             expandedId={expandedId}
             onToggleExpand={onToggleExpand}
+            onOpenPromoPanel={onOpenPromoPanel}
           />
         ))
       )}

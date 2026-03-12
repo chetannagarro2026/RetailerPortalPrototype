@@ -1,7 +1,8 @@
-import { DownOutlined, RightOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
+import { usePromotions, getVariantPromotions } from "../../context/PromotionContext";
 import { resolveVariantPricing } from "../../utils/pricing";
 import SkuAccordionContent from "./SkuAccordionContent";
 
@@ -13,6 +14,8 @@ interface SkuTableGroupProps {
   product: CatalogProduct;
   expandedId: string | null;
   onToggleExpand: (variantId: string | null) => void;
+  /** Called when user clicks the promo badge on a variant row */
+  onOpenPromoPanel?: (variantId: string) => void;
 }
 
 const STOCK_BADGE: Record<string, { label: string; color: string; bg: string }> = {
@@ -29,6 +32,7 @@ export default function SkuTableGroup({
   product,
   expandedId,
   onToggleExpand,
+  onOpenPromoPanel,
 }: SkuTableGroupProps) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
@@ -100,6 +104,14 @@ export default function SkuTableGroup({
                   Savings
                 </th>
               )}
+              {isAuthenticated && (
+                <th
+                  className="text-center px-3 py-2.5 font-semibold whitespace-nowrap"
+                  style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
+                >
+                  Promos
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -113,6 +125,7 @@ export default function SkuTableGroup({
                   product={product}
                   isExpanded={isExpanded}
                   onToggle={() => onToggleExpand(isExpanded ? null : v.id)}
+                  onOpenPromoPanel={onOpenPromoPanel}
                 />
               );
             })}
@@ -131,12 +144,14 @@ function SkuRow({
   product,
   isExpanded,
   onToggle,
+  onOpenPromoPanel,
 }: {
   variant: ProductVariant;
   columns: string[];
   product: CatalogProduct;
   isExpanded: boolean;
   onToggle: () => void;
+  onOpenPromoPanel?: (variantId: string) => void;
 }) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
@@ -215,15 +230,23 @@ function SkuRow({
           )}
         </td>
 
-        {/* List Price / Special Price / Promotion / Final Price */}
+        {/* Pricing cells */}
         <SkuPricingCells variant={variant} product={product} isExpanded={isExpanded} />
+
+        {/* Promo Badge */}
+        <SkuPromoBadgeCell
+          variant={variant}
+          product={product}
+          isExpanded={isExpanded}
+          onOpenPromoPanel={onOpenPromoPanel}
+        />
       </tr>
 
       {/* Expanded Accordion Content — lazy rendered */}
       {isExpanded && (
         <tr>
           <td
-            colSpan={columns.length + (isAuthenticated ? 5 : 4)}
+            colSpan={columns.length + (isAuthenticated ? 6 : 4)}
             style={{ padding: 0, borderBottom: `1px solid ${config.borderColor}` }}
           >
             <SkuAccordionContent product={product} variant={variant} />
@@ -231,6 +254,61 @@ function SkuRow({
         </tr>
       )}
     </>
+  );
+}
+
+// ── SKU Promo Badge Cell ────────────────────────────────────────────
+
+function SkuPromoBadgeCell({
+  variant,
+  product,
+  isExpanded,
+  onOpenPromoPanel,
+}: {
+  variant: ProductVariant;
+  product: CatalogProduct;
+  isExpanded: boolean;
+  onOpenPromoPanel?: (variantId: string) => void;
+}) {
+  const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
+  const { getAppliedPromotion } = usePromotions();
+
+  if (!isAuthenticated) return null;
+
+  const promotions = getVariantPromotions(variant.id, product);
+  const appliedPromo = getAppliedPromotion(variant.id);
+  const borderStyle = isExpanded ? "none" : `1px solid ${config.borderColor}`;
+
+  if (promotions.length === 0) {
+    return (
+      <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
+        <span className="text-[10px]" style={{ color: config.secondaryColor }}>—</span>
+      </td>
+    );
+  }
+
+  return (
+    <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenPromoPanel?.(variant.id);
+        }}
+        className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer transition-colors"
+        style={{
+          border: appliedPromo
+            ? `1.5px solid #16A34A`
+            : `1px solid ${config.borderColor}`,
+          backgroundColor: appliedPromo ? "#F0FDF4" : "#F0F4FF",
+          color: appliedPromo ? "#16A34A" : "#4338CA",
+        }}
+        title={appliedPromo ? `Applied: ${appliedPromo.label}` : `${promotions.length} available`}
+      >
+        <TagOutlined className="text-[9px]" />
+        {appliedPromo ? appliedPromo.label : promotions.length}
+      </button>
+    </td>
   );
 }
 
@@ -247,6 +325,7 @@ function SkuPricingCells({
 }) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
+  const { getAppliedPromotion, computeFinalPrice, computeSavingsPerUnit } = usePromotions();
   const pricing = resolveVariantPricing(variant, product);
   const borderStyle = isExpanded ? "none" : `1px solid ${config.borderColor}`;
 
@@ -258,14 +337,26 @@ function SkuPricingCells({
     );
   }
 
+  // Check if a promotion is applied via context
+  const appliedPromo = getAppliedPromotion(variant.id);
+  const basePrice = pricing.finalPrice; // special price or list price
+  const effectivePrice = appliedPromo
+    ? computeFinalPrice(variant.id, basePrice)
+    : pricing.finalPrice;
+  const promoSavings = appliedPromo
+    ? computeSavingsPerUnit(variant.id, basePrice)
+    : 0;
+  const totalSavings = pricing.listPrice - effectivePrice;
+  const totalSavingsPercent = pricing.listPrice > 0 ? Math.round((totalSavings / pricing.listPrice) * 100) : 0;
+
   return (
     <>
       {/* Final Price + struck-through list price */}
       <td className="px-3 py-2.5 text-right whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-        <span className="font-semibold" style={{ color: config.primaryColor }}>
-          ${pricing.finalPrice.toFixed(2)}
+        <span className="font-semibold" style={{ color: appliedPromo ? "#16A34A" : config.primaryColor }}>
+          ${effectivePrice.toFixed(2)}
         </span>
-        {pricing.hasSpecialPrice && (
+        {(pricing.hasSpecialPrice || appliedPromo) && (
           <>
             <br />
             <span className="text-[10px] line-through" style={{ color: config.secondaryColor }}>
@@ -273,12 +364,20 @@ function SkuPricingCells({
             </span>
           </>
         )}
+        {appliedPromo && (
+          <>
+            <br />
+            <span className="text-[9px] font-medium" style={{ color: "#4338CA" }}>
+              {appliedPromo.label}
+            </span>
+          </>
+        )}
       </td>
       {/* Savings */}
       <td className="px-3 py-2.5 text-right whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-        {pricing.savings > 0 ? (
+        {totalSavings > 0 ? (
           <span className="text-[10px]" style={{ color: "#16A34A" }}>
-            ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
+            ${totalSavings.toFixed(2)} ({totalSavingsPercent}%)
           </span>
         ) : (
           <span style={{ color: config.secondaryColor }}>—</span>

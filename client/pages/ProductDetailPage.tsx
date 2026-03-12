@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById } from "../data/catalogData";
+import { useAuth } from "../context/AuthContext";
 import { GalleryMainImage, GalleryThumbnails } from "../components/catalog/ProductGallery";
 import PDPHeader from "../components/pdp/PDPHeader";
 import SkuFilterPanel, {
@@ -9,6 +10,7 @@ import SkuFilterPanel, {
   applySkuFilters,
 } from "../components/product-family/SkuFilterPanel";
 import SkuGroupedTables from "../components/product-family/SkuGroupedTables";
+import SkuPromotionPanel from "../components/promotions/SkuPromotionPanel";
 
 // ── Specifications ──────────────────────────────────────────────────
 
@@ -84,10 +86,14 @@ export default function ProductDetailPage() {
   const config = activeBrandConfig;
   const { productId } = useParams<{ productId: string }>();
   const product = productId ? getProductById(decodeURIComponent(productId)) : null;
+  const { isAuthenticated } = useAuth();
 
   // SKU filter state
   const [activeFilters, setActiveFilters] = useState<SkuFilters>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Promotion panel state
+  const [promoPanelVariantId, setPromoPanelVariantId] = useState<string | null>(null);
 
   const allVariants = product?.variants || [];
   const variantAttributes = product?.variantAttributes || [];
@@ -95,6 +101,11 @@ export default function ProductDetailPage() {
   const filteredVariants = useMemo(
     () => applySkuFilters(allVariants, activeFilters),
     [allVariants, activeFilters],
+  );
+
+  const promoPanelVariant = useMemo(
+    () => promoPanelVariantId ? allVariants.find((v) => v.id === promoPanelVariantId) ?? null : null,
+    [promoPanelVariantId, allVariants],
   );
 
   const handleFilterChange = useCallback((key: string, values: string[]) => {
@@ -117,6 +128,14 @@ export default function ProductDetailPage() {
     setExpandedId(null);
   }, []);
 
+  const handleOpenPromoPanel = useCallback((variantId: string) => {
+    setPromoPanelVariantId((prev) => (prev === variantId ? null : variantId));
+  }, []);
+
+  const handleClosePromoPanel = useCallback(() => {
+    setPromoPanelVariantId(null);
+  }, []);
+
   if (!product) {
     return (
       <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
@@ -135,6 +154,7 @@ export default function ProductDetailPage() {
 
   const hasVariants = variantAttributes.length > 0 && allVariants.length > 0;
   const galleryImages = product.galleryImages || [product.imageUrl];
+  const showPromoPanel = isAuthenticated && promoPanelVariant !== null;
 
   return (
     <div className="max-w-content-wide mx-auto px-6 py-8">
@@ -177,7 +197,7 @@ export default function ProductDetailPage() {
               />
             </aside>
 
-            {/* Right: Grouped SKU Tables */}
+            {/* Center: Grouped SKU Tables */}
             <div className="flex-1 min-w-0">
               <SkuGroupedTables
                 product={product}
@@ -188,8 +208,29 @@ export default function ProductDetailPage() {
                 onClearAll={handleClearAll}
                 expandedId={expandedId}
                 onToggleExpand={setExpandedId}
+                onOpenPromoPanel={handleOpenPromoPanel}
               />
             </div>
+
+            {/* Right: Promotion Selection Panel (slide-in) */}
+            {showPromoPanel && (
+              <aside
+                className="shrink-0 sticky self-start overflow-y-auto rounded-xl"
+                style={{
+                  width: 320,
+                  top: "calc(var(--header-height) + var(--nav-height) + 24px)",
+                  maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+                  border: `1px solid ${config.borderColor}`,
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+                }}
+              >
+                <SkuPromotionPanel
+                  product={product}
+                  variant={promoPanelVariant!}
+                  onClose={handleClosePromoPanel}
+                />
+              </aside>
+            )}
           </div>
         </div>
       )}
