@@ -6,6 +6,7 @@ import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import type { CategoryTree } from "../../services/categoryService";
 import QuickAddPanel from "./QuickAddPanel";
+import { useAuth } from "@/context/AuthContext";
 
 const TABLE_PAGE_SIZE = 20;
 
@@ -24,6 +25,7 @@ export default function HybridFamilyTable({
   onPageChange,
 }: HybridFamilyTableProps) {
   const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
   const [quickAddProduct, setQuickAddProduct] = useState<CatalogProduct | null>(null);
 
   const handleQuickAdd = useCallback((product: CatalogProduct) => {
@@ -89,8 +91,16 @@ export default function HybridFamilyTable({
                   className="text-right px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "120px" }}
                 >
-                  Price
+                  {isAuthenticated ? "Special Price" : "Price"}
                 </th>
+                {isAuthenticated && (
+                  <th
+                    className="text-right px-4 py-3 font-semibold"
+                    style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "100px" }}
+                  >
+                    Savings
+                  </th>
+                )}
                 <th
                   className="text-center px-4 py-3 font-semibold"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}`, width: "100px" }}
@@ -111,6 +121,7 @@ export default function HybridFamilyTable({
                   key={product.id}
                   product={product}
                   isSelected={quickAddProduct?.id === product.id}
+                  isAuthenticated={isAuthenticated}
                   onQuickAdd={handleQuickAdd}
                 />
               ))}
@@ -160,14 +171,18 @@ export default function HybridFamilyTable({
 function ProductRow({
   product,
   isSelected,
+  isAuthenticated,
   onQuickAdd,
 }: {
   product: CatalogProduct;
   isSelected: boolean;
+  isAuthenticated: boolean;
   onQuickAdd: (product: CatalogProduct) => void;
 }) {
   const config = activeBrandConfig;
   const productLink = `/product/${product.upc}`;
+
+  const { showSignInModal } = useAuth();
 
   const stockStatus = product.availabilityStatus || "in-stock";
   const stockLabel = stockStatus === "in-stock" ? "In Stock" : 
@@ -199,7 +214,7 @@ function ProductRow({
           src={product.imageUrl}
           alt={product.name}
           loading="lazy"
-          className="w-12 h-12 object-cover rounded-lg"
+          className="w-12 h-12 object-contain rounded-lg"
           onError={(e) => {
             e.currentTarget.src = "https://via.placeholder.com/48x48?text=No+Img";
           }}
@@ -243,14 +258,55 @@ function ProductRow({
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-          {formatPrice(product.price)}
+          {isAuthenticated 
+            ? formatPrice(product.price)
+            : formatPrice(product.originalPrice || product.price)
+          }
         </span>
-        {product.originalPrice && product.originalPrice > product.price && (
+        {isAuthenticated && product.originalPrice && product.originalPrice > product.price && (
           <span className="text-[10px] line-through ml-1.5" style={{ color: config.secondaryColor }}>
             {formatPrice(product.originalPrice)}
           </span>
         )}
+        {!isAuthenticated && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                showSignInModal("Sign in to view Special Price and promotions.");
+              }}
+              className="block text-[9px] mt-0.5 cursor-pointer bg-transparent border-none p-0 underline ml-auto"
+              style={{ color: "#2563EB" }}
+            >
+              Login to view Special Price
+            </button>
+          )}
       </td>
+
+      {/* Savings */}
+      {isAuthenticated && (
+        <td
+          className="px-4 py-3 text-right"
+          style={{ borderBottom: `1px solid ${config.borderColor}` }}
+        >
+          {product.originalPrice && product.originalPrice > product.price ? (
+            <div>
+              <span className="text-sm font-semibold" style={{ color: "#16A34A" }}>
+                {formatPrice(product.originalPrice - product.price)}
+              </span>
+              <span
+                className="text-sm font-semibold ml-1"
+                style={{ color: "#16A34A" }}
+              >
+                ({Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%)
+              </span>
+            </div>
+          ) : (
+            <span className="text-[10px]" style={{ color: config.secondaryColor }}>
+              —
+            </span>
+          )}
+        </td>
+      )}
 
       {/* Stock Status */}
       <td

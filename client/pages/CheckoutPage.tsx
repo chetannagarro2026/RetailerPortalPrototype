@@ -1,20 +1,22 @@
 import { useState, useCallback, useMemo } from "react";
-import { Button, Input, Steps, Checkbox, App } from "antd";
+import { Button, Input, Steps, Checkbox, App, Spin } from "antd";
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   PlusOutlined,
   EnvironmentOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { activeBrandConfig, formatCurrency } from "../config/brandConfig";
+import { activeBrandConfig, formatPrice, formatCurrency } from "../config/brandConfig";
 import { useOrder } from "../context/OrderContext";
 import { useOrderHistory, type PurchaseOrder, type SavedAddress } from "../context/OrderHistoryContext";
 import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
 import { fetchBusinessAccountsByIdList } from "../services/businessAccountService";
 import { createSalesOrder, type SalesOrderResponse } from "../services/salesOrderService";
+import { getSourcing, getDeliveryEstimatesForCart, type SourcingResponse, type DeliveryEstimateResponse } from "../services/sourcingService";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 
 // ── Types ───────────────────────────────────────────────────────────
@@ -85,11 +87,13 @@ function ShippingStep({
   onChange,
   onNext,
   isValid,
+  isLoading,
 }: {
   shipping: ShippingForm;
   onChange: (s: ShippingForm) => void;
   onNext: () => void;
   isValid: boolean;
+  isLoading?: boolean;
 }) {
   const config = activeBrandConfig;
   const { addAddress } = useOrderHistory();
@@ -334,16 +338,17 @@ function ShippingStep({
         <Button
           type="primary"
           size="large"
-          disabled={!isValid}
+          disabled={!isValid || isLoading}
+          loading={isLoading}
           onClick={handleNext}
           style={{
             height: 44,
             fontWeight: 600,
             borderRadius: 8,
-            backgroundColor: isValid ? config.primaryColor : undefined,
+            backgroundColor: isValid && !isLoading ? config.primaryColor : undefined,
           }}
         >
-          Continue to Review
+          {isLoading ? "Getting Delivery Estimates..." : "Continue to Review"}
         </Button>
       </div>
     </div>
@@ -357,6 +362,7 @@ function ReviewStep({
   totalUnits,
   totalValue,
   shipping,
+  deliveryEstimates,
   onBack,
   onSubmit,
   isExceeded,
@@ -366,6 +372,7 @@ function ReviewStep({
   totalUnits: number;
   totalValue: number;
   shipping: ShippingForm;
+  deliveryEstimates: Record<string, DeliveryEstimateResponse>;
   onBack: () => void;
   onSubmit: () => void;
   isExceeded: boolean;
@@ -413,19 +420,31 @@ function ReviewStep({
         <div className="space-y-3">
           {items.map((item) => {
             const variantDesc = Object.values(item.variantAttributes || {}).join(" · ");
+            const deliveryEstimate = deliveryEstimates[item.upc];
+            
             return (
-              <div key={item.id} className="flex justify-between items-center">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate" style={{ color: config.primaryColor }}>
-                    {item.productName}
-                  </p>
-                  <p className="text-xs" style={{ color: config.secondaryColor }}>
-                    {item.upc}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
-                  </p>
+              <div key={item.id} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate" style={{ color: config.primaryColor }}>
+                      {item.productName}
+                    </p>
+                    <p className="text-xs" style={{ color: config.secondaryColor }}>
+                      {item.upc}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.quantity}
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
+                    {formatCurrency(item.quantity * item.unitPrice)}
+                  </span>
                 </div>
-                <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
-                  {formatCurrency(item.quantity * item.unitPrice)}
-                </span>
+                {deliveryEstimate && (
+                  <div className="flex items-center gap-1.5 pl-0.5">
+                    <ClockCircleOutlined className="text-xs" style={{ color: config.primaryColor }} />
+                    <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
+                      Est. Delivery: {deliveryEstimate.estimatedDeliveryDate}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -476,11 +495,24 @@ export default function CheckoutPage() {
   const { message } = App.useApp();
   const { items, totalUnits, totalValue, clearOrder } = useOrder();
   const { addOrder } = useOrderHistory();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const credit = useCreditState();
   const [step, setStep] = useState(0);
   const [shipping, setShipping] = useState<ShippingForm>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSourcing, setIsSourcing] = useState(false);
+  const [sourcingData, setSourcingData] = useState<SourcingResponse | null>(null);
+  const [deliveryEstimates, setDeliveryEstimates] = useState<Record<string, DeliveryEstimateResponse>>({});
+
+  // Calculate total savings
+  const totalSavings = isAuthenticated
+    ? items.reduce((sum, item) => {
+        if (item.originalPrice && item.originalPrice > item.unitPrice) {
+          return sum + (item.originalPrice - item.unitPrice) * item.quantity;
+        }
+        return sum;
+      }, 0)
+    : 0;
 
   if (items.length === 0) {
     return (
@@ -508,6 +540,56 @@ export default function CheckoutPage() {
     shipping.city.trim() &&
     shipping.state.trim() &&
     shipping.zip.trim();
+
+  // Handle moving from shipping to review step with sourcing API call
+  const handleNextStep = async () => {
+    if (!isShippingValid) return;
+    
+    setIsSourcing(true);
+    try {
+      // Call sourcing API
+      const sourcingRequest = {
+        upcList: items.map(item => ({
+          upc: item.upc,
+          quantity: item.quantity,
+          productCategory: "Kids", // Static as per requirement
+        })),
+        facilityIds: [],
+        channelCode: "CENTRIC_USA_ECOM",
+        distributionGroupId: "",
+        orderType: "SHIP",
+        ecommerceId: 9026,
+        customerDetails: {
+          customerType: ["Employee", "Pro-Athelete", "Loyalty"],
+          customerEmailId: "lonnie.madrigal@example.com",
+          customerId: 233554,
+        },
+        shippingAddressZipCode: shipping.zip,
+        shippingMode: "standard",
+        isOrderGiftWrap: false,
+      };
+
+      const sourcingResponse = await getSourcing(sourcingRequest);
+      setSourcingData(sourcingResponse);
+
+      // Call delivery estimate API for each item
+      if (sourcingResponse.isAvailable && sourcingResponse.sfsAvailabilityDetails.length > 0) {
+        const estimates = await getDeliveryEstimatesForCart(
+          items.map(item => ({ upc: item.upc, quantity: item.quantity })),
+          shipping.zip,
+          sourcingResponse
+        );
+        setDeliveryEstimates(estimates);
+      }
+
+      setStep(1);
+    } catch (error) {
+      console.error("Failed to get sourcing/delivery info:", error);
+      message.error("Failed to get delivery estimates. Please try again.");
+    } finally {
+      setIsSourcing(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (credit.isExceeded || isSubmitting) return;
@@ -611,14 +693,15 @@ export default function CheckoutPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-3">
           {step === 0 && (
             <ShippingStep
               shipping={shipping}
               onChange={setShipping}
-              onNext={() => setStep(1)}
+              onNext={handleNextStep}
               isValid={!!isShippingValid}
+              isLoading={isSourcing}
             />
           )}
           {step === 1 && (
@@ -627,6 +710,7 @@ export default function CheckoutPage() {
               totalUnits={totalUnits}
               totalValue={totalValue}
               shipping={shipping}
+              deliveryEstimates={deliveryEstimates}
               onBack={() => setStep(0)}
               onSubmit={handleSubmit}
               isExceeded={credit.isExceeded}
@@ -635,9 +719,9 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        <div className="space-y-5">
+        <div className="lg:col-span-2 space-y-5">
           <div
-            className="rounded-xl p-5"
+            className="rounded-xl p-5 min-w-[280px]"
             style={{ border: `1px solid ${config.borderColor}` }}
           >
             <h3 className="text-sm font-semibold mb-3" style={{ color: config.primaryColor }}>
@@ -647,6 +731,12 @@ export default function CheckoutPage() {
               <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
               <span className="font-medium" style={{ color: config.primaryColor }}>{formatCurrency(totalValue)}</span>
             </div>
+            {isAuthenticated && totalSavings > 0 && (
+              <div className="flex justify-between text-sm mb-2">
+                <span style={{ color: config.secondaryColor }}>You Save</span>
+                <span className="font-medium" style={{ color: "#16A34A" }}>−{formatCurrency(totalSavings)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <span style={{ color: config.secondaryColor }}>Payment Method</span>
               <span className="font-medium" style={{ color: config.primaryColor }}>Credit Account</span>

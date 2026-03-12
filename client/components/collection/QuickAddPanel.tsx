@@ -4,6 +4,7 @@ import { InputNumber, Tooltip } from "antd";
 import { CloseOutlined, WarningOutlined, ShoppingCartOutlined, PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
+import { useAuth } from "../../context/AuthContext";
 import { useCreditState } from "../../hooks/useCreditState";
 import type { CatalogProduct } from "../../data/catalogData";
 
@@ -21,6 +22,7 @@ export default function QuickAddPanel({
 }: QuickAddPanelProps) {
   const config = activeBrandConfig;
   const { addItems } = useOrder();
+  const { isAuthenticated } = useAuth();
   const credit = useCreditState();
   const [quantity, setQuantity] = useState(1);
 
@@ -66,6 +68,7 @@ export default function QuickAddPanel({
       variantAttributes: {},
       quantity: quantity,
       unitPrice: product.price,
+      originalPrice: product.originalPrice,
       imageUrl: product.imageUrl,
     }]);
 
@@ -110,7 +113,7 @@ export default function QuickAddPanel({
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-24 h-24 object-cover rounded-xl flex-shrink-0"
+            className="w-24 h-24 object-contain rounded-xl flex-shrink-0"
             onError={(e) => {
               e.currentTarget.src = "https://via.placeholder.com/96x96?text=No+Img";
             }}
@@ -160,14 +163,31 @@ export default function QuickAddPanel({
             </span>
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
-            <div className="flex items-baseline justify-between">
-              <span className="text-[10px]" style={{ color: config.secondaryColor }}>
-                Original
-              </span>
-              <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-                {formatPrice(product.originalPrice)}
-              </span>
-            </div>
+            <>
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-[10px]" style={{ color: config.secondaryColor }}>
+                  Original
+                </span>
+                <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
+                  {formatPrice(product.originalPrice)}
+                </span>
+              </div>
+              {isAuthenticated && (
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[10px]" style={{ color: config.secondaryColor }}>
+                    You Save
+                  </span>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold" style={{ color: "#16A34A" }}>
+                      {formatPrice(product.originalPrice - product.price)}
+                    </span>
+                    <span className="text-sm font-semibold ml-1" style={{ color: "#16A34A" }}>
+                      ({Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%)
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
           {product.unitMeasure && (
             <p className="text-[10px] mt-2" style={{ color: config.secondaryColor }}>

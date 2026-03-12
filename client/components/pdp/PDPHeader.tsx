@@ -1,4 +1,5 @@
 import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
+import { useAuth } from "../../context/AuthContext";
 import type { CatalogProduct } from "../../data/catalogData";
 
 interface PDPHeaderProps {
@@ -7,6 +8,7 @@ interface PDPHeaderProps {
 
 export default function PDPHeader({ product }: PDPHeaderProps) {
   const config = activeBrandConfig;
+  const { isAuthenticated } = useAuth();
 
   return (
     <div>
@@ -46,19 +48,34 @@ export default function PDPHeader({ product }: PDPHeaderProps) {
       )}
 
       {/* Base Price */}
-      <div className="flex items-baseline gap-2 mb-4">
-        <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-          {formatPrice(product.price)}
-        </span>
-        {product.originalPrice && (
-          <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-            {formatPrice(product.originalPrice)}
+      <div className="mb-4">
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
+            {formatPrice(product.price)}
           </span>
-        )}
-        {product.unitMeasure && (
-          <span className="text-xs" style={{ color: config.secondaryColor }}>
-            {product.unitMeasure}
-          </span>
+          {product.originalPrice && (
+            <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
+              {formatPrice(product.originalPrice)}
+            </span>
+          )}
+          {product.unitMeasure && (
+            <span className="text-xs" style={{ color: config.secondaryColor }}>
+              {product.unitMeasure}
+            </span>
+          )}
+        </div>
+        {isAuthenticated && product.originalPrice && product.originalPrice > product.price && (
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm" style={{ color: "#16A34A" }}>
+              You Save
+            </span>
+            <span className="text-sm font-semibold" style={{ color: "#16A34A" }}>
+              {formatPrice(product.originalPrice - product.price)}
+            </span>
+            <span className="text-sm" style={{ color: "#16A34A" }}>
+              ({Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%)
+            </span>
+          </div>
         )}
       </div>
 

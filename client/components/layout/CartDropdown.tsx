@@ -1,8 +1,9 @@
 import { Button, InputNumber } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
+import { activeBrandConfig, formatPrice, formatCurrency } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface CartDropdownProps {
   visible: boolean;
@@ -13,6 +14,17 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const { items, totalUnits, totalValue, updateQuantity, removeItem } = useOrder();
+  const { isAuthenticated } = useAuth();
+
+  // Calculate total savings
+  const totalSavings = isAuthenticated
+    ? items.reduce((sum, item) => {
+        if (item.originalPrice && item.originalPrice > item.unitPrice) {
+          return sum + (item.originalPrice - item.unitPrice) * item.quantity;
+        }
+        return sum;
+      }, 0)
+    : 0;
 
   if (!visible) return null;
 
@@ -94,7 +106,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                           value={item.quantity}
                           onChange={(val) => val && updateQuantity(item.id, val)}
                           controls={false}
-                          style={{ width: 52, height: 28, borderRadius: 0, textAlign: "center" }}
+                          style={{ width: 65, height: 28, borderRadius: 0, textAlign: "center" }}
                         />
                         <Button
                           size="small"
@@ -127,7 +139,12 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                     </div>
                   </div>
 
-                  <div className="flex justify-end mt-1.5">
+                  <div className="flex justify-end gap-3 mt-1.5">
+                    {isAuthenticated && item.originalPrice && item.originalPrice > item.unitPrice && (
+                      <span className="text-xs font-medium" style={{ color: "#16A34A" }}>
+                        Save {formatPrice((item.originalPrice - item.unitPrice) * item.quantity)}
+                      </span>
+                    )}
                     <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
                       {formatPrice(item.quantity * item.unitPrice)}
                     </span>
@@ -144,12 +161,20 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
             className="px-5 py-3.5"
             style={{ borderTop: `1px solid ${config.borderColor}` }}
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Estimated Total</span>
               <span className="text-base font-semibold" style={{ color: config.primaryColor }}>
-                {formatPrice(totalValue)}
+                {formatCurrency(totalValue)}
               </span>
             </div>
+            {isAuthenticated && totalSavings > 0 && (
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-gray-600">You Save</span>
+                <span className="text-sm font-semibold" style={{ color: "#16A34A" }}>
+                  −{formatCurrency(totalSavings)}
+                </span>
+              </div>
+            )}
             <Button
               type="primary"
               block

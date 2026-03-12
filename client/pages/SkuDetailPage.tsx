@@ -210,6 +210,7 @@ function SkuOrderSection({
       variantAttributes: variant.attributes,
       quantity: qty,
       unitPrice: variant.price,
+      originalPrice: product.originalPrice,
       imageUrl: product.imageUrl,
     });
   }, [variant, product, qty, addItem]);

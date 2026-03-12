@@ -14,6 +14,16 @@ export default function CartPage() {
   const { isAuthenticated, showSignInModal } = useAuth();
   const { isExceeded } = useCreditState();
 
+  // Calculate total savings
+  const totalSavings = isAuthenticated
+    ? items.reduce((sum, item) => {
+        if (item.originalPrice && item.originalPrice > item.unitPrice) {
+          return sum + (item.originalPrice - item.unitPrice) * item.quantity;
+        }
+        return sum;
+      }, 0)
+    : 0;
+
   if (items.length === 0) {
     return (
       <div className="max-w-content mx-auto px-6 py-16 text-center">
@@ -57,9 +67,9 @@ export default function CartPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Left: Line Items */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <CartItemList
             items={items}
             onUpdateQuantity={updateQuantity}
@@ -68,7 +78,7 @@ export default function CartPage() {
         </div>
 
         {/* Right: Order + Credit Summary */}
-        <div className="space-y-5">
+        <div className="space-y-5 lg:col-span-2">
           {/* Order Summary */}
           <div
             className="rounded-xl p-5"
@@ -82,6 +92,12 @@ export default function CartPage() {
                 <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
                 <span className="font-medium" style={{ color: config.primaryColor }}>{formatCurrency(totalValue)}</span>
               </div>
+              {isAuthenticated && totalSavings > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: config.secondaryColor }}>You Save</span>
+                  <span className="font-medium" style={{ color: "#16A34A" }}>−{formatCurrency(totalSavings)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span style={{ color: config.secondaryColor }}>Estimated Shipping</span>
                 <span className="text-xs font-medium" style={{ color: "#16A34A" }}>Calculated at checkout</span>
@@ -150,6 +166,8 @@ function CartItemList({
 }) {
   const config = activeBrandConfig;
 
+  const { isAuthenticated } = useAuth();
+
   return (
     <div
       className="rounded-xl overflow-hidden"
@@ -202,6 +220,11 @@ function CartItemList({
                 <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
                   {formatPrice(item.unitPrice)} / unit
                 </p>
+                {isAuthenticated && item.originalPrice && item.originalPrice > item.unitPrice && (
+                  <p className="text-xs mt-1" style={{ color: "#16A34A" }}>
+                    Save {formatPrice((item.originalPrice - item.unitPrice) * item.quantity)} ({Math.round(((item.originalPrice - item.unitPrice) / item.originalPrice) * 100)}%)
+                  </p>
+                )}
               </div>
             </div>
 

@@ -67,8 +67,8 @@ function calculateTotalProductCount(
   }
 
   // Otherwise, sum up all children's product counts
-  let total = node.productIds.length; // Include own products if any
-  
+  // let total = node.productIds.length; // Include own products if any
+  let total = 0;
   for (const child of nodes.values()) {
     if (child.parentId === nodeId) {
       total += calculateTotalProductCount(child.id, nodes);

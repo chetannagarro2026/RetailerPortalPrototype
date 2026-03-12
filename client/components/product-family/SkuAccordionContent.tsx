@@ -36,6 +36,7 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
       variantAttributes: variant.attributes,
       quantity: qty,
       unitPrice: variant.price,
+      originalPrice: product.originalPrice,
       imageUrl: product.imageUrl,
     });
   }, [variant, product, qty, addItem]);

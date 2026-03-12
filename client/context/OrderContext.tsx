@@ -13,6 +13,7 @@ export interface OrderLineItem {
   variantAttributes: Record<string, string>;
   quantity: number;
   unitPrice: number;
+  originalPrice?: number;
   imageUrl?: string;
 }
 

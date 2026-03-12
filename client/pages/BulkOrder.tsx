@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Button, Row, Col, App } from "antd";
-import { ShoppingCartOutlined, SyncOutlined } from "@ant-design/icons";
+import { Button, Row, Col, App, Spin } from "antd";
+import { ShoppingCartOutlined, SyncOutlined, LoadingOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
+import { apiConfig } from "../config/apiConfig";
 import { useOrder } from "../context/OrderContext";
-import { findVariantByUpc } from "../data/skuIndex";
+import { useAuth } from "../context/AuthContext";
+import { fetchProductByUpc, fetchBestPrices, transformProductResponse, type PriceRequestItem } from "../services/productService";
 import LineByLinePanel, {
   type OrderEntry,
   type EntryError,
@@ -111,15 +113,19 @@ function validatePasteText(text: string): string | null {
 
 export default function BulkOrder() {
   const config = activeBrandConfig;
-  const { message } = App.useApp();
   const { addItems } = useOrder();
+  const { message } = App.useApp();
+  const { user, isAuthenticated } = useAuth();
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [entries, setEntries] = useState<OrderEntry[]>([...EMPTY_ROWS]);
   const [pasteText, setPasteText] = useState("");
   const [lastSource, setLastSource] = useState<Source>(null);
   const [lineErrors, setLineErrors] = useState<EntryError[]>([]);
   const [pasteError, setPasteError] = useState<string | null>(null);
   const [upcErrors, setUpcErrors] = useState<string[]>([]);
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [fetchProgress, setFetchProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Sync: lines → textarea (debounced)
   useEffect(() => {
@@ -185,66 +191,146 @@ export default function BulkOrder() {
   // Count valid entries for CTA state
   const { validCount } = validateEntries(entries);
 
-  // ── Add to Cart handler (direct add, no preview) ────────────────
-  const handleAddToCart = useCallback(() => {
+  // ── Add to Cart handler (with API fetching) ────────────────
+  const handleAddToCart = useCallback(async () => {
     setUpcErrors([]);
+    setIsAddingToCart(true);
+    setFetchProgress(null);
 
-    // Gather valid entries and aggregate duplicate UPCs
-    const upcMap = new Map<string, number>();
-    for (const entry of entries) {
-      const upc = entry.itemCode.trim();
-      const qty = Number(entry.quantity);
-      if (!upc || isNaN(qty) || qty <= 0) continue;
-      upcMap.set(upc, (upcMap.get(upc) || 0) + qty);
-    }
-
-    const notFound: string[] = [];
-    const itemsToAdd: Parameters<typeof addItems>[0] = [];
-
-    for (const [upc, qty] of upcMap) {
-      const result = findVariantByUpc(upc);
-      if (!result) {
-        notFound.push(upc);
-        continue;
+    try {
+      // Gather valid entries and aggregate duplicate UPCs
+      const upcMap = new Map<string, number>();
+      for (const entry of entries) {
+        const upc = entry.itemCode.trim();
+        const qty = Number(entry.quantity);
+        if (!upc || isNaN(qty) || qty <= 0) continue;
+        upcMap.set(upc, (upcMap.get(upc) || 0) + qty);
       }
-      itemsToAdd.push({
-        id: result.variant.id,
-        productId: result.product.id,
-        productName: result.product.name,
-        upc: result.variant.upc,
-        variantAttributes: result.variant.attributes,
-        quantity: qty,
-        unitPrice: result.variant.price,
-        imageUrl: result.product.imageUrl,
-      });
-    }
 
-    // Add valid items to cart
-    if (itemsToAdd.length > 0) {
-      addItems(itemsToAdd);
-    }
+      const totalUpcs = upcMap.size;
+      if (totalUpcs === 0) {
+        message.warning("No valid items to add");
+        setIsAddingToCart(false);
+        return;
+      }
 
-    // Handle results
-    if (notFound.length > 0) {
-      setUpcErrors(notFound);
-    }
+      const notFound: string[] = [];
+      const fetchedProducts: Array<{
+        upc: string;
+        quantity: number;
+        productData: ReturnType<typeof transformProductResponse>;
+      }> = [];
+      let currentIndex = 0;
 
-    if (itemsToAdd.length > 0 && notFound.length > 0) {
-      message.warning({
-        content: `${itemsToAdd.length} item${itemsToAdd.length !== 1 ? "s" : ""} added. ${notFound.length} UPC${notFound.length !== 1 ? "s" : ""} not found.`,
-        duration: 4,
-      });
-    } else if (itemsToAdd.length > 0) {
-      // Clear form on full success
-      setEntries([...EMPTY_ROWS]);
-      setPasteText("");
-    } else if (notFound.length > 0) {
-      message.error({
-        content: `No valid UPCs found. ${notFound.length} UPC${notFound.length !== 1 ? "s" : ""} not recognized.`,
-        duration: 4,
-      });
+      // Step 1: Fetch all product details
+      for (const [upc, qty] of upcMap) {
+        currentIndex++;
+        setFetchProgress({ current: currentIndex, total: totalUpcs });
+
+        try {
+          const productResponse = await fetchProductByUpc(upc);
+          const productData = transformProductResponse(productResponse);
+          fetchedProducts.push({ upc, quantity: qty, productData });
+        } catch (error) {
+          console.error(`Failed to fetch product ${upc}:`, error);
+          notFound.push(upc);
+        }
+      }
+
+      // Step 2: Fetch prices for all successfully fetched products in ONE API call
+      const itemsToAdd: Parameters<typeof addItems>[0] = [];
+      
+      if (fetchedProducts.length > 0) {
+        setFetchProgress({ current: totalUpcs, total: totalUpcs });
+        
+        try {
+          // Build price request payload for all products
+          const priceRequestItems: PriceRequestItem[] = fetchedProducts.map(({ upc }) => {
+            const priceItem: PriceRequestItem = {
+              upc,
+              channelCode: apiConfig.priceChannelCode,
+            };
+            
+            if (isAuthenticated && user?.accountId) {
+              priceItem.accoundId = parseInt(user.accountId, 10);
+            }
+            
+            return priceItem;
+          });
+
+          // Single batch pricing API call
+          const priceResponse = await fetchBestPrices(priceRequestItems);
+
+          // Step 3: Combine product data with pricing and prepare cart items
+          for (const { upc, quantity, productData } of fetchedProducts) {
+            const priceInfo = priceResponse.productPrice[upc];
+            const unitPrice = priceInfo ? Number(priceInfo.listPrice) : 0;
+            const originalPrice = priceInfo ? Number(priceInfo.basePrice) : undefined;
+
+            itemsToAdd.push({
+              id: productData.id,
+              productId: productData.id,
+              productName: productData.name,
+              upc: productData.upcId,
+              variantAttributes: {},
+              quantity,
+              unitPrice,
+              originalPrice,
+              imageUrl: productData.imageUrl,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch prices:", error);
+          // If pricing fails, add items with 0 price
+          for (const { quantity, productData } of fetchedProducts) {
+            itemsToAdd.push({
+              id: productData.id,
+              productId: productData.id,
+              productName: productData.name,
+              upc: productData.upcId,
+              variantAttributes: {},
+              quantity,
+              unitPrice: 0,
+              imageUrl: productData.imageUrl,
+            });
+          }
+        }
+      }
+
+      // Add valid items to cart
+      if (itemsToAdd.length > 0) {
+        addItems(itemsToAdd);
+      }
+
+      // Handle results
+      if (notFound.length > 0) {
+        setUpcErrors(notFound);
+      }
+
+      if (itemsToAdd.length > 0 && notFound.length > 0) {
+        message.warning({
+          content: `${itemsToAdd.length} item${itemsToAdd.length !== 1 ? "s" : ""} added. ${notFound.length} UPC${notFound.length !== 1 ? "s" : ""} not found.`,
+          duration: 4,
+        });
+      } else if (itemsToAdd.length > 0) {
+        // Clear form on full success
+        setEntries([...EMPTY_ROWS]);
+        setPasteText("");
+        message.success(`${itemsToAdd.length} item${itemsToAdd.length !== 1 ? "s" : ""} added to cart!`);
+      } else if (notFound.length > 0) {
+        message.error({
+          content: `No valid UPCs found. ${notFound.length} UPC${notFound.length !== 1 ? "s" : ""} not recognized.`,
+          duration: 4,
+        });
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      message.error("An error occurred while adding items to cart. Please try again.");
+    } finally {
+      setIsAddingToCart(false);
+      setFetchProgress(null);
     }
-  }, [entries, addItems, message]);
+  }, [entries, addItems, message, isAuthenticated, user?.accountId]);
 
   return (
     <div className="max-w-content mx-auto px-6 py-8">
@@ -312,15 +398,23 @@ export default function BulkOrder() {
       {/* CTA */}
       <div className="mt-8 flex items-center justify-between">
         <span className="text-sm" style={{ color: config.secondaryColor }}>
-          {validCount > 0
-            ? `${validCount} valid item${validCount !== 1 ? "s" : ""} ready to add`
-            : "No valid items entered yet"}
+          {isAddingToCart && fetchProgress ? (
+            <span className="flex items-center gap-2">
+              <LoadingOutlined className="text-base" />
+              Fetching product {fetchProgress.current} of {fetchProgress.total}...
+            </span>
+          ) : validCount > 0 ? (
+            `${validCount} valid item${validCount !== 1 ? "s" : ""} ready to add`
+          ) : (
+            "No valid items entered yet"
+          )}
         </span>
         <Button
           type="primary"
           size="large"
-          icon={<ShoppingCartOutlined />}
-          disabled={validCount === 0}
+          icon={isAddingToCart ? <LoadingOutlined /> : <ShoppingCartOutlined />}
+          disabled={validCount === 0 || isAddingToCart}
+          loading={isAddingToCart}
           onClick={handleAddToCart}
           style={{
             height: 44,
@@ -328,10 +422,10 @@ export default function BulkOrder() {
             paddingRight: 28,
             fontWeight: 600,
             borderRadius: 8,
-            backgroundColor: validCount > 0 ? config.primaryColor : undefined,
+            backgroundColor: validCount > 0 && !isAddingToCart ? config.primaryColor : undefined,
           }}
         >
-          Add to Cart
+          {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
         </Button>
       </div>
     </div>

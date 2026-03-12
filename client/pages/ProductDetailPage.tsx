@@ -245,6 +245,7 @@ export default function ProductDetailPage() {
       variantAttributes: {},
       quantity: quantity,
       unitPrice: product.price || 0,
+      originalPrice: product.originalPrice,
       imageUrl: product.imageUrl,
     });
   };

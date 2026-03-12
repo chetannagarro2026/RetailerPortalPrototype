@@ -34,7 +34,7 @@ export default function CollectionHeader({
     <div className="flex items-start justify-between mb-5">
       <div>
         <h1
-          className="text-lg font-semibold mb-0.5"
+          className="text-lg font-semibold mb-0.5 mr-3"
           style={{ color: config.primaryColor }}
         >
           {title}

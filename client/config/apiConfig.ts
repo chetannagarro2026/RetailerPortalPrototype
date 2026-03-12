@@ -24,6 +24,8 @@ const EXTERNAL_SALES_ORDER_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_SALE
 const EXTERNAL_USER_MANAGEMENT_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_USER_MANAGEMENT_PATH || "/user-management/dev/api/v1"}`;
 const EXTERNAL_NOTIFICATION_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_NOTIFICATION_API_PATH || "/notification/dev/v1"}`;
 const EXTERNAL_CASE_MANAGEMENT_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_CASE_MANAGEMENT_PATH || "/casemanagement/dev/api/v1"}`;
+const EXTERNAL_SOURCING_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_SOURCING_API_PATH || "/sourcing/dev/api/v2"}`;
+const EXTERNAL_DELIVERY_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_DELIVERY_API_PATH || "/deliverydateestimate/dev/api/v1"}`;
 
 // Price API configuration
 const PRICE_CHANNEL_CODE = import.meta.env.VITE_PRICE_CHANNEL_CODE || "CENTRIC_USA_ECOM";
@@ -95,6 +97,12 @@ export const apiConfig = {
 
     // Product by UPC
     productByUpc: (upcId: string) => `${EXTERNAL_API_BASE}/products/upc/${upcId}`,
+
+    // Sourcing
+    sourcing: `${EXTERNAL_SOURCING_BASE}/sourcing/`,
+
+    // Delivery Date Estimate
+    deliveryEstimate: `${EXTERNAL_DELIVERY_BASE}/delivery/estimate/date`,
 
     // Add your API endpoints below
     // products: `${BASE_URL}/products`,

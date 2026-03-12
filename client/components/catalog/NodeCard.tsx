@@ -27,7 +27,7 @@ export default function NodeCard({ node, tree }: NodeCardProps) {
           <img
             src={node.heroImage}
             alt={node.label}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
