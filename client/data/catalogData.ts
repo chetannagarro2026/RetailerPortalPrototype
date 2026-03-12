@@ -45,15 +45,53 @@ export interface VariantAttribute {
 
 /** Promotion metadata */
 export interface PromotionInfo {
+  id: string;
   label: string;
+  description?: string;
+  type: "discount" | "free-goods" | "bogo";
   discountPercent?: number;
   freeQty?: number;
   qualifyingQty?: number;
   minQty?: number;
+  maxUses?: number;
   validFrom?: string;
   validTo?: string;
   scope?: "sku" | "family";
+  /** Which variant IDs this promotion applies to (undefined = all) */
+  eligibleVariantIds?: string[];
+  rules?: string[];
 }
+
+/** Cart-level promotion definition */
+export interface CartPromotion {
+  id: string;
+  label: string;
+  description: string;
+  type: "spend-discount" | "spend-free-units";
+  thresholdAmount: number;
+  discountAmount?: number;
+  freeUnits?: number;
+}
+
+/** Predefined cart promotions */
+export const cartPromotions: CartPromotion[] = [
+  {
+    id: "cart-promo-1",
+    label: "$50 OFF",
+    description: "Spend $2000 and get $50 OFF your order",
+    type: "spend-discount",
+    thresholdAmount: 2000,
+    discountAmount: 50,
+  },
+  {
+    id: "cart-promo-2",
+    label: "10 Free Units",
+    description: "Spend $1500 and get 10 free units",
+    type: "spend-free-units",
+    thresholdAmount: 1500,
+    freeUnits: 10,
+  },
+];
 
 /** A single purchasable variant (one cell in the matrix) */
 export interface ProductVariant {
@@ -68,8 +106,10 @@ export interface ProductVariant {
   finalPrice?: number;
   /** Promotion label e.g. "10% OFF", "Buy 1 Get 1" */
   promotionLabel?: string;
-  /** Full promotion details */
+  /** Full promotion details (legacy single) */
   promotionInfo?: PromotionInfo;
+  /** All available promotions for this variant */
+  promotions?: PromotionInfo[];
   availabilityStatus: "in-stock" | "low-stock" | "out-of-stock" | "pre-order";
   stockQty: number;
 }
@@ -88,8 +128,10 @@ export interface CatalogProduct {
   finalPrice?: number;
   /** Promotion label e.g. "10% OFF", "Buy 1 Get 1" */
   promotionLabel?: string;
-  /** Full promotion details */
+  /** Full promotion details (legacy single) */
   promotionInfo?: PromotionInfo;
+  /** All available promotions for this product / family */
+  promotions?: PromotionInfo[];
   /** Dynamic badges — not hardcoded to specific types */
   badges?: Array<{ label: string; color?: string; bg?: string }>;
   /** Dynamic display attributes chosen per taxonomy config */
@@ -539,19 +581,98 @@ const specPools: Array<Array<{ label: string; value: string }>> = [
 ];
 
 // ── Promotion Pools ─────────────────────────────────────────────────
-// Deterministic promotion assignment based on product index
-const promotionPool: (PromotionInfo | undefined)[] = [
-  undefined, // no promotion
-  { label: "10% OFF", discountPercent: 10, minQty: 1, validFrom: "2026-01-01", validTo: "2026-06-30", scope: "family" },
-  undefined,
-  { label: "15% OFF", discountPercent: 15, minQty: 3, validFrom: "2026-02-01", validTo: "2026-04-30", scope: "sku" },
-  undefined,
-  undefined,
-  { label: "Buy 10 Get 2 Free", freeQty: 2, qualifyingQty: 10, minQty: 10, validFrom: "2026-01-15", validTo: "2026-05-31", scope: "family" },
-  undefined,
-  { label: "Buy 1 Get 1", freeQty: 1, qualifyingQty: 1, minQty: 1, validFrom: "2026-03-01", validTo: "2026-07-31", scope: "sku" },
-  undefined,
+// Master list of all possible promotions
+const allPromotions: PromotionInfo[] = [
+  {
+    id: "promo-10off", label: "10% OFF", description: "Get 10% off on eligible SKUs",
+    type: "discount", discountPercent: 10, minQty: 1,
+    validFrom: "2026-01-01", validTo: "2026-06-30", scope: "family",
+    rules: ["Minimum Quantity: 1", "Cannot combine with other promotions"],
+  },
+  {
+    id: "promo-15off", label: "15% OFF", description: "Get 15% off on eligible SKUs",
+    type: "discount", discountPercent: 15, minQty: 5,
+    validFrom: "2026-02-01", validTo: "2026-04-30", scope: "sku",
+    rules: ["Minimum Quantity: 5", "Cannot combine with other promotions"],
+  },
+  {
+    id: "promo-20off", label: "20% OFF", description: "Get 20% off on eligible SKUs",
+    type: "discount", discountPercent: 20, minQty: 10,
+    validFrom: "2026-03-01", validTo: "2026-07-31", scope: "sku",
+    rules: ["Minimum Quantity: 10", "Limited time offer"],
+  },
+  {
+    id: "promo-b10g2", label: "Buy 10 Get 2 Free", description: "Purchase 10 units and receive 2 additional units free",
+    type: "free-goods", freeQty: 2, qualifyingQty: 10, minQty: 10, maxUses: 5,
+    validFrom: "2026-01-15", validTo: "2026-05-31", scope: "family",
+    rules: ["Minimum quantity: 10", "Maximum uses per order: 5"],
+  },
+  {
+    id: "promo-b20g5", label: "Buy 20 Get 5 Free", description: "Purchase 20 units and receive 5 additional units free",
+    type: "free-goods", freeQty: 5, qualifyingQty: 20, minQty: 20, maxUses: 3,
+    validFrom: "2026-02-01", validTo: "2026-06-30", scope: "family",
+    rules: ["Minimum quantity: 20", "Maximum uses per order: 3"],
+  },
+  {
+    id: "promo-bogo", label: "Buy 1 Get 1 Free", description: "Buy one unit and get one free",
+    type: "bogo", freeQty: 1, qualifyingQty: 1, minQty: 1,
+    validFrom: "2026-03-01", validTo: "2026-07-31", scope: "sku",
+    rules: ["Minimum Quantity: 1", "One per customer"],
+  },
+  {
+    id: "promo-b1g2", label: "Buy 1 Get 2 Free", description: "Buy one unit and get two free",
+    type: "bogo", freeQty: 2, qualifyingQty: 1, minQty: 1,
+    validFrom: "2026-04-01", validTo: "2026-08-31", scope: "sku",
+    rules: ["Minimum Quantity: 1", "Limited availability"],
+  },
 ];
+
+/**
+ * Promotion assignment patterns per product index.
+ * Distribution: ~35% list only, ~35% special only, ~30% with promos
+ * Products with promos get 1-3 promotions from the master list.
+ */
+type PricingScenario = "list-only" | "special-only" | "with-promos";
+function getProductPricingScenario(idx: number): PricingScenario {
+  // Deterministic pattern: 0-3 list-only, 4-6 special-only, 7-9 with-promos
+  const bucket = idx % 10;
+  if (bucket <= 3) return "list-only";    // 40%
+  if (bucket <= 6) return "special-only"; // 30%
+  return "with-promos";                   // 30%
+}
+
+/** Get promotions for a product based on its index */
+function getProductPromotions(productId: string, idx: number, variants?: ProductVariant[]): PromotionInfo[] {
+  const scenario = getProductPricingScenario(idx);
+  if (scenario !== "with-promos") return [];
+
+  // Assign 1-3 promotions deterministically
+  const promoCount = 1 + (idx % 3); // 1, 2, or 3
+  const startIdx = (idx * 3) % allPromotions.length;
+  const promos: PromotionInfo[] = [];
+  for (let i = 0; i < promoCount; i++) {
+    const base = allPromotions[(startIdx + i) % allPromotions.length];
+    // Assign eligible variant IDs for SKU-scoped promos
+    let eligibleVariantIds: string[] | undefined;
+    if (base.scope === "sku" && variants && variants.length > 0) {
+      // Only some variants are eligible (deterministic subset)
+      eligibleVariantIds = variants
+        .filter((_, vi) => (vi + i) % 3 !== 0) // ~66% of variants eligible
+        .map((v) => v.id);
+    }
+    promos.push({
+      ...base,
+      id: `${base.id}-${productId}`,
+      eligibleVariantIds,
+    });
+  }
+  return promos;
+}
+
+// Legacy single-promo compat: pick first discount promo if any
+function getLegacySinglePromo(promos: PromotionInfo[]): PromotionInfo | undefined {
+  return promos.find((p) => p.type === "discount") || promos[0];
+}
 
 /** Compute special price as ~80% of list price (deterministic per index) */
 function computeSpecialPrice(listPrice: number, idx: number): number {
@@ -566,13 +687,29 @@ function computeFinalPrice(specialPrice: number, promo: PromotionInfo | undefine
   return Math.round(specialPrice * (1 - promo.discountPercent / 100) * 100) / 100;
 }
 
+/**
+ * Determine the pricing scenario for a specific variant within a product.
+ * Supports mixed SKU pricing within a family.
+ */
+type VariantPricingScenario = "list-only" | "special-only" | "special-and-promo" | "promo-only";
+function getVariantPricingScenario(productIdx: number, variantIdx: number): VariantPricingScenario {
+  const productScenario = getProductPricingScenario(productIdx);
+  if (productScenario === "list-only") return "list-only";
+  if (productScenario === "special-only") return "special-only";
+  // For products with promos, mix the variant scenarios
+  const bucket = (productIdx * 7 + variantIdx) % 4;
+  if (bucket === 0) return "list-only";
+  if (bucket === 1) return "special-only";
+  if (bucket === 2) return "special-and-promo";
+  return "special-and-promo"; // majority get promos
+}
+
 /** Generate variants for a product based on its variant attributes */
 function generateVariants(
   productId: string,
   skuPrefix: string,
   basePrice: number,
   attrs: VariantAttribute[],
-  productPromo: PromotionInfo | undefined,
   productIdx: number,
 ): ProductVariant[] {
   const variants: ProductVariant[] = [];
@@ -586,18 +723,20 @@ function generateVariants(
       const status: ProductVariant["availabilityStatus"] =
         stockVal === 0 ? "out-of-stock" : stockVal < 15 ? "low-stock" : "in-stock";
       const variantListPrice = Math.round(basePrice * priceMod * 100) / 100;
-      const variantSpecialPrice = computeSpecialPrice(variantListPrice, productIdx + idx);
-      const variantPromo = productPromo;
-      const variantFinalPrice = computeFinalPrice(variantSpecialPrice, variantPromo);
+
+      const variantScenario = getVariantPricingScenario(productIdx, idx);
+      const hasSpecial = variantScenario === "special-only" || variantScenario === "special-and-promo";
+      const variantSpecialPrice = hasSpecial ? computeSpecialPrice(variantListPrice, productIdx + idx) : undefined;
+      // No auto-applied promo — promotions are user-selected now
+      const effectiveBase = variantSpecialPrice ?? variantListPrice;
+
       variants.push({
         id: `${productId}-v${idx}`,
         sku: `${skuPrefix}-${Object.values(combo).map((v) => v.replace(/\s+/g, "").slice(0, 3).toUpperCase()).join("-")}`,
         attributes: { ...combo },
         price: variantListPrice,
         specialPrice: variantSpecialPrice,
-        finalPrice: variantFinalPrice,
-        promotionLabel: variantPromo?.label,
-        promotionInfo: variantPromo,
+        finalPrice: effectiveBase, // will be updated when promo is applied
         availabilityStatus: status,
         stockQty: stockVal,
       });
@@ -727,19 +866,25 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
     const brand = brandNames[idx % brandNames.length];
     const basePrice = 28 + ((idx * 17) % 120);
     const badge = badges[idx % badges.length];
-    const promo = promotionPool[idx % promotionPool.length];
-    const specialPrice = computeSpecialPrice(basePrice, idx);
-    const finalPrice = computeFinalPrice(specialPrice, promo);
+    const scenario = getProductPricingScenario(idx);
+    const hasSpecialPrice = scenario !== "list-only";
+    const specialPrice = hasSpecialPrice ? computeSpecialPrice(basePrice, idx) : undefined;
+    const productId = `${nodeId}-p${idx}`;
+    const skuPrefix = `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`;
+    const variants = generateVariants(productId, skuPrefix, basePrice, variantAttrPools[idx % variantAttrPools.length], idx);
+    const promotions = getProductPromotions(productId, idx, variants);
+    const legacyPromo = getLegacySinglePromo(promotions);
     return {
-      id: `${nodeId}-p${idx}`,
+      id: productId,
       name: `${node.label} Style ${idx + 1}`,
-      sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+      sku: skuPrefix,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
       specialPrice,
-      finalPrice,
-      promotionLabel: promo?.label,
-      promotionInfo: promo,
+      finalPrice: specialPrice ?? basePrice,
+      promotionLabel: legacyPromo?.label,
+      promotionInfo: legacyPromo,
+      promotions,
       imageUrl: images[idx % images.length],
       badges: badge ? [badge] : undefined,
       brand,
@@ -752,17 +897,8 @@ export function getProductsForNode(nodeId: string, page: number, pageSize: numbe
       minOrderQty: idx % 3 === 0 ? 6 : 1,
       casePackQty: idx % 5 === 0 ? 6 : undefined,
       attributes: { brand, category: node.label },
-
-      // Variant data — deterministic per product
       variantAttributes: variantAttrPools[idx % variantAttrPools.length],
-      variants: generateVariants(
-        `${nodeId}-p${idx}`,
-        `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
-        basePrice,
-        variantAttrPools[idx % variantAttrPools.length],
-        promo,
-        idx,
-      ),
+      variants,
       galleryImages: [
         images[idx % images.length],
         images[(idx + 1) % images.length],
@@ -908,19 +1044,25 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
     const brand = brandNames[idx % brandNames.length];
     const basePrice = 28 + ((idx * 17) % 120);
     const badge = badges[idx % badges.length];
-    const promo = promotionPool[idx % promotionPool.length];
-    const specialPrice = computeSpecialPrice(basePrice, idx);
-    const finalPrice = computeFinalPrice(specialPrice, promo);
+    const scenario = getProductPricingScenario(idx);
+    const hasSpecialPrice = scenario !== "list-only";
+    const specialPrice = hasSpecialPrice ? computeSpecialPrice(basePrice, idx) : undefined;
+    const productId = `${nodeId}-p${idx}`;
+    const skuPrefix = `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`;
+    const variants = generateVariants(productId, skuPrefix, basePrice, variantAttrPools[idx % variantAttrPools.length], idx);
+    const promotions = getProductPromotions(productId, idx, variants);
+    const legacyPromo = getLegacySinglePromo(promotions);
     return {
-      id: `${nodeId}-p${idx}`,
+      id: productId,
       name: `${node.label} Style ${idx + 1}`,
-      sku: `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
+      sku: skuPrefix,
       price: basePrice,
       originalPrice: idx % 5 === 0 ? Math.round(basePrice * 1.3) : undefined,
       specialPrice,
-      finalPrice,
-      promotionLabel: promo?.label,
-      promotionInfo: promo,
+      finalPrice: specialPrice ?? basePrice,
+      promotionLabel: legacyPromo?.label,
+      promotionInfo: legacyPromo,
+      promotions,
       imageUrl: images[idx % images.length],
       badges: badge ? [badge] : undefined,
       brand,
@@ -934,14 +1076,7 @@ export function getAllProductsForNode(nodeId: string): CatalogProduct[] {
       casePackQty: idx % 5 === 0 ? 6 : undefined,
       attributes: { brand, category: node.label },
       variantAttributes: variantAttrPools[idx % variantAttrPools.length],
-      variants: generateVariants(
-        `${nodeId}-p${idx}`,
-        `${node.slug.toUpperCase().slice(0, 3)}-FT26-${String(100 + idx).padStart(3, "0")}`,
-        basePrice,
-        variantAttrPools[idx % variantAttrPools.length],
-        promo,
-        idx,
-      ),
+      variants,
       galleryImages: [
         images[idx % images.length],
         images[(idx + 1) % images.length],

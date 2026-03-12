@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { App as AntApp } from "antd";
 import { AuthProvider } from "./context/AuthContext";
 import { OrderProvider } from "./context/OrderContext";
+import { PromotionProvider } from "./context/PromotionContext";
 import { OrderHistoryProvider } from "./context/OrderHistoryContext";
 import AuthGate from "./components/auth/AuthGate";
 import ScrollToTop from "./components/layout/ScrollToTop";
@@ -45,6 +46,7 @@ export default function App() {
         <ToastProvider>
         <OrderHistoryProvider>
         <OrderProvider>
+        <PromotionProvider>
           <BrowserRouter>
           <ScrollToTop />
           <Layout>
@@ -83,6 +85,7 @@ export default function App() {
             </Routes>
           </Layout>
           </BrowserRouter>
+        </PromotionProvider>
         </OrderProvider>
         </OrderHistoryProvider>
         </ToastProvider>
