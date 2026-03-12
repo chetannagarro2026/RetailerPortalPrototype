@@ -1,7 +1,8 @@
+import { TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
-import { resolveProductPricing, getEffectiveTierPricing } from "../../utils/pricing";
+import { resolveProductPricing, getEffectiveTierPricing, countProductPromotions } from "../../utils/pricing";
 
 interface PDPHeaderProps {
   product: CatalogProduct;
@@ -49,6 +50,19 @@ export default function PDPHeader({ product }: PDPHeaderProps) {
         SKU: {product.sku}
       </p>
 
+
+      {/* Promotions Available Badge */}
+      {isAuthenticated && countProductPromotions(product) > 0 && (
+        <div className="mb-3">
+          <span
+            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full cursor-default"
+            style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
+          >
+            <TagOutlined className="text-[11px]" />
+            {countProductPromotions(product)} {countProductPromotions(product) === 1 ? "Promotion" : "Promotions"} Available
+          </span>
+        </div>
+      )}
 
       {/* Pricing */}
       <PdpPricingBlock

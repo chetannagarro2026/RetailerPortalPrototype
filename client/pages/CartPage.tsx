@@ -6,6 +6,7 @@ import { useOrder, type OrderLineItem } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
+import CartPromotionsSection from "../components/cart/CartPromotionsSection";
 
 export default function CartPage() {
   const config = activeBrandConfig;
@@ -77,8 +78,11 @@ export default function CartPage() {
           />
         </div>
 
-        {/* Right: Order + Credit Summary */}
+        {/* Right: Cart Promotions + Order + Credit Summary */}
         <div className="space-y-5">
+          {/* Cart Promotions */}
+          <CartPromotionsSection />
+
           {/* Order Summary */}
           <div
             className="rounded-xl p-5"
@@ -249,8 +253,11 @@ function CartLineItem({
           >
             {item.productName}
             {isFree && (
-              <span className="text-[10px] ml-1.5 font-semibold" style={{ color: "#16A34A" }}>
-                (Promo – Free Item)
+              <span
+                className="text-[10px] ml-1.5 font-semibold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: "#F0FDF4", color: "#16A34A", border: "1px solid #BBF7D0" }}
+              >
+                Free Item
               </span>
             )}
           </Link>

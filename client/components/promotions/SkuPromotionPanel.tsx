@@ -1,4 +1,4 @@
-import { CloseOutlined, CheckCircleFilled, TagOutlined } from "@ant-design/icons";
+import { CloseOutlined, CheckCircleFilled, TagOutlined, StarFilled } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant, PromotionInfo } from "../../data/catalogData";
 import { usePromotions, getVariantPromotions } from "../../context/PromotionContext";
@@ -9,12 +9,40 @@ interface SkuPromotionPanelProps {
   onClose: () => void;
 }
 
+/** Compute per-unit savings for a promotion */
+function computePromoSavings(promo: PromotionInfo, basePrice: number): number {
+  if (promo.type === "discount" && promo.discountPercent) {
+    return Math.round(basePrice * (promo.discountPercent / 100) * 100) / 100;
+  }
+  if ((promo.type === "bogo" || promo.type === "free-goods") && promo.freeQty && promo.qualifyingQty) {
+    const effectiveDiscount = promo.freeQty / (promo.qualifyingQty + promo.freeQty);
+    return Math.round(basePrice * effectiveDiscount * 100) / 100;
+  }
+  return 0;
+}
+
+/** Find the promotion index with highest savings */
+function findRecommendedIndex(promotions: PromotionInfo[], basePrice: number): number {
+  if (promotions.length === 0) return -1;
+  let bestIdx = 0;
+  let bestSavings = computePromoSavings(promotions[0], basePrice);
+  for (let i = 1; i < promotions.length; i++) {
+    const s = computePromoSavings(promotions[i], basePrice);
+    if (s > bestSavings) {
+      bestSavings = s;
+      bestIdx = i;
+    }
+  }
+  return bestSavings > 0 ? bestIdx : -1;
+}
+
 export default function SkuPromotionPanel({ product, variant, onClose }: SkuPromotionPanelProps) {
   const config = activeBrandConfig;
   const { getAppliedPromotion, applyPromotion, removePromotion } = usePromotions();
   const promotions = getVariantPromotions(variant.id, product);
   const appliedPromo = getAppliedPromotion(variant.id);
   const basePrice = variant.specialPrice ?? variant.price;
+  const recommendedIdx = findRecommendedIndex(promotions, basePrice);
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: "#fff" }}>
@@ -61,14 +89,16 @@ export default function SkuPromotionPanel({ product, variant, onClose }: SkuProm
 
       {/* Promotion Cards */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-        {promotions.map((promo) => {
+        {promotions.map((promo, idx) => {
           const isApplied = appliedPromo?.id === promo.id;
+          const isRecommended = idx === recommendedIdx;
           return (
             <SkuPromoCard
               key={promo.id}
               promo={promo}
               basePrice={basePrice}
               isApplied={isApplied}
+              isRecommended={isRecommended}
               onApply={() => applyPromotion(variant.id, promo)}
               onRemove={() => removePromotion(variant.id)}
             />
@@ -88,12 +118,14 @@ function SkuPromoCard({
   promo,
   basePrice,
   isApplied,
+  isRecommended,
   onApply,
   onRemove,
 }: {
   promo: PromotionInfo;
   basePrice: number;
   isApplied: boolean;
+  isRecommended: boolean;
   onApply: () => void;
   onRemove: () => void;
 }) {
@@ -109,22 +141,34 @@ function SkuPromoCard({
     savingsText = `Effective discount ~${effectiveDiscount}%`;
   }
 
+  // Applied = orange border, available = default
+  const appliedBorderColor = "#EA580C";
+
   return (
     <div
       className="rounded-lg p-4 transition-colors"
       style={{
-        border: isApplied ? `2px solid ${config.primaryColor}` : `1px solid ${config.borderColor}`,
-        backgroundColor: isApplied ? "#F0F4FF" : "#fff",
+        border: isApplied ? `2px solid ${appliedBorderColor}` : `1px solid ${config.borderColor}`,
+        backgroundColor: isApplied ? "#FFF7ED" : "#fff",
       }}
     >
-      {/* Title */}
-      <div className="flex items-center gap-2 mb-1.5">
-        <TagOutlined className="text-xs" style={{ color: "#4338CA" }} />
+      {/* Title row */}
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <TagOutlined className="text-xs" style={{ color: isApplied ? "#EA580C" : "#4338CA" }} />
         <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
           {promo.label}
         </span>
+        {isRecommended && !isApplied && (
+          <span
+            className="inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ backgroundColor: "#EFF6FF", color: "#2563EB" }}
+          >
+            <StarFilled className="text-[8px]" />
+            Recommended
+          </span>
+        )}
         {isApplied && (
-          <CheckCircleFilled className="text-xs" style={{ color: "#16A34A" }} />
+          <CheckCircleFilled className="text-xs" style={{ color: "#EA580C" }} />
         )}
       </div>
 

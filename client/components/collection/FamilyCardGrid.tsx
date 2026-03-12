@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Pagination } from "antd";
+import { TagOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
-import { getFinalPriceRange } from "../../utils/pricing";
+import { getFinalPriceRange, countProductPromotions, getProductPromotionLabels } from "../../utils/pricing";
 
 const PAGE_SIZE = 20;
 
@@ -112,13 +114,29 @@ function FamilyCard({ product }: { product: CatalogProduct }) {
           <p className="text-sm font-semibold mb-0" style={{ color: config.primaryColor }}>
             {meta.priceLabel}
           </p>
-          {isAuthenticated && meta.hasOffers && (
-            <span
-              className="inline-block text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
+          {isAuthenticated && meta.promoCount > 0 && (
+            <Tooltip
+              title={
+                <div>
+                  <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
+                  {meta.promoLabels.map((label: string, i: number) => (
+                    <div key={i} className="text-[11px]">&bull; {label}</div>
+                  ))}
+                  {meta.promoCount > 3 && (
+                    <div className="text-[10px] mt-1 opacity-70">+{meta.promoCount - 3} more</div>
+                  )}
+                </div>
+              }
+              placement="bottom"
             >
-              Offers Available
-            </span>
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full cursor-default"
+                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
+              >
+                <TagOutlined className="text-[9px]" />
+                {meta.promoCount} {meta.promoCount === 1 ? "Promotion" : "Promotions"}
+              </span>
+            </Tooltip>
           )}
           {!isAuthenticated && (
             <button
@@ -261,5 +279,8 @@ function computeCardMeta(product: CatalogProduct, isAuthenticated: boolean) {
     aggregatedStatus = product.availabilityStatus;
   }
 
-  return { priceLabel, listPriceLabel, skuCount, attrSummary, aggregatedStatus, hasOffers: range.hasOffers };
+  const promoCount = countProductPromotions(product);
+  const promoLabels = getProductPromotionLabels(product, 3);
+
+  return { priceLabel, listPriceLabel, skuCount, attrSummary, aggregatedStatus, hasOffers: range.hasOffers, promoCount, promoLabels };
 }

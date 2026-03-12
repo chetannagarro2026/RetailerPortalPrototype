@@ -1,12 +1,13 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { InputNumber } from "antd";
-import { ShoppingCartOutlined, AppstoreOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, AppstoreOutlined, TagOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
-import { resolveProductPricing, hasMixedPromotions, getEffectiveTierPricing } from "../../utils/pricing";
+import { resolveProductPricing, hasMixedPromotions, getEffectiveTierPricing, countProductPromotions, getProductPromotionLabels } from "../../utils/pricing";
 import QuickMatrix from "./QuickMatrix";
 
 interface ProductCardProps {
@@ -342,29 +343,15 @@ function PricingBlock({
         )}
       </div>
 
-      {/* Promotion pill OR Special Price label */}
-      {hasPromo ? (
-        <span
-          className="inline-block text-[10px] font-semibold mt-1 px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
-        >
-          {pricing.promotionLabel}
-        </span>
-      ) : (
+      {/* Special Price label */}
+      {pricing.hasSpecialPrice && (
         <span className="block text-[10px] mt-0.5" style={{ color: "#16A34A" }}>
           Special Price
         </span>
       )}
 
-      {/* Mixed SKU scenario */}
-      {mixed && !hasPromo && (
-        <span
-          className="inline-block text-[10px] font-medium mt-1 px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: "#FFF7ED", color: "#9A3412" }}
-        >
-          Offers Available
-        </span>
-      )}
+      {/* Promotions badge with count + tooltip */}
+      <PromotionsBadge product={product} compact={compact} />
 
       {/* Volume pricing (reflects final effective price) */}
       {showTiers && effectiveTiers && effectiveTiers.length > 1 && (
@@ -385,6 +372,46 @@ function PricingBlock({
         </div>
       )}
     </div>
+  );
+}
+
+// ── Shared: Promotions Badge with Tooltip ───────────────────────────
+
+function PromotionsBadge({
+  product,
+  compact,
+}: {
+  product: CatalogProduct;
+  compact?: boolean;
+}) {
+  const { isAuthenticated } = useAuth();
+  const promoCount = countProductPromotions(product);
+
+  if (!isAuthenticated || promoCount === 0) return null;
+
+  const labels = getProductPromotionLabels(product, 3);
+  const tooltipContent = (
+    <div>
+      <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
+      {labels.map((label, i) => (
+        <div key={i} className="text-[11px]">&bull; {label}</div>
+      ))}
+      {promoCount > 3 && (
+        <div className="text-[10px] mt-1 opacity-70">+{promoCount - 3} more</div>
+      )}
+    </div>
+  );
+
+  return (
+    <Tooltip title={tooltipContent} placement="bottom">
+      <span
+        className={`inline-flex items-center gap-1 ${compact ? "text-[9px]" : "text-[10px]"} font-semibold mt-1 px-2 py-0.5 rounded-full cursor-default`}
+        style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
+      >
+        <TagOutlined className="text-[9px]" />
+        {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+      </span>
+    </Tooltip>
   );
 }
 

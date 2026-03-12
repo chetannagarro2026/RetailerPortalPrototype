@@ -20,7 +20,7 @@ function fmt(val: number): string {
 function formatDiscountLabel(item: InvoiceLineItem): string {
   if (!item.discount) return "";
   if (item.discount.type === "percentage") return `${item.discount.value}%`;
-  if (item.discount.type === "volume") return item.discount.label || "Volume Offer";
+  if (item.discount.type === "volume") return item.discount.label || "Volume Promotion";
   return `–${fmt(item.discount.value)}`;
 }
 

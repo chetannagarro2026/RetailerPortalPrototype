@@ -599,7 +599,7 @@ const allPromotions: PromotionInfo[] = [
     id: "promo-20off", label: "20% OFF", description: "Get 20% off on eligible SKUs",
     type: "discount", discountPercent: 20, minQty: 10,
     validFrom: "2026-03-01", validTo: "2026-07-31", scope: "sku",
-    rules: ["Minimum Quantity: 10", "Limited time offer"],
+    rules: ["Minimum Quantity: 10", "Limited time promotion"],
   },
   {
     id: "promo-b10g2", label: "Buy 10 Get 2 Free", description: "Purchase 10 units and receive 2 additional units free",

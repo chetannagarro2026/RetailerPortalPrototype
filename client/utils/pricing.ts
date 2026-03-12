@@ -134,3 +134,13 @@ export function getEffectiveTierPricing(
 export function formatCurrency(val: number): string {
   return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+/** Count total promotions available for a product family */
+export function countProductPromotions(product: CatalogProduct): number {
+  return (product.promotions || []).length;
+}
+
+/** Get up to N promotion labels for tooltip display */
+export function getProductPromotionLabels(product: CatalogProduct, max = 3): string[] {
+  return (product.promotions || []).slice(0, max).map((p) => p.label);
+}

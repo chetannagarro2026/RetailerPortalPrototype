@@ -277,7 +277,7 @@ function OfferDetailsSection({ product, variant }: { product: CatalogProduct; va
         className="w-full flex items-center justify-between px-5 py-3.5 cursor-pointer bg-transparent border-none text-left"
         style={{ color: config.primaryColor }}
       >
-        <span className="text-sm font-semibold">View Offer Details</span>
+        <span className="text-sm font-semibold">View Promotion Details</span>
         {expanded
           ? <DownOutlined className="text-[10px]" style={{ color: config.secondaryColor }} />
           : <RightOutlined className="text-[10px]" style={{ color: config.secondaryColor }} />}
@@ -285,7 +285,7 @@ function OfferDetailsSection({ product, variant }: { product: CatalogProduct; va
 
       {expanded && (
         <div className="px-5 pb-4 space-y-2.5">
-          <DetailRow label="Offer Type" value={promoInfo.label} />
+          <DetailRow label="Promotion Type" value={promoInfo.label} />
           {promoInfo.minQty !== undefined && promoInfo.minQty > 1 && (
             <DetailRow label="Minimum Quantity" value={`${promoInfo.minQty} units`} />
           )}

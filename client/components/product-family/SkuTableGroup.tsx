@@ -298,15 +298,18 @@ function SkuPromoBadgeCell({
         className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer transition-colors"
         style={{
           border: appliedPromo
-            ? `1.5px solid #16A34A`
+            ? `1.5px solid #EA580C`
             : `1px solid ${config.borderColor}`,
-          backgroundColor: appliedPromo ? "#F0FDF4" : "#F0F4FF",
-          color: appliedPromo ? "#16A34A" : "#4338CA",
+          backgroundColor: appliedPromo ? "#FFF7ED" : "#F0FDF4",
+          color: appliedPromo ? "#EA580C" : "#16A34A",
         }}
         title={appliedPromo ? `Applied: ${appliedPromo.label}` : `${promotions.length} available`}
       >
         <TagOutlined className="text-[9px]" />
-        {appliedPromo ? appliedPromo.label : promotions.length}
+        {appliedPromo
+          ? <>{appliedPromo.label} Applied <span className="text-[8px] ml-0.5">&#9662;</span></>
+          : <>{promotions.length} {promotions.length === 1 ? "Promotion" : "Promotions"} <span className="text-[8px] ml-0.5">&#9662;</span></>
+        }
       </button>
     </td>
   );

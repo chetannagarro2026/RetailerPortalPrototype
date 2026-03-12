@@ -7,7 +7,7 @@ export type DiscountType = "percentage" | "fixed" | "volume";
 export interface LineDiscount {
   type: DiscountType;
   value: number; // percentage (e.g. 10) or fixed amount (e.g. 500)
-  label?: string; // e.g. "Volume Offer Applied"
+  label?: string; // e.g. "Volume Promotion Applied"
 }
 
 export interface InvoiceLineItem {
@@ -228,7 +228,7 @@ export const INVOICES: Invoice[] = [
     orderDiscount: { type: "fixed", value: 1000, label: "Loyalty Rebate" },
     items: [
       { id: "i7", productName: "Cashmere Overcoat – Camel", sku: "COT-CML-L", quantity: 15, unitPrice: 1200, taxRate: 0.1 },
-      { id: "i8", productName: "Leather Belt – Brown", sku: "BLT-BRN-M", quantity: 100, unitPrice: 65, taxRate: 0.1, discount: { type: "volume", value: 650, label: "Volume Offer Applied" } },
+      { id: "i8", productName: "Leather Belt – Brown", sku: "BLT-BRN-M", quantity: 100, unitPrice: 65, taxRate: 0.1, discount: { type: "volume", value: 650, label: "Volume Promotion Applied" } },
       { id: "i9", productName: "Silk Tie – Burgundy", sku: "TIE-BRG-OS", quantity: 50, unitPrice: 75, taxRate: 0.1 },
     ],
     payments: [

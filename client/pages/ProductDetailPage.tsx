@@ -212,24 +212,32 @@ export default function ProductDetailPage() {
               />
             </div>
 
-            {/* Right: Promotion Selection Panel (slide-in) */}
+            {/* Right: Fixed Promotion Selection Panel */}
             {showPromoPanel && (
-              <aside
-                className="shrink-0 sticky self-start overflow-y-auto rounded-xl"
-                style={{
-                  width: 320,
-                  top: "calc(var(--header-height) + var(--nav-height) + 24px)",
-                  maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
-                  border: `1px solid ${config.borderColor}`,
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-                }}
-              >
-                <SkuPromotionPanel
-                  product={product}
-                  variant={promoPanelVariant!}
-                  onClose={handleClosePromoPanel}
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 z-40"
+                  style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
+                  onClick={handleClosePromoPanel}
                 />
-              </aside>
+                {/* Panel */}
+                <aside
+                  className="fixed top-0 right-0 z-50 overflow-y-auto"
+                  style={{
+                    width: 420,
+                    height: "100vh",
+                    borderLeft: `1px solid ${config.borderColor}`,
+                    boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
+                  }}
+                >
+                  <SkuPromotionPanel
+                    product={product}
+                    variant={promoPanelVariant!}
+                    onClose={handleClosePromoPanel}
+                  />
+                </aside>
+              </>
             )}
           </div>
         </div>

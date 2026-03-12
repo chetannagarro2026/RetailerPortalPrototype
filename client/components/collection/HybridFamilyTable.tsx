@@ -5,11 +5,13 @@ import {
   RightOutlined,
   DownOutlined,
   ShoppingCartOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
-import { getFinalPriceRange } from "../../utils/pricing";
+import { getFinalPriceRange, countProductPromotions, getProductPromotionLabels } from "../../utils/pricing";
 import FamilyRowExpansion from "./FamilyRowExpansion";
 import QuickAddPanel from "./QuickAddPanel";
 
@@ -262,7 +264,7 @@ function FamilyRow({
   const familyLink = `/product/${product.id}`;
 
   const { isAuthenticated, showSignInModal } = useAuth();
-  const { priceRange, listPriceRange, hasOffers, skuCount, attrSummary } = useMemo(
+  const { priceRange, listPriceRange, hasOffers, skuCount, attrSummary, promoCount, promoLabels } = useMemo(
     () => computeFamilyMeta(product, isAuthenticated),
     [product, isAuthenticated],
   );
@@ -359,13 +361,29 @@ function FamilyRow({
             <div className="line-through" style={{ color: config.secondaryColor }}>{listPriceRange}</div>
           )}
           <div className="font-medium" style={{ color: config.primaryColor }}>{priceRange}</div>
-          {isAuthenticated && hasOffers && (
-            <span
-              className="inline-block text-[9px] font-semibold mt-0.5 px-1.5 py-0.5 rounded-full"
-              style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
+          {isAuthenticated && promoCount > 0 && (
+            <Tooltip
+              title={
+                <div>
+                  <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
+                  {promoLabels.map((label: string, i: number) => (
+                    <div key={i} className="text-[11px]">&bull; {label}</div>
+                  ))}
+                  {promoCount > 3 && (
+                    <div className="text-[10px] mt-1 opacity-70">+{promoCount - 3} more</div>
+                  )}
+                </div>
+              }
+              placement="bottom"
             >
-              Offers Available
-            </span>
+              <span
+                className="inline-flex items-center gap-1 text-[9px] font-semibold mt-0.5 px-1.5 py-0.5 rounded-full cursor-default"
+                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
+              >
+                <TagOutlined className="text-[8px]" />
+                {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+              </span>
+            </Tooltip>
           )}
           {!isAuthenticated && (
             <button
@@ -485,5 +503,8 @@ function computeFamilyMeta(product: CatalogProduct, isAuthenticated: boolean) {
   }
   const attrSummary = parts.length > 0 ? parts.join(" · ") : "—";
 
-  return { priceRange, listPriceRange, hasOffers: range.hasOffers, skuCount, attrSummary };
+  const promoCount = countProductPromotions(product);
+  const promoLabels = getProductPromotionLabels(product, 3);
+
+  return { priceRange, listPriceRange, hasOffers: range.hasOffers, skuCount, attrSummary, promoCount, promoLabels };
 }
