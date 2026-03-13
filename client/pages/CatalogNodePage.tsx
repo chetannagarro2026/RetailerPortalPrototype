@@ -116,7 +116,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
   const isBrandMode = modeInfo.mode === "brand";
 
   return (
-    <div className="w-full px-6 py-8">
+    <div className="w-full px-6 py-4">
       {/* Breadcrumb */}
       <GlobalBreadcrumb modeInfo={modeInfo} />
 
@@ -145,7 +145,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         </div>
       )}
 
-      <div className="flex gap-6">
+      <div className="flex" style={{ gap: 24 }}>
         {/* Left Sidebar: Full tree + Filters */}
         <aside
           className="shrink-0 sticky self-start overflow-y-auto pr-4"
@@ -325,7 +325,7 @@ function GlobalBreadcrumb({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         ];
 
   return (
-    <nav className="flex items-center gap-1.5 flex-wrap mb-4">
+    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 16 }}>
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (
@@ -452,10 +452,10 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
   }, []);
 
   return (
-    <div className="w-full px-6 py-8">
+    <div className="w-full px-6 py-4">
       <CatalogBreadcrumb node={node} />
 
-      <div className="flex gap-6">
+      <div className="flex" style={{ gap: 24 }}>
         {/* Left Sidebar: Tree + Filters */}
         {treeRoot && (
           <aside
@@ -584,7 +584,7 @@ export default function CatalogNodePage() {
 
   if (isSubcategoryLanding) {
     return (
-      <div className="w-full px-6 py-8">
+      <div className="w-full px-6 py-4">
         {node.level > 0 && <CatalogBreadcrumb node={node} />}
         <div className="mb-6">
           <h1
