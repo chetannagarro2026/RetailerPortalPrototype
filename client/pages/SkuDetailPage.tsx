@@ -355,16 +355,19 @@ function SkuOrderSection({
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <InputNumber
-          min={minQty}
-          step={step}
-          value={qty}
-          onChange={handleQtyChange}
-          disabled={disabled}
-          className="sku-qty-input"
-          style={{ width: 100, height: 44 }}
-        />
+      <div className="flex items-end gap-3">
+        <div>
+          <label className="block text-[10px] font-semibold mb-1" style={{ color: config.secondaryColor }}>QTY</label>
+          <InputNumber
+            min={minQty}
+            step={step}
+            value={qty}
+            onChange={handleQtyChange}
+            disabled={disabled}
+            className="sku-qty-input"
+            style={{ width: 100, height: 44 }}
+          />
+        </div>
         <Button
           type="primary"
           size="large"
