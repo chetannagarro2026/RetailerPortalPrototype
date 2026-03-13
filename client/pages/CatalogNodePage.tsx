@@ -116,7 +116,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
   const isBrandMode = modeInfo.mode === "brand";
 
   return (
-    <div className="w-full px-4 py-4">
+    <div className="w-full px-4 pt-2 pb-4">
       {/* Breadcrumb — full width, aligned with sidebar left edge */}
       <GlobalBreadcrumb modeInfo={modeInfo} />
 
@@ -125,7 +125,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         <div>
           <h1
             className="text-lg font-semibold"
-            style={{ color: config.primaryColor, marginBottom: 6 }}
+            style={{ color: config.primaryColor, marginBottom: 4 }}
           >
             {isBrandMode && modeInfo.brandName ? modeInfo.brandName : title}
           </h1>
@@ -301,7 +301,7 @@ function GlobalBreadcrumb({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         ];
 
   return (
-    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 8 }}>
+    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 4 }}>
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (
