@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
-import { ShoppingCartOutlined, DownOutlined, RightOutlined, TagOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, TagOutlined } from "@ant-design/icons";
 import Tag, { DropdownIndicator } from "../components/ui/Tag";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
@@ -62,7 +62,6 @@ export default function SkuDetailPage() {
         <div>
           <SkuHeader product={product} variant={variant} onOpenPromoPanel={handleOpenPromoPanel} />
           <SkuOrderSection product={product} variant={variant} addItem={addItem} />
-          <OfferDetailsSection product={product} variant={variant} />
           <FulfillmentSection variant={variant} />
           {product.specifications && product.specifications.length > 0 && (
             <SkuSpecifications specifications={product.specifications} />
@@ -294,60 +293,6 @@ function SkuHeader({ product, variant, onOpenPromoPanel }: { product: CatalogPro
           {product.description}
         </p>
       )}
-    </div>
-  );
-}
-
-// ── Offer Details Section ───────────────────────────────────────────
-
-function OfferDetailsSection({ product, variant }: { product: CatalogProduct; variant: ProductVariant }) {
-  const config = activeBrandConfig;
-  const { isAuthenticated } = useAuth();
-  const [expanded, setExpanded] = useState(false);
-
-  const promoInfo = variant.promotionInfo ?? product.promotionInfo;
-  if (!isAuthenticated || !promoInfo) return null;
-
-  return (
-    <div
-      className="rounded-xl mb-5 overflow-hidden"
-      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
-    >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-3.5 cursor-pointer bg-transparent border-none text-left"
-        style={{ color: config.primaryColor }}
-      >
-        <span className="text-sm font-semibold">View Promotion Details</span>
-        {expanded
-          ? <DownOutlined className="text-[10px]" style={{ color: config.secondaryColor }} />
-          : <RightOutlined className="text-[10px]" style={{ color: config.secondaryColor }} />}
-      </button>
-
-      {expanded && (
-        <div className="px-5 pb-4 space-y-2.5">
-          <DetailRow label="Promotion Type" value={promoInfo.label} />
-          {promoInfo.minQty !== undefined && promoInfo.minQty > 1 && (
-            <DetailRow label="Minimum Quantity" value={`${promoInfo.minQty} units`} />
-          )}
-          {promoInfo.validFrom && promoInfo.validTo && (
-            <DetailRow label="Validity" value={`${promoInfo.validFrom} – ${promoInfo.validTo}`} />
-          )}
-          {promoInfo.scope && (
-            <DetailRow label="Scope" value={promoInfo.scope === "sku" ? "SKU Level" : "Product Family"} />
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  const config = activeBrandConfig;
-  return (
-    <div className="flex items-center text-xs" style={{ borderTop: `1px solid ${config.borderColor}`, paddingTop: 8 }}>
-      <span className="w-36 shrink-0 font-medium" style={{ color: config.secondaryColor }}>{label}</span>
-      <span style={{ color: config.primaryColor }}>{value}</span>
     </div>
   );
 }
