@@ -356,46 +356,48 @@ function FamilyRow({
         {/* Price Range */}
         <td
           className="px-2 py-2 text-[11px] whitespace-nowrap"
-          style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 2, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
+          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
-          {isAuthenticated && listPriceRange && (
-            <div className="line-through" style={{ color: config.secondaryColor }}>{listPriceRange}</div>
-          )}
-          <div className="font-medium" style={{ color: config.primaryColor, marginBottom: 4 }}>{priceRange}</div>
-          {isAuthenticated && promoCount > 0 && (
-            <Tooltip
-              title={
-                <div>
-                  <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
-                  {promoLabels.map((label: string, i: number) => (
-                    <div key={i} className="text-[11px]">&bull; {label}</div>
-                  ))}
-                  {promoCount > 3 && (
-                    <div className="text-[10px] mt-1 opacity-70">+{promoCount - 3} more</div>
-                  )}
-                </div>
-              }
-              placement="bottom"
-            >
-              <span className="mt-0.5">
-                <Tag variant="promotion" size="compact" icon={<TagOutlined style={{ fontSize: 10, fontWeight: 800 }} />}>
-                  {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
-                </Tag>
-              </span>
-            </Tooltip>
-          )}
-          {!isAuthenticated && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                showSignInModal("Sign in to view Special Price and promotions.");
-              }}
-              className="block text-[9px] mt-0.5 cursor-pointer bg-transparent border-none p-0 underline ml-auto"
-              style={{ color: "#2563EB" }}
-            >
-              Login to view Special Price
-            </button>
-          )}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            {isAuthenticated && listPriceRange && (
+              <div className="line-through" style={{ color: config.secondaryColor }}>{listPriceRange}</div>
+            )}
+            <div className="font-medium" style={{ color: config.primaryColor, marginBottom: 4 }}>{priceRange}</div>
+            {isAuthenticated && promoCount > 0 && (
+              <Tooltip
+                title={
+                  <div>
+                    <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
+                    {promoLabels.map((label: string, i: number) => (
+                      <div key={i} className="text-[11px]">&bull; {label}</div>
+                    ))}
+                    {promoCount > 3 && (
+                      <div className="text-[10px] mt-1 opacity-70">+{promoCount - 3} more</div>
+                    )}
+                  </div>
+                }
+                placement="bottom"
+              >
+                <span>
+                  <Tag variant="promotion" size="compact" icon={<TagOutlined style={{ fontSize: 10, fontWeight: 800 }} />}>
+                    {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+                  </Tag>
+                </span>
+              </Tooltip>
+            )}
+            {!isAuthenticated && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  showSignInModal("Sign in to view Special Price and promotions.");
+                }}
+                className="text-[9px] cursor-pointer bg-transparent border-none p-0 underline"
+                style={{ color: "#2563EB" }}
+              >
+                Login to view Special Price
+              </button>
+            )}
+          </div>
         </td>
 
         {/* SKU Count */}
