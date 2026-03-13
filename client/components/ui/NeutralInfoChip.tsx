@@ -26,7 +26,7 @@ export default function NeutralInfoChip({
       className={`inline-flex items-center ${className}`}
       style={{
         height: 16,
-        padding: "0px 8px",
+        padding: "2px 6px",
         borderRadius: 12,
         fontSize: 10,
         fontWeight: 600,
