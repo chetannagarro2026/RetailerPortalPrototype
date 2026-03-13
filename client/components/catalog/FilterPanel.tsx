@@ -38,10 +38,6 @@ export default function FilterPanel({
   return (
     <div
       style={{
-        borderTop: "1px solid #E5E7EB",
-        borderRight: "1px solid #E5E7EB",
-        borderBottom: "1px solid #E5E7EB",
-        borderLeft: "none",
         padding: "16px 16px 24px 16px",
       }}
     >
