@@ -115,7 +115,7 @@ export default function DashboardPage() {
       : [];
 
   return (
-    <div className="max-w-[1440px] mx-auto px-6 py-6">
+    <div className="max-w-[1440px] mx-auto px-4 py-4">
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold m-0 mb-1" style={{ color: config.primaryColor }}>

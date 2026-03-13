@@ -569,7 +569,7 @@ export default function CatalogNodePage() {
 
   if (!node) {
     return (
-      <div className="w-full px-6 py-12 text-center">
+      <div className="w-full px-4 py-4 text-center">
         <h1
           className="text-xl font-semibold mb-2"
           style={{ color: config.primaryColor }}

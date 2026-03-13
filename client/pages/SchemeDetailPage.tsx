@@ -33,7 +33,7 @@ export default function SchemeDetailPage() {
   return (
     <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}>
       {/* Back link */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-4 pt-4 pb-4">
         <button
           onClick={() => navigate("/account/schemes")}
           className="flex items-center gap-2 text-sm font-medium cursor-pointer bg-transparent border-none px-0"
@@ -45,7 +45,7 @@ export default function SchemeDetailPage() {
       </div>
 
       {/* Two-column layout */}
-      <div className="flex gap-6 px-6 pb-6" style={{ minHeight: "calc(100vh - 260px)" }}>
+      <div className="flex gap-6 px-4 pb-4" style={{ minHeight: "calc(100vh - 260px)" }}>
         {/* Left column — 68% */}
         <div style={{ flex: "0 0 68%", minWidth: 0 }} className="flex flex-col gap-6">
           <SchemeOverview scheme={scheme} />

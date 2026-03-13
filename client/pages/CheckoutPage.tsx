@@ -437,7 +437,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-content mx-auto px-6 py-16 text-center">
+      <div className="max-w-content mx-auto px-4 py-4 text-center">
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
           No items to checkout
         </h1>
@@ -503,7 +503,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content mx-auto px-4 py-4">
       <Link
         to="/cart"
         className="text-xs no-underline mb-4 flex items-center gap-1"

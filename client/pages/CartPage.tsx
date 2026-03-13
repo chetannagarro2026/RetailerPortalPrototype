@@ -28,7 +28,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-content mx-auto px-6 py-16 text-center">
+      <div className="max-w-content mx-auto px-4 py-4 text-center">
         <ShoppingOutlined className="text-5xl mb-4" style={{ color: config.secondaryColor }} />
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
           Your cart is empty
@@ -48,7 +48,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content mx-auto px-4 py-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

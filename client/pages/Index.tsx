@@ -9,7 +9,7 @@ export default function Index() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="max-w-content mx-auto px-6 py-8">
+    <div className="max-w-content mx-auto px-4 py-4">
       <Row gutter={[16, 24]}>
         {/* Hero Banner — Full Width */}
         <Col xs={24}>

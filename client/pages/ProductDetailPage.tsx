@@ -150,7 +150,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
+      <div className="max-w-content-wide mx-auto px-4 py-4 text-center">
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
           Product Not Found
         </h1>
@@ -170,7 +170,7 @@ export default function ProductDetailPage() {
   const showProductInfoPanel = isAuthenticated && showProductPromoPanel && product !== null;
 
   return (
-    <div className="max-w-content-wide mx-auto px-6 py-4">
+    <div className="max-w-content-wide mx-auto px-4 py-4">
       {/* Breadcrumb */}
       <Link to="/catalog" className="text-xs no-underline mb-4 block" style={{ color: config.secondaryColor }}>
         &larr; Back to Catalog

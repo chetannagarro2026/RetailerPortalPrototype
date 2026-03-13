@@ -16,7 +16,7 @@ export default function SchemesPage() {
 
   return (
     <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}>
-      <div className="px-6 pt-6 pb-2">
+      <div className="px-4 pt-4 pb-2">
         <h1 className="text-xl font-bold m-0 mb-1" style={{ color: config.primaryColor }}>
           Schemes & Promotions
         </h1>
@@ -44,7 +44,7 @@ export default function SchemesPage() {
         </div>
       </div>
 
-      <div className="px-6 pb-8">
+      <div className="px-4 pb-4">
         {activeTab === "active" && <ActiveSchemesTab />}
         {activeTab === "achievements" && <AchievementsTab />}
       </div>

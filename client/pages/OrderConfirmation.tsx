@@ -36,7 +36,7 @@ export default function OrderConfirmation() {
     "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-12">
+    <div className="max-w-2xl mx-auto px-4 py-4">
       {/* Success Header */}
       <div className="text-center mb-8">
         <CheckCircleFilled className="text-5xl mb-4" style={{ color: "#16A34A" }} />

@@ -108,7 +108,7 @@ export default function TicketDetailPage() {
   return (
     <div style={{ width: "100%", maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}>
       {/* Back link */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-4 pt-4 pb-4">
         <button
           onClick={() => navigate("/account/support")}
           className="flex items-center gap-2 text-sm font-medium cursor-pointer bg-transparent border-none px-0"
@@ -120,7 +120,7 @@ export default function TicketDetailPage() {
       </div>
 
       {/* 2-column workspace */}
-      <div className="flex gap-6 px-6 pb-6" style={{ height: "calc(100vh - 200px)" }}>
+      <div className="flex gap-6 px-4 pb-4" style={{ height: "calc(100vh - 200px)" }}>
         {/* Left column — 70% — Conversation */}
         <div className="flex flex-col" style={{ flex: "0 0 70%", minWidth: 0 }}>
           {/* Subject heading */}

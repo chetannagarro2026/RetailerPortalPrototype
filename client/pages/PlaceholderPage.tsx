@@ -15,7 +15,7 @@ export default function PlaceholderPage() {
     .join(" ");
 
   return (
-    <div className="max-w-content mx-auto px-6 py-16">
+    <div className="max-w-content mx-auto px-4 py-4">
       <div
         className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-24"
         style={{ borderColor: config.borderColor }}

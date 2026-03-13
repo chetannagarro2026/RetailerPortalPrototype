@@ -13,7 +13,7 @@ export default function NotFound() {
   }, [location.pathname]);
 
   return (
-    <div className="max-w-content mx-auto px-6 py-24 flex items-center justify-center">
+    <div className="max-w-content mx-auto px-4 py-4 flex items-center justify-center">
       <Result
         status="404"
         title="Page Not Found"
