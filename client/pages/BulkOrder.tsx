@@ -328,6 +328,7 @@ export default function BulkOrder() {
             paddingRight: 28,
             fontWeight: 600,
             borderRadius: 8,
+            boxShadow: "none",
             backgroundColor: validCount > 0 ? config.primaryColor : undefined,
           }}
         >

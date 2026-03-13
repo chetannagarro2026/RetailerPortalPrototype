@@ -121,6 +121,7 @@ export default function SkuAccordionContent({ product, variant }: SkuAccordionCo
                   backgroundColor: disabled ? undefined : config.primaryColor,
                   borderRadius: 6,
                   fontWeight: 600,
+                  boxShadow: "none",
                 }}
               >
                 Add to Cart

@@ -375,6 +375,7 @@ function SkuOrderSection({
             height: 44,
             fontWeight: 600,
             borderRadius: 8,
+            boxShadow: "none",
             backgroundColor: disabled ? undefined : config.primaryColor,
           }}
         >
