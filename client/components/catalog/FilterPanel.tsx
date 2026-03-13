@@ -166,7 +166,7 @@ function CheckboxFilter({
           />
         </div>
       )}
-      <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+      <div className="space-y-1.5">
         {filtered.map((opt) => (
           <label
             key={opt.value}
