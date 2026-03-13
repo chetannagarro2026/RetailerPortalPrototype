@@ -78,3 +78,16 @@
   transform: translateY(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
+
+/* SKU detail page quantity input — centered value */
+.sku-qty-input .ant-input-number-input-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.sku-qty-input .ant-input-number-input {
+  text-align: center;
+}

@@ -362,6 +362,7 @@ function SkuOrderSection({
           value={qty}
           onChange={handleQtyChange}
           disabled={disabled}
+          className="sku-qty-input"
           style={{ width: 100, height: 44 }}
         />
         <Button
