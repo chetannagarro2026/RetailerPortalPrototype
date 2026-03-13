@@ -102,9 +102,9 @@ export default function Tag({
       className={`inline-flex items-center ${className}`}
       style={{
         height: 24,
-        padding: "4px 10px",
+        padding: "0px 8px",
         borderRadius: isNeutral ? 8 : 16,
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 500,
         gap: 6,
         lineHeight: 1,

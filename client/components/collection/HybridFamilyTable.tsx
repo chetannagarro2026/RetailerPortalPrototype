@@ -378,7 +378,7 @@ function FamilyRow({
               placement="bottom"
             >
               <span className="mt-0.5">
-                <Tag variant="promotion" icon={<TagOutlined />}>
+                <Tag variant="promotion" icon={<TagOutlined style={{ fontSize: 10, fontWeight: 800 }} />}>
                   {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
                 </Tag>
               </span>
