@@ -362,7 +362,7 @@ function SkuOrderSection({
           value={qty}
           onChange={handleQtyChange}
           disabled={disabled}
-          style={{ width: 100 }}
+          style={{ width: 100, height: 44 }}
         />
         <Button
           type="primary"
