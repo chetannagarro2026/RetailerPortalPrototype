@@ -355,13 +355,13 @@ function FamilyRow({
 
         {/* Price Range */}
         <td
-          className="px-2 py-2 text-right text-[11px] whitespace-nowrap"
-          style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
+          className="px-2 py-2 text-[11px] whitespace-nowrap"
+          style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 2, borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
           {isAuthenticated && listPriceRange && (
             <div className="line-through" style={{ color: config.secondaryColor }}>{listPriceRange}</div>
           )}
-          <div className="font-medium" style={{ color: config.primaryColor }}>{priceRange}</div>
+          <div className="font-medium" style={{ color: config.primaryColor, marginBottom: 4 }}>{priceRange}</div>
           {isAuthenticated && promoCount > 0 && (
             <Tooltip
               title={
