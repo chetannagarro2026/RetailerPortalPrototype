@@ -113,7 +113,7 @@ export default function QuickAddPanel({
 
   return (
     <div
-      className="flex flex-col h-full"
+      className="flex flex-col h-full min-h-0"
       style={{ backgroundColor: "#fff" }}
     >
       {/* Header */}
@@ -145,7 +145,7 @@ export default function QuickAddPanel({
       </div>
 
       {/* SKU Table */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto min-h-0">
         <table className="w-full border-collapse text-xs">
           <thead>
             <tr style={{ backgroundColor: config.cardBg }}>
