@@ -109,7 +109,9 @@ export default function HybridFamilyTable({
       ref={containerRef}
       className="flex"
       style={panelOpen ? {
-        height: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+        position: "sticky" as const,
+        top: "calc(var(--header-height) + var(--nav-height) + 16px)",
+        height: "calc(100vh - var(--header-height) - var(--nav-height) - 32px)",
       } : undefined}
     >
       {/* Main table area */}
