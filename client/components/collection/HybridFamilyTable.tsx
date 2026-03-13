@@ -224,7 +224,7 @@ export default function HybridFamilyTable({
             className="shrink-0 sticky self-start flex flex-col shadow-xl rounded-xl overflow-hidden"
             style={{
               top: "calc(var(--header-height) + var(--nav-height) + 16px)",
-              height: "calc(100vh - var(--header-height) - var(--nav-height) - 160px)",
+              height: "calc(100vh - var(--header-height) - var(--nav-height) - 132px)",
               width: panelWidth,
               border: `1px solid ${config.borderColor}`,
               backgroundColor: "#fff",
