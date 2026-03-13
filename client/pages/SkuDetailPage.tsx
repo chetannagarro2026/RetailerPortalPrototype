@@ -201,23 +201,25 @@ function SkuHeader({ product, variant, onOpenPromoPanel }: { product: CatalogPro
             )}
           </div>
 
-          {/* Struck-through list price */}
-          {pricing.hasSpecialPrice && (
-            <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-              ${pricing.listPrice.toFixed(2)}
-            </span>
+          {/* List Price + Savings on same line */}
+          {(pricing.hasSpecialPrice || pricing.savings > 0) && (
+            <div className="flex items-center gap-2 mt-1">
+              {pricing.hasSpecialPrice && (
+                <span className="text-sm line-through" style={{ color: "#6B7280" }}>
+                  ${pricing.listPrice.toFixed(2)}
+                </span>
+              )}
+              {pricing.savings > 0 && (
+                <span className="text-xs font-medium" style={{ color: "#16A34A" }}>
+                  Save {pricing.savingsPercent}%
+                </span>
+              )}
+            </div>
           )}
 
-          {/* Savings */}
-          {pricing.savings > 0 && (
-            <p className="text-xs mt-1" style={{ color: "#16A34A" }}>
-              You Save ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
-            </p>
-          )}
-
-          {/* Promotions Available badge */}
+          {/* Promotions Available badge — below pricing */}
           {promoCount > 0 && (
-            <div className="mt-2">
+            <div style={{ marginTop: 12 }}>
               <Tag
                 variant="promotion"
                 icon={<TagOutlined />}
