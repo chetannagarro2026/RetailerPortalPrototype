@@ -157,7 +157,7 @@ export default function HybridFamilyTable({
                   Key Attributes
                 </th>
                 <th
-                  className="text-right px-2 py-2 font-semibold whitespace-nowrap"
+                  className="text-center px-2 py-2 font-semibold whitespace-nowrap"
                   style={{ color: config.primaryColor, borderBottom: `2px solid ${config.borderColor}` }}
                 >
                   Price Range
