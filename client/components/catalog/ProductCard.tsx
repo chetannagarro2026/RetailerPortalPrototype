@@ -406,7 +406,7 @@ function PromotionsBadge({
   return (
     <Tooltip title={tooltipContent} placement="bottom">
       <span className="mt-1">
-        <Tag variant="promotion" icon={<TagOutlined />}>
+        <Tag variant="promotion" size="compact" icon={<TagOutlined />}>
           {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
         </Tag>
       </span>

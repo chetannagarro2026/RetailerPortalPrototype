@@ -91,7 +91,7 @@ function PromotionCard({ promo, product }: { promo: PromotionInfo; product: Cata
         {eligibleSkus ? (
           <div className="flex flex-wrap gap-1">
             {eligibleSkus.slice(0, 8).map((label, i) => (
-              <Tag key={i} variant="neutral">{label}</Tag>
+              <Tag key={i} variant="neutral" size="compact">{label}</Tag>
             ))}
             {eligibleSkus.length > 8 && (
               <span className="text-[10px] px-2 py-0.5" style={{ color: config.secondaryColor }}>
@@ -141,5 +141,5 @@ const PROMO_TYPE_VARIANT: Record<string, { variant: "discount" | "freeGoods" | "
 
 function PromoTypeBadge({ type }: { type: string }) {
   const cfg = PROMO_TYPE_VARIANT[type] || PROMO_TYPE_VARIANT.discount;
-  return <Tag variant={cfg.variant}>{cfg.label}</Tag>;
+  return <Tag variant={cfg.variant} size="compact">{cfg.label}</Tag>;
 }

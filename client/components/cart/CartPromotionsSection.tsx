@@ -137,7 +137,7 @@ function CartPromoCard({
               Apply
             </button>
           ) : (
-            <Tag variant="neutral">Locked</Tag>
+            <Tag variant="neutral" size="compact">Locked</Tag>
           )}
         </div>
       </div>

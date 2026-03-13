@@ -254,7 +254,7 @@ function CartLineItem({
           >
             {item.productName}
             {isFree && (
-              <Tag variant="freeGoods" className="ml-1.5">Free Item</Tag>
+              <Tag variant="freeGoods" size="compact" className="ml-1.5">Free Item</Tag>
             )}
           </Link>
           <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
@@ -282,7 +282,7 @@ function CartLineItem({
                 </span>
               )}
               {item.promotionLabel && (
-                <Tag variant="applied">{item.promotionLabel} applied</Tag>
+                <Tag variant="applied" size="compact">{item.promotionLabel} applied</Tag>
               )}
             </div>
           )}

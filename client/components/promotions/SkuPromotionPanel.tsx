@@ -160,7 +160,7 @@ function SkuPromoCard({
           {promo.label}
         </span>
         {isRecommended && !isApplied && (
-          <Tag variant="recommended" icon={<StarFilled />}>
+          <Tag variant="recommended" size="compact" icon={<StarFilled />}>
             Recommended
           </Tag>
         )}

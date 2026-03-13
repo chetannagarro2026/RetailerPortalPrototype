@@ -3,11 +3,12 @@ import type { ReactNode, CSSProperties, MouseEventHandler } from "react";
 /**
  * Standardized Tag / Chip component system.
  *
- * All tags use:
- *   height  24px  |  padding  4px 10px  |  border-radius  16px
- *   font-size 12px  |  font-weight 500  |  gap 6px
- *   1px semantic border (always visible)
- *   icon size 12px, vertically centered
+ * Two size variants:
+ *   Standard (24px) — page headers, hero sections
+ *   Compact  (20px) — tables, dropdowns, dense layouts
+ *
+ * Shared: 10px font, 500 weight, 8px h-padding, 16px border-radius,
+ *         1px semantic border (always visible)
  */
 
 // ── Color Palette ───────────────────────────────────────────────────
@@ -61,12 +62,21 @@ export type TagVariant = keyof typeof TAG_STYLES;
 
 // ── Props ───────────────────────────────────────────────────────────
 
+export type TagSize = "standard" | "compact";
+
+const SIZE_CONFIG = {
+  standard: { height: 24, iconSize: 12, gap: 6 },
+  compact:  { height: 20, iconSize: 10, gap: 4 },
+} as const;
+
 export interface TagProps {
   /** Visual variant */
   variant: TagVariant;
+  /** Size variant — standard (24px) for headers, compact (20px) for tables/dense layouts. Defaults to "standard". */
+  size?: TagSize;
   /** Tag content (text label) */
   children: ReactNode;
-  /** Optional leading icon (rendered at 12px) */
+  /** Optional leading icon */
   icon?: ReactNode;
   /** Optional trailing element (e.g. dropdown indicator) */
   suffix?: ReactNode;
@@ -84,6 +94,7 @@ export interface TagProps {
 
 export default function Tag({
   variant,
+  size = "standard",
   children,
   icon,
   suffix,
@@ -94,6 +105,7 @@ export default function Tag({
 }: TagProps) {
   const colors = TAG_STYLES[variant];
   const isNeutral = variant === "neutral";
+  const s = SIZE_CONFIG[size];
 
   return (
     <span
@@ -101,12 +113,12 @@ export default function Tag({
       title={title}
       className={`inline-flex items-center ${className}`}
       style={{
-        height: 24,
+        height: s.height,
         padding: "0px 8px",
         borderRadius: isNeutral ? 8 : 16,
         fontSize: 10,
         fontWeight: 500,
-        gap: 6,
+        gap: s.gap,
         lineHeight: 1,
         whiteSpace: "nowrap",
         cursor: onClick ? "pointer" : "default",
@@ -118,13 +130,13 @@ export default function Tag({
       }}
     >
       {icon && (
-        <span style={{ fontSize: 12, lineHeight: 0, display: "inline-flex", alignItems: "center", color: "inherit" }}>
+        <span style={{ fontSize: s.iconSize, lineHeight: 0, display: "inline-flex", alignItems: "center", color: "inherit" }}>
           {icon}
         </span>
       )}
       {children}
       {suffix && (
-        <span style={{ fontSize: 10, lineHeight: 0, display: "inline-flex", alignItems: "center", color: "inherit" }}>
+        <span style={{ fontSize: s.iconSize, lineHeight: 0, display: "inline-flex", alignItems: "center", color: "inherit" }}>
           {suffix}
         </span>
       )}

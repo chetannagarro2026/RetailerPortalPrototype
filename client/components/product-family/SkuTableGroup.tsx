@@ -399,6 +399,7 @@ function SkuPromoBadgeCell({
     <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
       <Tag
         variant={appliedPromo ? "applied" : "promotion"}
+        size="compact"
         icon={<TagOutlined />}
         suffix={<DropdownIndicator />}
         onClick={(e) => {

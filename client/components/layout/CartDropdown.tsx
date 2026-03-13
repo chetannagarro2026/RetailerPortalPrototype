@@ -75,7 +75,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {item.productName}
-                        {isFree && <Tag variant="freeGoods" className="ml-1.5">Free Item</Tag>}
+                        {isFree && <Tag variant="freeGoods" size="compact" className="ml-1.5">Free Item</Tag>}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
                         {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
@@ -91,7 +91,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                           )}
                           <span className="text-xs text-gray-500">${item.unitPrice.toFixed(2)} / unit</span>
                           {item.promotionLabel && (
-                            <Tag variant="applied" className="ml-1.5">{item.promotionLabel} applied</Tag>
+                            <Tag variant="applied" size="compact" className="ml-1.5">{item.promotionLabel} applied</Tag>
                           )}
                         </div>
                       )}

@@ -131,7 +131,7 @@ function FamilyCard({ product }: { product: CatalogProduct }) {
               placement="bottom"
             >
               <span className="mt-0.5">
-                <Tag variant="promotion" icon={<TagOutlined />}>
+                <Tag variant="promotion" size="compact" icon={<TagOutlined />}>
                   {meta.promoCount} {meta.promoCount === 1 ? "Promotion" : "Promotions"}
                 </Tag>
               </span>
