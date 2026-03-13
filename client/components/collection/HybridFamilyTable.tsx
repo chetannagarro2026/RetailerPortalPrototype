@@ -358,7 +358,7 @@ function FamilyRow({
           className="px-2 py-2 text-[11px] whitespace-nowrap"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
-          <div className="flex flex-col items-center justify-center gap-0.5">
+          <div className="text-center">
             {isAuthenticated && listPriceRange && (
               <div className="line-through" style={{ color: config.secondaryColor }}>{listPriceRange}</div>
             )}

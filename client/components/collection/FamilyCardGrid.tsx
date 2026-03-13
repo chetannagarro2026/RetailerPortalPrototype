@@ -106,13 +106,13 @@ function FamilyCard({ product }: { product: CatalogProduct }) {
         </p>
 
         {/* Price Range */}
-        <div className="mb-1.5">
+        <div className="mb-1.5 flex flex-col gap-0.5">
           {isAuthenticated && meta.listPriceLabel && (
             <p className="text-[10px] line-through mb-0" style={{ color: config.secondaryColor }}>
               {meta.listPriceLabel}
             </p>
           )}
-          <p className="text-sm font-semibold mb-0" style={{ color: config.primaryColor }}>
+          <p className="text-sm font-semibold" style={{ color: config.primaryColor, marginBottom: 2 }}>
             {meta.priceLabel}
           </p>
           {isAuthenticated && meta.promoCount > 0 && (
