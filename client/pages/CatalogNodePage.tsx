@@ -1,16 +1,14 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import {
   getNodeBySlugPath,
   getChildren,
   getAncestors,
-  getAllProductsForNode,
   getAllCatalogProducts,
   getAllBrands,
 } from "../data/catalogData";
 import { useCatalogState, type SortKey, type ActiveFilters } from "../hooks/useCatalogState";
-import { filterAttributeRegistry } from "../data/catalogData";
 import CatalogBreadcrumb from "../components/catalog/CatalogBreadcrumb";
 import SubcategoryCardGrid from "../components/catalog/SubcategoryCardGrid";
 import CategoryTree from "../components/catalog/CategoryTree";
@@ -18,7 +16,6 @@ import FilterPanel from "../components/catalog/FilterPanel";
 import ActiveFilterChips from "../components/catalog/ActiveFilterChips";
 import FamilyCardGrid from "../components/collection/FamilyCardGrid";
 import { type CollectionViewMode } from "../components/collection/CollectionHeader";
-import SubcategoryTabs from "../components/collection/SubcategoryTabs";
 import HybridFamilyTable from "../components/collection/HybridFamilyTable";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -350,70 +347,9 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
     ancestors.find((a) => a.level === 1) || (node.level === 1 ? node : null);
 
   const [viewMode, setViewMode] = useState<CollectionViewMode>("table");
-  const [activeTab, setActiveTab] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(1);
 
-  // When a tab is active, load that child node's products directly
-  // and apply the same filters/sorting from the parent catalog state
-  const displayProducts = useMemo(() => {
-    if (!activeTab) return catalog.filteredProducts;
-
-    let products = getAllProductsForNode(activeTab);
-
-    // Apply active filters (same logic as useCatalogState)
-    for (const [key, values] of Object.entries(catalog.activeFilters)) {
-      if (values.length === 0) continue;
-      const def = filterAttributeRegistry.find((d) => d.key === key);
-      if (!def) continue;
-      products = products.filter((p) => {
-        const raw = def.extract(p);
-        const pv = Array.isArray(raw)
-          ? raw
-          : raw != null
-            ? [String(raw)]
-            : [];
-        return pv.some((v) => values.includes(v));
-      });
-    }
-
-    // Apply price range
-    if (catalog.priceRange) {
-      products = products.filter(
-        (p) =>
-          p.price >= catalog.priceRange!.min &&
-          p.price <= catalog.priceRange!.max,
-      );
-    }
-
-    // Apply sorting
-    const sorted = [...products];
-    switch (catalog.sortBy) {
-      case "price-asc":
-        sorted.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        sorted.sort((a, b) => b.price - a.price);
-        break;
-      case "alpha-asc":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "alpha-desc":
-        sorted.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case "newest":
-        sorted.reverse();
-        break;
-      default:
-        break;
-    }
-    return sorted;
-  }, [
-    activeTab,
-    catalog.filteredProducts,
-    catalog.activeFilters,
-    catalog.priceRange,
-    catalog.sortBy,
-  ]);
+  const displayProducts = catalog.filteredProducts;
 
   // Paginate for table view
   const PAGE_SIZE = 20;
@@ -421,11 +357,6 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
     const start = (tablePage - 1) * PAGE_SIZE;
     return displayProducts.slice(start, start + PAGE_SIZE);
   }, [displayProducts, tablePage]);
-
-  const handleTabChange = useCallback((tabId: string | null) => {
-    setActiveTab(tabId);
-    setTablePage(1);
-  }, []);
 
   return (
     <div className="w-full px-4 py-4">
@@ -442,7 +373,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
             {node.label}
             <span className="text-lg font-light" style={{ color: config.secondaryColor }}>
               {" "}&ndash; {displayProducts.length} Product Famil{displayProducts.length !== 1 ? "ies" : "y"}
-              {(catalog.hasActiveFilters || activeTab !== null) &&
+              {catalog.hasActiveFilters &&
                 ` (filtered from ${catalog.allProducts.length})`}
               {children.length > 0 && ` \u00b7 ${children.length} Subcategories`}
             </span>
@@ -469,7 +400,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
             }}
           >
             <CategoryTree
-              activeNodeId={activeTab || node.id}
+              activeNodeId={node.id}
               rootNodeId={treeRoot.id}
             />
 
@@ -501,15 +432,6 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
             onClearAll={catalog.clearAllFilters}
             onClearPriceRange={() => catalog.setPriceRange(null)}
           />
-
-          {/* Subcategory Tabs */}
-          {children.length > 0 && (
-            <SubcategoryTabs
-              children={children}
-              activeTabId={activeTab}
-              onTabChange={handleTabChange}
-            />
-          )}
 
           {/* Content: Table (default) or Grid */}
           {viewMode === "table" ? (
