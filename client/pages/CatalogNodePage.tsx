@@ -347,7 +347,7 @@ function GlobalBreadcrumb({ modeInfo }: { modeInfo: CatalogModeInfo }) {
             ) : (
               <Link
                 to={crumb.href}
-                className="text-[8px] font-semibold no-underline transition-colors hover:underline"
+                className="text-xs font-semibold no-underline transition-colors hover:underline"
                 style={{ color: config.secondaryColor }}
               >
                 {crumb.label}
