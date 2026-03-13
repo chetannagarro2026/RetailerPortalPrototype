@@ -165,7 +165,6 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
 
           {catalog.resolvedFilters.length > 0 && (
             <div
-              className="mt-5 pt-5"
               style={{ borderTop: `1px solid ${config.borderColor}` }}
             >
               <FilterPanel
@@ -406,7 +405,6 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
 
             {catalog.resolvedFilters.length > 0 && (
               <div
-                className="mt-5 pt-5"
                 style={{ borderTop: `1px solid ${config.borderColor}` }}
               >
                 <FilterPanel
