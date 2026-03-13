@@ -198,7 +198,7 @@ export default function ProductDetailPage() {
           <div className="flex gap-6">
             {/* Left: Filter Panel (sticky) */}
             <aside
-              className="shrink-0 sticky self-start overflow-y-auto pr-4"
+              className="shrink-0 sticky self-start overflow-y-auto pr-4 pl-4 pt-2 pb-2"
               style={{
                 width: 220,
                 top: "calc(var(--header-height) + var(--nav-height) + 24px)",
