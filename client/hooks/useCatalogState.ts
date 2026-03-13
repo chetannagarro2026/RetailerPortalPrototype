@@ -15,7 +15,8 @@ export type SortKey =
   | "alpha-asc"
   | "alpha-desc"
   | "newest"
-  | "bestselling";
+  | "bestselling"
+  | "promotions";
 
 /** Active filters: key → set of selected string values (for checkbox/boolean) or [min, max] for range */
 export type ActiveFilters = Record<string, string[]>;
@@ -195,6 +196,14 @@ export function useCatalogState(
           const aBS = a.badges?.some((bg) => bg.label === "Bestseller") ? 1 : 0;
           const bBS = b.badges?.some((bg) => bg.label === "Bestseller") ? 1 : 0;
           return bBS - aBS;
+        });
+        break;
+      case "promotions":
+        // Products with more promotions first
+        sorted.sort((a, b) => {
+          const aCount = a.promotions?.length ?? 0;
+          const bCount = b.promotions?.length ?? 0;
+          return bCount - aCount;
         });
         break;
       default:

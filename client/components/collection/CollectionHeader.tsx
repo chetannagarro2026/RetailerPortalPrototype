@@ -61,6 +61,7 @@ export default function CollectionHeader({
             { value: "alpha-desc", label: "Name: Z → A" },
             { value: "newest", label: "Newest First" },
             { value: "bestselling", label: "Best Selling" },
+            { value: "promotions", label: "Most Promotions" },
           ]}
         />
       </div>
