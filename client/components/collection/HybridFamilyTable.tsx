@@ -68,8 +68,6 @@ export default function HybridFamilyTable({
     );
   }
 
-  const panelOpen = !!quickAddProduct;
-
   // ── Drag-to-resize state ──
   const containerRef = useRef<HTMLDivElement>(null);
   const [panelWidth, setPanelWidth] = useState(420);
@@ -108,16 +106,12 @@ export default function HybridFamilyTable({
     <div
       ref={containerRef}
       className="flex"
-      style={panelOpen ? {
-        position: "sticky" as const,
-        top: "calc(var(--header-height) + var(--nav-height) + 16px)",
-        height: "calc(100vh - var(--header-height) - var(--nav-height) - 32px)",
-      } : undefined}
+      style={{ flex: 1 }}
     >
       {/* Main table area */}
       <div
         className="min-w-0"
-        style={panelOpen ? { overflow: "auto", flex: 1 } : { flex: 1 }}
+        style={{ flex: 1 }}
       >
         <div
           className="rounded-xl overflow-hidden"
@@ -211,32 +205,32 @@ export default function HybridFamilyTable({
         )}
       </div>
 
-      {/* Drag handle */}
+      {/* Quick Add Panel — fixed floating panel */}
       {quickAddProduct && (
         <div
-          onMouseDown={onDragStart}
-          className="shrink-0 flex items-center justify-center cursor-col-resize group"
-          style={{ width: 8 }}
-          title="Drag to resize"
-        >
-          <div
-            className="w-1 h-10 rounded-full transition-colors group-hover:h-16"
-            style={{ backgroundColor: config.borderColor }}
-          />
-        </div>
-      )}
-
-      {/* Quick Add Panel — in-flow, scrolls independently */}
-      {quickAddProduct && (
-        <div
-          className="shrink-0 flex flex-col shadow-lg rounded-xl overflow-hidden"
+          className="fixed flex flex-col shadow-xl rounded-xl overflow-hidden"
           style={{
+            top: "calc(var(--header-height) + var(--nav-height) + 16px)",
+            right: 16,
+            bottom: 40,
             width: panelWidth,
-            height: "100%",
             border: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",
+            zIndex: 50,
           }}
         >
+          {/* Drag handle (left edge) */}
+          <div
+            onMouseDown={onDragStart}
+            className="absolute left-0 top-0 bottom-0 flex items-center justify-center cursor-col-resize group"
+            style={{ width: 8, zIndex: 1 }}
+            title="Drag to resize"
+          >
+            <div
+              className="w-1 h-10 rounded-full transition-colors group-hover:h-16"
+              style={{ backgroundColor: config.borderColor }}
+            />
+          </div>
           <QuickAddPanel
             key={quickAddProduct.id}
             product={quickAddProduct}
