@@ -170,7 +170,7 @@ export default function ProductDetailPage() {
   const showProductInfoPanel = isAuthenticated && showProductPromoPanel && product !== null;
 
   return (
-    <div className="max-w-content-wide mx-auto px-4 py-4">
+    <div className="max-w-content-wide mx-auto px-4 pt-4 pb-2">
       {/* Breadcrumb */}
       <Link to="/catalog" className="text-xs no-underline mb-4 block" style={{ color: config.secondaryColor }}>
         &larr; Back to Catalog
