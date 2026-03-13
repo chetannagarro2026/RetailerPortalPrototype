@@ -113,12 +113,12 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
   const isBrandMode = modeInfo.mode === "brand";
 
   return (
-    <div className="w-full px-4 pt-2 pb-4">
+    <div className="w-full pr-4 pt-2 pb-4">
       {/* Breadcrumb — full width, aligned with sidebar left edge */}
       <GlobalBreadcrumb modeInfo={modeInfo} />
 
       {/* Page Title Row: title+subtitle left, controls right */}
-      <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+      <div className="flex items-start justify-between" style={{ marginBottom: 16, marginLeft: 16 }}>
         <div>
           <h1
             className="text-lg font-semibold"
@@ -154,8 +154,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
           className="shrink-0 self-stretch overflow-y-auto pr-4"
           style={{
             width: 240,
-            borderTop: "1px solid #E5E7EB",
-            borderRight: "1px solid #E5E7EB",
+            paddingLeft: 2,
           }}
         >
           <CategoryTree activeNodeId="" rootNodeId="root" />
@@ -294,7 +293,7 @@ function GlobalBreadcrumb({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         ];
 
   return (
-    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 4 }}>
+    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 4, marginLeft: 16 }}>
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (
@@ -355,12 +354,12 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
   }, [displayProducts, tablePage]);
 
   return (
-    <div className="w-full px-4 py-4">
+    <div className="w-full pr-4 py-4">
       {/* Breadcrumb — full width, aligned with sidebar left edge */}
       <CatalogBreadcrumb node={node} />
 
       {/* Page Title Row: title+subtitle left, controls right */}
-      <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+      <div className="flex items-start justify-between" style={{ marginBottom: 16, marginLeft: 16 }}>
         <div>
           <h1
             className="text-lg font-semibold"
@@ -388,8 +387,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
             className="shrink-0 self-stretch overflow-y-auto pr-4"
             style={{
               width: 240,
-              borderTop: "1px solid #E5E7EB",
-              borderRight: "1px solid #E5E7EB",
+              paddingLeft: 2,
             }}
           >
             <CategoryTree
