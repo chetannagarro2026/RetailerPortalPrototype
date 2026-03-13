@@ -151,14 +151,11 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
       <div className="flex" style={{ gap: 24 }}>
         {/* Left Sidebar: Full tree + Filters */}
         <aside
-          className="shrink-0 sticky self-start overflow-y-auto pr-4"
+          className="shrink-0 self-stretch overflow-y-auto pr-4"
           style={{
             width: 240,
-            top: "calc(var(--header-height) + var(--nav-height) + 24px)",
-            maxHeight:
-              "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
-            border: `1px solid ${config.borderColor}`,
-            borderRadius: 8,
+            borderTop: "1px solid #E5E7EB",
+            borderRight: "1px solid #E5E7EB",
           }}
         >
           <CategoryTree activeNodeId="" rootNodeId="root" />
@@ -388,14 +385,11 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
         {/* Left Sidebar: Tree + Filters */}
         {treeRoot && (
           <aside
-            className="shrink-0 sticky self-start overflow-y-auto pr-4"
+            className="shrink-0 self-stretch overflow-y-auto pr-4"
             style={{
               width: 240,
-              top: "calc(var(--header-height) + var(--nav-height) + 24px)",
-              maxHeight:
-                "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
-              border: `1px solid ${config.borderColor}`,
-              borderRadius: 8,
+              borderTop: "1px solid #E5E7EB",
+              borderRight: "1px solid #E5E7EB",
             }}
           >
             <CategoryTree
