@@ -82,12 +82,12 @@ export default function SkuFilterPanel({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <span
-          className="text-xs font-semibold uppercase tracking-wider"
-          style={{ color: config.primaryColor }}
+        <h4
+          className="text-xs uppercase"
+          style={{ color: config.secondaryColor, fontWeight: 600, letterSpacing: "0.04em" }}
         >
           Filters
-        </span>
+        </h4>
         {hasActive && (
           <button
             onClick={onClearAll}
@@ -161,7 +161,7 @@ function FilterSection({
         />
       )}
 
-      <div className="space-y-1 max-h-[180px] overflow-y-auto">
+      <div className="space-y-1">
         {filtered.map((option) => (
           <label
             key={option.value}

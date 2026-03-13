@@ -198,13 +198,12 @@ export default function ProductDetailPage() {
           <div className="flex gap-6">
             {/* Left: Filter Panel (sticky) */}
             <aside
-              className="shrink-0 sticky self-start overflow-y-auto pr-4 pl-4 pt-2 pb-2"
+              className="shrink-0 sticky self-start overflow-y-auto pr-4"
               style={{
-                width: 220,
-                top: "calc(var(--header-height) + var(--nav-height) + 24px)",
-                maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
-                border: `1px solid ${config.borderColor}`,
-                borderRadius: 8,
+                width: 240,
+                paddingLeft: 2,
+                top: "calc(var(--header-height) + var(--nav-height) + 16px)",
+                maxHeight: "calc(100vh - var(--header-height) - var(--nav-height) - 24px)",
               }}
             >
               <SkuFilterPanel
