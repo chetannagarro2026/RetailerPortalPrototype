@@ -53,9 +53,17 @@ export default function PDPHeader({ product, onOpenPromotionPanel }: PDPHeaderPr
       </p>
 
 
-      {/* Promotions Available Badge */}
+      {/* Pricing */}
+      <PdpPricingBlock
+        pricing={pricing}
+        product={product}
+        isAuthenticated={isAuthenticated}
+        showSignInModal={showSignInModal}
+      />
+
+      {/* Promotions Available Badge — below pricing */}
       {isAuthenticated && countProductPromotions(product) > 0 && (
-        <div className="mb-3">
+        <div style={{ marginTop: 12, marginBottom: 16 }}>
           <Tag
             variant="promotion"
             icon={<TagOutlined />}
@@ -66,14 +74,6 @@ export default function PDPHeader({ product, onOpenPromotionPanel }: PDPHeaderPr
           </Tag>
         </div>
       )}
-
-      {/* Pricing */}
-      <PdpPricingBlock
-        pricing={pricing}
-        product={product}
-        isAuthenticated={isAuthenticated}
-        showSignInModal={showSignInModal}
-      />
 
       {/* Order constraints */}
       {((product.minOrderQty && product.minOrderQty > 1) || product.casePackQty) && (
@@ -178,18 +178,20 @@ function PdpPricingBlock({
         )}
       </div>
 
-      {/* Struck-through list price */}
-      {pricing.hasSpecialPrice && (
-        <span className="text-sm line-through" style={{ color: config.secondaryColor }}>
-          ${pricing.listPrice.toFixed(2)}
-        </span>
-      )}
-
-      {/* Savings line */}
-      {pricing.savings > 0 && (
-        <p className="text-xs mt-1" style={{ color: "#16A34A" }}>
-          You Save ${pricing.savings.toFixed(2)} ({pricing.savingsPercent}%)
-        </p>
+      {/* List Price + Savings on same line */}
+      {(pricing.hasSpecialPrice || pricing.savings > 0) && (
+        <div className="flex items-center gap-2 mt-1">
+          {pricing.hasSpecialPrice && (
+            <span className="text-sm line-through" style={{ color: "#6B7280" }}>
+              ${pricing.listPrice.toFixed(2)}
+            </span>
+          )}
+          {pricing.savings > 0 && (
+            <span className="text-xs font-medium" style={{ color: "#16A34A" }}>
+              Save {pricing.savingsPercent}%
+            </span>
+          )}
+        </div>
       )}
 
 
