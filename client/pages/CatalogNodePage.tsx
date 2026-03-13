@@ -17,7 +17,7 @@ import CategoryTree from "../components/catalog/CategoryTree";
 import FilterPanel from "../components/catalog/FilterPanel";
 import ActiveFilterChips from "../components/catalog/ActiveFilterChips";
 import FamilyCardGrid from "../components/collection/FamilyCardGrid";
-import CollectionHeader, { type CollectionViewMode } from "../components/collection/CollectionHeader";
+import { type CollectionViewMode } from "../components/collection/CollectionHeader";
 import SubcategoryTabs from "../components/collection/SubcategoryTabs";
 import HybridFamilyTable from "../components/collection/HybridFamilyTable";
 
@@ -117,35 +117,39 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
 
   return (
     <div className="w-full px-4 py-4">
-      {/* Breadcrumb — aligned with content area (past sidebar) */}
-      <div style={{ paddingLeft: 264 }}>
-        <GlobalBreadcrumb modeInfo={modeInfo} />
-      </div>
+      {/* Breadcrumb — full width, aligned with sidebar left edge */}
+      <GlobalBreadcrumb modeInfo={modeInfo} />
 
-      {/* Brand header */}
-      {isBrandMode && brandStats && (
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h1
-              className="text-xl font-semibold mb-0.5"
-              style={{ color: config.primaryColor }}
-            >
-              {modeInfo.brandName}
-            </h1>
-            <p className="text-xs" style={{ color: config.secondaryColor }}>
-              {brandStats.familyCount} Product Families &middot;{" "}
-              {brandStats.skuCount.toLocaleString()} SKUs
-            </p>
-          </div>
-          <Link
-            to="/catalog"
-            className="text-xs no-underline"
-            style={{ color: config.secondaryColor }}
+      {/* Page Title Row: title+subtitle left, controls right */}
+      <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+        <div>
+          <h1
+            className="text-lg font-semibold"
+            style={{ color: config.primaryColor, marginBottom: 6 }}
           >
-            Clear Brand Filter
-          </Link>
+            {isBrandMode && modeInfo.brandName ? modeInfo.brandName : title}
+          </h1>
+          <p className="text-xs" style={{ color: config.secondaryColor }}>
+            {catalog.filteredProducts.length} Product Famil{catalog.filteredProducts.length !== 1 ? "ies" : "y"}
+            {catalog.hasActiveFilters &&
+              ` (filtered from ${catalog.allProducts.length})`}
+            {isBrandMode && brandStats && ` \u00b7 ${brandStats.skuCount.toLocaleString()} SKUs`}
+          </p>
         </div>
-      )}
+        <div className="flex items-center gap-3">
+          {isBrandMode && (
+            <Link
+              to="/catalog"
+              className="text-xs no-underline"
+              style={{ color: config.secondaryColor }}
+            >
+              Clear Brand Filter
+            </Link>
+          )}
+          <ViewToggleInline mode={viewMode} onChange={setViewMode} />
+          <SortSelectInline sortBy={catalog.sortBy} onChange={catalog.setSortBy} />
+        </div>
+      </div>
 
       <div className="flex" style={{ gap: 24 }}>
         {/* Left Sidebar: Full tree + Filters */}
@@ -186,37 +190,6 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
 
         {/* Right: Content */}
         <div className="flex-1 min-w-0">
-          {!isBrandMode && (
-            <CollectionHeader
-              title={title}
-              familyCount={catalog.filteredProducts.length}
-              totalFamilies={catalog.allProducts.length}
-              subcategoryCount={0}
-              hasActiveFilters={catalog.hasActiveFilters}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              sortBy={catalog.sortBy}
-              onSortChange={catalog.setSortBy}
-            />
-          )}
-
-          {isBrandMode && (
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-xs" style={{ color: config.secondaryColor }}>
-                {catalog.filteredProducts.length} Product Families
-                {catalog.hasActiveFilters &&
-                  ` (filtered from ${catalog.allProducts.length})`}
-              </p>
-              <div className="flex items-center gap-3">
-                <ViewToggleInline mode={viewMode} onChange={setViewMode} />
-                <SortSelectInline
-                  sortBy={catalog.sortBy}
-                  onChange={catalog.setSortBy}
-                />
-              </div>
-            </div>
-          )}
-
           <ActiveFilterChips
             activeFilters={catalog.activeFilters}
             priceRange={catalog.priceRange}
@@ -328,7 +301,7 @@ function GlobalBreadcrumb({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         ];
 
   return (
-    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 16 }}>
+    <nav className="flex items-center gap-1.5 flex-wrap" style={{ marginBottom: 8 }}>
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (
@@ -456,8 +429,29 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
 
   return (
     <div className="w-full px-4 py-4">
-      <div style={{ paddingLeft: 264 }}>
-        <CatalogBreadcrumb node={node} />
+      {/* Breadcrumb — full width, aligned with sidebar left edge */}
+      <CatalogBreadcrumb node={node} />
+
+      {/* Page Title Row: title+subtitle left, controls right */}
+      <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+        <div>
+          <h1
+            className="text-lg font-semibold"
+            style={{ color: config.primaryColor, marginBottom: 6 }}
+          >
+            {node.label}
+          </h1>
+          <p className="text-xs" style={{ color: config.secondaryColor }}>
+            {displayProducts.length} Product Famil{displayProducts.length !== 1 ? "ies" : "y"}
+            {(catalog.hasActiveFilters || activeTab !== null) &&
+              ` (filtered from ${catalog.allProducts.length})`}
+            {children.length > 0 && ` \u00b7 ${children.length} Subcategories`}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <ViewToggleInline mode={viewMode} onChange={setViewMode} />
+          <SortSelectInline sortBy={catalog.sortBy} onChange={catalog.setSortBy} />
+        </div>
       </div>
 
       <div className="flex" style={{ gap: 24 }}>
@@ -496,20 +490,8 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
           </aside>
         )}
 
-        {/* Right: Header + Tabs + Table/Grid */}
+        {/* Right: Tabs + Table/Grid */}
         <div className="flex-1 min-w-0">
-          <CollectionHeader
-            title={node.label}
-            familyCount={displayProducts.length}
-            totalFamilies={catalog.allProducts.length}
-            subcategoryCount={children.length}
-            hasActiveFilters={catalog.hasActiveFilters || activeTab !== null}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            sortBy={catalog.sortBy}
-            onSortChange={catalog.setSortBy}
-          />
-
           {/* Active Filter Chips */}
           <ActiveFilterChips
             activeFilters={catalog.activeFilters}
@@ -592,9 +574,7 @@ export default function CatalogNodePage() {
     return (
       <div className="w-full px-4 py-4">
         {node.level > 0 && (
-          <div style={{ paddingLeft: 264 }}>
-            <CatalogBreadcrumb node={node} />
-          </div>
+          <CatalogBreadcrumb node={node} />
         )}
         <div className="mb-6">
           <h1
