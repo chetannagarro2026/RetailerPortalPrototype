@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { InputNumber } from "antd";
 import { ShoppingCartOutlined, AppstoreOutlined, TagOutlined } from "@ant-design/icons";
+import Tag from "../ui/Tag";
 import { Tooltip } from "antd";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
@@ -404,12 +405,10 @@ function PromotionsBadge({
 
   return (
     <Tooltip title={tooltipContent} placement="bottom">
-      <span
-        className={`inline-flex items-center gap-1 ${compact ? "text-[9px]" : "text-[10px]"} font-semibold mt-1 px-2 py-0.5 rounded-full cursor-default`}
-        style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
-      >
-        <TagOutlined className="text-[9px]" />
-        {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+      <span className="mt-1">
+        <Tag variant="promotion" icon={<TagOutlined />}>
+          {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+        </Tag>
       </span>
     </Tooltip>
   );

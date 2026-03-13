@@ -1,5 +1,6 @@
 import { TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import Tag, { DropdownIndicator } from "../ui/Tag";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
 import { resolveProductPricing, getEffectiveTierPricing, countProductPromotions } from "../../utils/pricing";
@@ -55,15 +56,14 @@ export default function PDPHeader({ product, onOpenPromotionPanel }: PDPHeaderPr
       {/* Promotions Available Badge */}
       {isAuthenticated && countProductPromotions(product) > 0 && (
         <div className="mb-3">
-          <span
+          <Tag
+            variant="promotion"
+            icon={<TagOutlined />}
+            suffix={<DropdownIndicator />}
             onClick={onOpenPromotionPanel}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer transition-colors"
-            style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
           >
-            <TagOutlined className="text-[11px]" />
             {countProductPromotions(product)} {countProductPromotions(product) === 1 ? "Promotion" : "Promotions"} Available
-            <span className="text-[10px] ml-0.5">&#9662;</span>
-          </span>
+          </Tag>
         </div>
       )}
 

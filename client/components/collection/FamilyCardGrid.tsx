@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Pagination } from "antd";
 import { TagOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
+import Tag from "../ui/Tag";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
@@ -129,12 +130,10 @@ function FamilyCard({ product }: { product: CatalogProduct }) {
               }
               placement="bottom"
             >
-              <span
-                className="inline-flex items-center gap-1 text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full cursor-default"
-                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
-              >
-                <TagOutlined className="text-[9px]" />
-                {meta.promoCount} {meta.promoCount === 1 ? "Promotion" : "Promotions"}
+              <span className="mt-0.5">
+                <Tag variant="promotion" icon={<TagOutlined />}>
+                  {meta.promoCount} {meta.promoCount === 1 ? "Promotion" : "Promotions"}
+                </Tag>
               </span>
             </Tooltip>
           )}

@@ -1,5 +1,6 @@
 import { TagOutlined, CheckCircleFilled, GiftOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import Tag from "../ui/Tag";
 import { cartPromotions, type CartPromotion } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
@@ -136,12 +137,7 @@ function CartPromoCard({
               Apply
             </button>
           ) : (
-            <span
-              className="text-[10px] font-medium px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: config.cardBg, color: config.secondaryColor }}
-            >
-              Locked
-            </span>
+            <Tag variant="neutral">Locked</Tag>
           )}
         </div>
       </div>

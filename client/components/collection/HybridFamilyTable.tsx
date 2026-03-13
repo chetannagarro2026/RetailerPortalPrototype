@@ -8,6 +8,7 @@ import {
   TagOutlined,
 } from "@ant-design/icons";
 import { Tooltip } from "antd";
+import Tag from "../ui/Tag";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
@@ -376,12 +377,10 @@ function FamilyRow({
               }
               placement="bottom"
             >
-              <span
-                className="inline-flex items-center gap-1 text-[9px] font-semibold mt-0.5 px-1.5 py-0.5 rounded-full cursor-default"
-                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
-              >
-                <TagOutlined className="text-[8px]" />
-                {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+              <span className="mt-0.5">
+                <Tag variant="promotion" icon={<TagOutlined />}>
+                  {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
+                </Tag>
               </span>
             </Tooltip>
           )}

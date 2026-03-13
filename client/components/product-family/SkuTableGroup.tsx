@@ -1,5 +1,6 @@
 import { DownOutlined, RightOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import Tag, { DropdownIndicator } from "../ui/Tag";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
 import { usePromotions, getVariantPromotions } from "../../context/PromotionContext";
@@ -290,27 +291,21 @@ function SkuPromoBadgeCell({
 
   return (
     <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-      <button
+      <Tag
+        variant={appliedPromo ? "applied" : "promotion"}
+        icon={<TagOutlined />}
+        suffix={<DropdownIndicator />}
         onClick={(e) => {
           e.stopPropagation();
           onOpenPromoPanel?.(variant.id);
         }}
-        className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer transition-colors"
-        style={{
-          border: appliedPromo
-            ? `1.5px solid #EA580C`
-            : `1px solid ${config.borderColor}`,
-          backgroundColor: appliedPromo ? "#FFF7ED" : "#F0FDF4",
-          color: appliedPromo ? "#EA580C" : "#16A34A",
-        }}
         title={appliedPromo ? `Applied: ${appliedPromo.label}` : `${promotions.length} available`}
       >
-        <TagOutlined className="text-[9px]" />
         {appliedPromo
-          ? <>{appliedPromo.label} Applied <span className="text-[8px] ml-0.5">&#9662;</span></>
-          : <>{promotions.length} {promotions.length === 1 ? "Promotion" : "Promotions"} <span className="text-[8px] ml-0.5">&#9662;</span></>
+          ? <>{appliedPromo.label} Applied</>
+          : <>{promotions.length} {promotions.length === 1 ? "Promotion" : "Promotions"}</>
         }
-      </button>
+      </Tag>
     </td>
   );
 }

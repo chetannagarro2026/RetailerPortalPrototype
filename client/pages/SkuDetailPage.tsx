@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
 import { ShoppingCartOutlined, DownOutlined, RightOutlined, TagOutlined } from "@ant-design/icons";
+import Tag, { DropdownIndicator } from "../components/ui/Tag";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
 import { useOrder } from "../context/OrderContext";
@@ -216,15 +217,16 @@ function SkuHeader({ product, variant, onOpenPromoPanel }: { product: CatalogPro
 
           {/* Promotions Available badge */}
           {promoCount > 0 && (
-            <span
-              onClick={onOpenPromoPanel}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold mt-2 px-3 py-1.5 rounded-full cursor-pointer transition-colors"
-              style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
-            >
-              <TagOutlined className="text-[11px]" />
-              {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"} Available
-              <span className="text-[10px] ml-0.5">&#9662;</span>
-            </span>
+            <div className="mt-2">
+              <Tag
+                variant="promotion"
+                icon={<TagOutlined />}
+                suffix={<DropdownIndicator />}
+                onClick={onOpenPromoPanel}
+              >
+                {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"} Available
+              </Tag>
+            </div>
           )}
         </div>
       )}

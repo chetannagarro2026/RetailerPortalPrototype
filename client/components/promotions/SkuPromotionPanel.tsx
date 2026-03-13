@@ -1,5 +1,6 @@
 import { CloseOutlined, CheckCircleFilled, TagOutlined, StarFilled } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
+import Tag from "../ui/Tag";
 import type { CatalogProduct, ProductVariant, PromotionInfo } from "../../data/catalogData";
 import { usePromotions, getVariantPromotions } from "../../context/PromotionContext";
 
@@ -159,13 +160,9 @@ function SkuPromoCard({
           {promo.label}
         </span>
         {isRecommended && !isApplied && (
-          <span
-            className="inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: "#EFF6FF", color: "#2563EB" }}
-          >
-            <StarFilled className="text-[8px]" />
+          <Tag variant="recommended" icon={<StarFilled />}>
             Recommended
-          </span>
+          </Tag>
         )}
         {isApplied && (
           <CheckCircleFilled className="text-xs" style={{ color: "#EA580C" }} />

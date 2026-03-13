@@ -1,5 +1,6 @@
 import { Button, InputNumber } from "antd";
 import { DeleteOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import Tag from "../components/ui/Tag";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder, type OrderLineItem } from "../context/OrderContext";
@@ -253,12 +254,7 @@ function CartLineItem({
           >
             {item.productName}
             {isFree && (
-              <span
-                className="text-[10px] ml-1.5 font-semibold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: "#F0FDF4", color: "#16A34A", border: "1px solid #BBF7D0" }}
-              >
-                Free Item
-              </span>
+              <Tag variant="freeGoods" className="ml-1.5">Free Item</Tag>
             )}
           </Link>
           <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
@@ -286,12 +282,7 @@ function CartLineItem({
                 </span>
               )}
               {item.promotionLabel && (
-                <span
-                  className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}
-                >
-                  {item.promotionLabel} applied
-                </span>
+                <Tag variant="applied">{item.promotionLabel} applied</Tag>
               )}
             </div>
           )}

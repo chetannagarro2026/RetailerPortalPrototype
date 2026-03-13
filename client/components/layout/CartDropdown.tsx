@@ -1,5 +1,6 @@
 import { Button, InputNumber } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
+import Tag from "../ui/Tag";
 import { useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
@@ -74,7 +75,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {item.productName}
-                        {isFree && <span className="text-[10px] ml-1.5 font-semibold" style={{ color: "#16A34A" }}>(Free Item)</span>}
+                        {isFree && <Tag variant="freeGoods" className="ml-1.5">Free Item</Tag>}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
                         {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
@@ -90,9 +91,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                           )}
                           <span className="text-xs text-gray-500">${item.unitPrice.toFixed(2)} / unit</span>
                           {item.promotionLabel && (
-                            <span className="text-[9px] font-medium ml-1.5 px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}>
-                              {item.promotionLabel} applied
-                            </span>
+                            <Tag variant="applied" className="ml-1.5">{item.promotionLabel} applied</Tag>
                           )}
                         </div>
                       )}

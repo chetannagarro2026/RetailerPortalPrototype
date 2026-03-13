@@ -1,6 +1,7 @@
 import { CloseOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct, PromotionInfo } from "../../data/catalogData";
+import Tag from "../ui/Tag";
 
 interface PromotionInfoPanelProps {
   product: CatalogProduct;
@@ -73,7 +74,7 @@ function PromotionCard({ promo, product }: { promo: PromotionInfo; product: Cata
         <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
           {promo.label}
         </span>
-        <TypeBadge type={promo.type} />
+        <PromoTypeBadge type={promo.type} />
       </div>
 
       {promo.description && (
@@ -90,13 +91,7 @@ function PromotionCard({ promo, product }: { promo: PromotionInfo; product: Cata
         {eligibleSkus ? (
           <div className="flex flex-wrap gap-1">
             {eligibleSkus.slice(0, 8).map((label, i) => (
-              <span
-                key={i}
-                className="text-[10px] px-2 py-0.5 rounded"
-                style={{ backgroundColor: "#fff", color: config.primaryColor, border: `1px solid ${config.borderColor}` }}
-              >
-                {label}
-              </span>
+              <Tag key={i} variant="neutral">{label}</Tag>
             ))}
             {eligibleSkus.length > 8 && (
               <span className="text-[10px] px-2 py-0.5" style={{ color: config.secondaryColor }}>
@@ -138,19 +133,13 @@ function PromotionCard({ promo, product }: { promo: PromotionInfo; product: Cata
   );
 }
 
-function TypeBadge({ type }: { type: string }) {
-  const styles: Record<string, { bg: string; color: string; label: string }> = {
-    discount: { bg: "#F0F4FF", color: "#4338CA", label: "Discount" },
-    "free-goods": { bg: "#F0FDF4", color: "#166534", label: "Free Goods" },
-    bogo: { bg: "#FFF7ED", color: "#9A3412", label: "BOGO" },
-  };
-  const s = styles[type] || styles.discount;
-  return (
-    <span
-      className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-      style={{ backgroundColor: s.bg, color: s.color }}
-    >
-      {s.label}
-    </span>
-  );
+const PROMO_TYPE_VARIANT: Record<string, { variant: "discount" | "freeGoods" | "bogo"; label: string }> = {
+  discount: { variant: "discount", label: "Discount" },
+  "free-goods": { variant: "freeGoods", label: "Free Goods" },
+  bogo: { variant: "bogo", label: "BOGO" },
+};
+
+function PromoTypeBadge({ type }: { type: string }) {
+  const cfg = PROMO_TYPE_VARIANT[type] || PROMO_TYPE_VARIANT.discount;
+  return <Tag variant={cfg.variant}>{cfg.label}</Tag>;
 }
