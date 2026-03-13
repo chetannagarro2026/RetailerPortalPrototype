@@ -56,6 +56,12 @@ export default function CategoryTree({ activeNodeId, rootNodeId }: CategoryTreeP
 
   return (
     <nav className="text-sm">
+      <h4
+        className="text-xs uppercase"
+        style={{ color: config.secondaryColor, fontWeight: 600, letterSpacing: "0.04em", marginBottom: 12, padding: "16px 16px 0 16px" }}
+      >
+        Categories
+      </h4>
       {rootChildren.map((child) => (
         <TreeNode
           key={child.id}
