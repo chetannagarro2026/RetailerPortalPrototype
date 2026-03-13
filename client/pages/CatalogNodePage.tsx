@@ -125,16 +125,16 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
         <div>
           <h1
             className="text-lg font-semibold"
-            style={{ color: config.primaryColor, marginBottom: 4 }}
+            style={{ color: config.primaryColor }}
           >
             {isBrandMode && modeInfo.brandName ? modeInfo.brandName : title}
+            <span className="text-lg font-light" style={{ color: config.secondaryColor }}>
+              {" "}&ndash; {catalog.filteredProducts.length} Product Famil{catalog.filteredProducts.length !== 1 ? "ies" : "y"}
+              {catalog.hasActiveFilters &&
+                ` (filtered from ${catalog.allProducts.length})`}
+              {isBrandMode && brandStats && ` \u00b7 ${brandStats.skuCount.toLocaleString()} SKUs`}
+            </span>
           </h1>
-          <p className="text-xs" style={{ color: config.secondaryColor }}>
-            {catalog.filteredProducts.length} Product Famil{catalog.filteredProducts.length !== 1 ? "ies" : "y"}
-            {catalog.hasActiveFilters &&
-              ` (filtered from ${catalog.allProducts.length})`}
-            {isBrandMode && brandStats && ` \u00b7 ${brandStats.skuCount.toLocaleString()} SKUs`}
-          </p>
         </div>
         <div className="flex items-center gap-3">
           {isBrandMode && (
@@ -437,16 +437,16 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
         <div>
           <h1
             className="text-lg font-semibold"
-            style={{ color: config.primaryColor, marginBottom: 6 }}
+            style={{ color: config.primaryColor }}
           >
             {node.label}
+            <span className="text-lg font-light" style={{ color: config.secondaryColor }}>
+              {" "}&ndash; {displayProducts.length} Product Famil{displayProducts.length !== 1 ? "ies" : "y"}
+              {(catalog.hasActiveFilters || activeTab !== null) &&
+                ` (filtered from ${catalog.allProducts.length})`}
+              {children.length > 0 && ` \u00b7 ${children.length} Subcategories`}
+            </span>
           </h1>
-          <p className="text-xs" style={{ color: config.secondaryColor }}>
-            {displayProducts.length} Product Famil{displayProducts.length !== 1 ? "ies" : "y"}
-            {(catalog.hasActiveFilters || activeTab !== null) &&
-              ` (filtered from ${catalog.allProducts.length})`}
-            {children.length > 0 && ` \u00b7 ${children.length} Subcategories`}
-          </p>
         </div>
         <div className="flex items-center gap-3">
           <ViewToggleInline mode={viewMode} onChange={setViewMode} />
