@@ -221,9 +221,9 @@ export default function HybridFamilyTable({
             />
           </div>
           <div
-            className="shrink-0 sticky self-start flex flex-col shadow-xl rounded-xl overflow-hidden"
+            className="shrink-0 sticky self-end flex flex-col shadow-xl rounded-xl overflow-hidden"
             style={{
-              top: "calc(var(--header-height) + var(--nav-height) + 16px)",
+              bottom: 132,
               height: "calc(100vh - var(--header-height) - var(--nav-height) - 132px)",
               width: panelWidth,
               border: `1px solid ${config.borderColor}`,
