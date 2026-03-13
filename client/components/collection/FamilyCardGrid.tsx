@@ -4,6 +4,7 @@ import { Pagination } from "antd";
 import { TagOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import Tag from "../ui/Tag";
+import NeutralInfoChip from "../ui/NeutralInfoChip";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
@@ -161,12 +162,9 @@ function FamilyCard({ product }: { product: CatalogProduct }) {
 
         {/* Footer: SKU count */}
         <div className="mt-auto pt-2 flex items-center justify-between">
-          <span
-            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: config.cardBg, color: config.primaryColor }}
-          >
+          <NeutralInfoChip>
             {meta.skuCount} SKU{meta.skuCount !== 1 ? "s" : ""}
-          </span>
+          </NeutralInfoChip>
           <span
             className="text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ color: config.primaryColor }}

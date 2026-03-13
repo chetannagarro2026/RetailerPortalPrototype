@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import Tag from "../ui/Tag";
+import NeutralInfoChip from "../ui/NeutralInfoChip";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
@@ -405,12 +406,7 @@ function FamilyRow({
           className="px-2 py-2 text-center"
           style={{ borderBottom: isExpanded ? "none" : `1px solid ${config.borderColor}` }}
         >
-          <span
-            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: config.cardBg, color: config.primaryColor }}
-          >
-            {skuCount}
-          </span>
+          <NeutralInfoChip>{skuCount}</NeutralInfoChip>
         </td>
 
         {/* Actions */}
