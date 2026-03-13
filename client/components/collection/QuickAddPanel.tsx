@@ -118,7 +118,7 @@ export default function QuickAddPanel({
     >
       {/* Header */}
       <div
-        className="flex items-start justify-between px-5 py-4 shrink-0"
+        className="flex items-start justify-between px-4 pt-4 pb-2 shrink-0"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         <div className="min-w-0">
