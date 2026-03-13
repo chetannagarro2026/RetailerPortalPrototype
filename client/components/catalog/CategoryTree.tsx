@@ -23,13 +23,12 @@ export default function CategoryTree({ activeNodeId, rootNodeId }: CategoryTreeP
   const [expanded, setExpanded] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     if (activeNodeId) {
+      // Expand only the ancestors of the active node (its branch)
       getAncestors(activeNodeId).forEach((a) => initial.add(a.id));
       const activeNode = catalogNodes.find((n) => n.id === activeNodeId);
       if (activeNode?.hasChildren) initial.add(activeNodeId);
-    } else {
-      // Global/brand mode: expand level-1 nodes
-      rootChildren.forEach((c) => initial.add(c.id));
     }
+    // Otherwise keep everything collapsed
     return initial;
   });
 
