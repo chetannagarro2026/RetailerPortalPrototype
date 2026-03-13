@@ -11,6 +11,7 @@ import SkuFilterPanel, {
 } from "../components/product-family/SkuFilterPanel";
 import SkuGroupedTables from "../components/product-family/SkuGroupedTables";
 import SkuPromotionPanel from "../components/promotions/SkuPromotionPanel";
+import PromotionInfoPanel from "../components/promotions/PromotionInfoPanel";
 
 // ── Specifications ──────────────────────────────────────────────────
 
@@ -48,9 +49,11 @@ function SpecificationsSection({
 function ProductTopSection({
   product,
   galleryImages,
+  onOpenPromotionPanel,
 }: {
   product: ReturnType<typeof getProductById> & {};
   galleryImages: string[];
+  onOpenPromotionPanel?: () => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -61,7 +64,7 @@ function ProductTopSection({
 
       {/* Right: Info + Specs + Thumbnails */}
       <div>
-        <PDPHeader product={product} />
+        <PDPHeader product={product} onOpenPromotionPanel={onOpenPromotionPanel} />
         {product.specifications && product.specifications.length > 0 && (
           <div className="mt-6">
             <SpecificationsSection specifications={product.specifications} />
@@ -94,6 +97,7 @@ export default function ProductDetailPage() {
 
   // Promotion panel state
   const [promoPanelVariantId, setPromoPanelVariantId] = useState<string | null>(null);
+  const [showProductPromoPanel, setShowProductPromoPanel] = useState(false);
 
   const allVariants = product?.variants || [];
   const variantAttributes = product?.variantAttributes || [];
@@ -136,6 +140,14 @@ export default function ProductDetailPage() {
     setPromoPanelVariantId(null);
   }, []);
 
+  const handleOpenProductPromoPanel = useCallback(() => {
+    setShowProductPromoPanel(true);
+  }, []);
+
+  const handleCloseProductPromoPanel = useCallback(() => {
+    setShowProductPromoPanel(false);
+  }, []);
+
   if (!product) {
     return (
       <div className="max-w-content-wide mx-auto px-6 py-12 text-center">
@@ -155,6 +167,7 @@ export default function ProductDetailPage() {
   const hasVariants = variantAttributes.length > 0 && allVariants.length > 0;
   const galleryImages = product.galleryImages || [product.imageUrl];
   const showPromoPanel = isAuthenticated && promoPanelVariant !== null;
+  const showProductInfoPanel = isAuthenticated && showProductPromoPanel && product !== null;
 
   return (
     <div className="max-w-content-wide mx-auto px-6 py-8">
@@ -164,7 +177,11 @@ export default function ProductDetailPage() {
       </Link>
 
       {/* Top Section: Gallery + Product Family Info + Specifications + Thumbnails */}
-      <ProductTopSection product={product} galleryImages={galleryImages} />
+      <ProductTopSection
+        product={product}
+        galleryImages={galleryImages}
+        onOpenPromotionPanel={handleOpenProductPromoPanel}
+      />
 
       {/* SKU Tables Section */}
       {hasVariants && (
@@ -212,7 +229,7 @@ export default function ProductDetailPage() {
               />
             </div>
 
-            {/* Right: Fixed Promotion Selection Panel */}
+            {/* Right: Fixed SKU Promotion Selection Panel */}
             {showPromoPanel && (
               <>
                 {/* Backdrop */}
@@ -241,6 +258,28 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Product-level Promotion Info Panel (informational only) */}
+      {showProductInfoPanel && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
+            onClick={handleCloseProductPromoPanel}
+          />
+          <aside
+            className="fixed top-0 right-0 z-50 overflow-y-auto"
+            style={{
+              width: 420,
+              height: "100vh",
+              borderLeft: `1px solid ${config.borderColor}`,
+              boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
+            }}
+          >
+            <PromotionInfoPanel product={product!} onClose={handleCloseProductPromoPanel} />
+          </aside>
+        </>
       )}
     </div>
   );

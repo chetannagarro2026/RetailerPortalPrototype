@@ -1,21 +1,28 @@
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
-import { ShoppingCartOutlined, DownOutlined, RightOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, DownOutlined, RightOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
 import { useOrder } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
 import { resolveVariantPricing, getEffectiveTierPricing } from "../utils/pricing";
+import { getVariantPromotions } from "../context/PromotionContext";
+import SkuPromotionPanel from "../components/promotions/SkuPromotionPanel";
 import FulfillmentPanel from "../components/product-family/FulfillmentPanel";
 
 export default function SkuDetailPage() {
   const config = activeBrandConfig;
   const { productId, variantId } = useParams<{ productId: string; variantId: string }>();
   const { addItem } = useOrder();
+  const { isAuthenticated } = useAuth();
 
   const product = productId ? getProductById(decodeURIComponent(productId)) : null;
   const variant = product?.variants?.find((v) => v.id === variantId) || null;
+
+  const [showPromoPanel, setShowPromoPanel] = useState(false);
+  const handleOpenPromoPanel = useCallback(() => setShowPromoPanel(true), []);
+  const handleClosePromoPanel = useCallback(() => setShowPromoPanel(false), []);
 
   if (!product || !variant) {
     return (
@@ -52,7 +59,7 @@ export default function SkuDetailPage() {
         </div>
 
         <div>
-          <SkuHeader product={product} variant={variant} />
+          <SkuHeader product={product} variant={variant} onOpenPromoPanel={handleOpenPromoPanel} />
           <SkuOrderSection product={product} variant={variant} addItem={addItem} />
           <OfferDetailsSection product={product} variant={variant} />
           <FulfillmentSection variant={variant} />
@@ -61,6 +68,32 @@ export default function SkuDetailPage() {
           )}
         </div>
       </div>
+
+      {/* SKU Promotion Selection Panel */}
+      {isAuthenticated && showPromoPanel && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
+            onClick={handleClosePromoPanel}
+          />
+          <aside
+            className="fixed top-0 right-0 z-50 overflow-y-auto"
+            style={{
+              width: 420,
+              height: "100vh",
+              borderLeft: `1px solid ${config.borderColor}`,
+              boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
+            }}
+          >
+            <SkuPromotionPanel
+              product={product}
+              variant={variant}
+              onClose={handleClosePromoPanel}
+            />
+          </aside>
+        </>
+      )}
     </div>
   );
 }
@@ -93,10 +126,11 @@ function SkuBreadcrumb({ product, variant }: { product: CatalogProduct; variant:
 
 // ── SKU Header ──────────────────────────────────────────────────────
 
-function SkuHeader({ product, variant }: { product: CatalogProduct; variant: ProductVariant }) {
+function SkuHeader({ product, variant, onOpenPromoPanel }: { product: CatalogProduct; variant: ProductVariant; onOpenPromoPanel?: () => void }) {
   const config = activeBrandConfig;
   const { isAuthenticated, showSignInModal } = useAuth();
   const pricing = resolveVariantPricing(variant, product);
+  const promoCount = isAuthenticated ? getVariantPromotions(variant.id, product).length : 0;
   const variantDesc = Object.entries(variant.attributes)
     .map(([k, v]) => `${k}: ${v}`)
     .join(" · ");
@@ -180,13 +214,16 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
             </p>
           )}
 
-          {/* Compact inline promotion pill */}
-          {pricing.hasPromotion && (
+          {/* Promotions Available badge */}
+          {promoCount > 0 && (
             <span
-              className="inline-block text-[10px] font-medium mt-1.5 px-2.5 py-0.5 rounded-full"
-              style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}
+              onClick={onOpenPromoPanel}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold mt-2 px-3 py-1.5 rounded-full cursor-pointer transition-colors"
+              style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
             >
-              {pricing.promotionLabel} applied
+              <TagOutlined className="text-[11px]" />
+              {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"} Available
+              <span className="text-[10px] ml-0.5">&#9662;</span>
             </span>
           )}
         </div>

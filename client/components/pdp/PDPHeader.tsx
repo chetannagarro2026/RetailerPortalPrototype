@@ -6,9 +6,10 @@ import { resolveProductPricing, getEffectiveTierPricing, countProductPromotions 
 
 interface PDPHeaderProps {
   product: CatalogProduct;
+  onOpenPromotionPanel?: () => void;
 }
 
-export default function PDPHeader({ product }: PDPHeaderProps) {
+export default function PDPHeader({ product, onOpenPromotionPanel }: PDPHeaderProps) {
   const config = activeBrandConfig;
   const { isAuthenticated, showSignInModal } = useAuth();
   const pricing = resolveProductPricing(product);
@@ -55,11 +56,13 @@ export default function PDPHeader({ product }: PDPHeaderProps) {
       {isAuthenticated && countProductPromotions(product) > 0 && (
         <div className="mb-3">
           <span
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full cursor-default"
+            onClick={onOpenPromotionPanel}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full cursor-pointer transition-colors"
             style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
           >
             <TagOutlined className="text-[11px]" />
             {countProductPromotions(product)} {countProductPromotions(product) === 1 ? "Promotion" : "Promotions"} Available
+            <span className="text-[10px] ml-0.5">&#9662;</span>
           </span>
         </div>
       )}
@@ -189,15 +192,6 @@ function PdpPricingBlock({
         </p>
       )}
 
-      {/* Compact inline promotion pill — below savings */}
-      {pricing.hasPromotion && (
-        <span
-          className="inline-block text-[10px] font-medium mt-1.5 px-2.5 py-0.5 rounded-full"
-          style={{ backgroundColor: "#F0F4FF", color: "#4338CA" }}
-        >
-          {pricing.promotionLabel} applied
-        </span>
-      )}
 
       {/* Volume Pricing (reflects final effective price) */}
       {effectiveTiers && effectiveTiers.length > 1 && (
