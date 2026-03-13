@@ -34,7 +34,7 @@ export default function SubcategoryCardGrid({ node }: SubcategoryCardGridProps) 
 
   // Level 1+: NodeCard grid (3-4 cols, 24px gap)
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pl-4">
       {children.map((child) => (
         <NodeCard key={child.id} node={child} />
       ))}

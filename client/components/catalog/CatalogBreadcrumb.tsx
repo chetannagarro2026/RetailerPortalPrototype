@@ -24,7 +24,7 @@ export default function CatalogBreadcrumb({ node }: CatalogBreadcrumbProps) {
   ];
 
   return (
-    <nav className="flex items-center gap-1.5 flex-wrap mb-2 ml-4">
+    <nav className="flex items-center gap-1.5 flex-wrap mb-2 pl-4">
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (

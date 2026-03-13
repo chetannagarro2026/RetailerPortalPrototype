@@ -488,13 +488,13 @@ export default function CatalogNodePage() {
 
   if (isSubcategoryLanding) {
     return (
-      <div className="w-full px-4 py-4">
+      <div className="w-full pr-4 py-4">
         {node.level > 0 && (
           <CatalogBreadcrumb node={node} />
         )}
         <div className="mb-6">
           <h1
-            className="text-xl font-semibold mb-1"
+            className="text-xl font-semibold mb-1 pl-4"
             style={{ color: config.primaryColor }}
           >
             {node.label}
