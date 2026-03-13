@@ -42,10 +42,10 @@ export default function SkuDetailPage() {
   }
 
   return (
-    <div className="max-w-content-wide mx-auto px-6 py-8">
+    <div className="max-w-content-wide mx-auto px-6 py-4">
       <SkuBreadcrumb product={product} variant={variant} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
         <div>
           <div
             className="w-full rounded-xl overflow-hidden"
