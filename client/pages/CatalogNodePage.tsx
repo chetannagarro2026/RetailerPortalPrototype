@@ -116,7 +116,7 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
   const isBrandMode = modeInfo.mode === "brand";
 
   return (
-    <div className="w-full px-6 py-4">
+    <div className="w-full px-4 py-4">
       {/* Breadcrumb — aligned with content area (past sidebar) */}
       <div style={{ paddingLeft: 264 }}>
         <GlobalBreadcrumb modeInfo={modeInfo} />
@@ -454,7 +454,7 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
   }, []);
 
   return (
-    <div className="w-full px-6 py-4">
+    <div className="w-full px-4 py-4">
       <div style={{ paddingLeft: 264 }}>
         <CatalogBreadcrumb node={node} />
       </div>
@@ -588,7 +588,7 @@ export default function CatalogNodePage() {
 
   if (isSubcategoryLanding) {
     return (
-      <div className="w-full px-6 py-4">
+      <div className="w-full px-4 py-4">
         {node.level > 0 && (
           <div style={{ paddingLeft: 264 }}>
             <CatalogBreadcrumb node={node} />
