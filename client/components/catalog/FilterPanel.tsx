@@ -36,77 +36,87 @@ export default function FilterPanel({
   if (resolvedFilters.length === 0) return null;
 
   return (
-    <div className="space-y-1">
+    <div
+      style={{
+        borderTop: "1px solid #E5E7EB",
+        borderRight: "1px solid #E5E7EB",
+        borderBottom: "1px solid #E5E7EB",
+        borderLeft: "none",
+        padding: "16px 16px 24px 16px",
+      }}
+    >
       <h4
-        className="text-xs font-semibold uppercase tracking-wider mb-3"
-        style={{ color: config.secondaryColor }}
+        className="text-xs uppercase"
+        style={{ color: config.secondaryColor, fontWeight: 600, letterSpacing: "0.04em", marginBottom: 12 }}
       >
         Filters
       </h4>
-      {resolvedFilters.map((rf) => {
-        const isOpen = openSections.has(rf.def.key);
-        const selectedCount = (activeFilters[rf.def.key] || []).length;
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {resolvedFilters.map((rf) => {
+          const isOpen = openSections.has(rf.def.key);
+          const selectedCount = (activeFilters[rf.def.key] || []).length;
 
-        return (
-          <div
-            key={rf.def.key}
-            className="border-b"
-            style={{ borderColor: config.borderColor }}
-          >
-            <button
-              onClick={() => toggle(rf.def.key)}
-              className="w-full flex items-center justify-between py-3 text-xs font-medium cursor-pointer bg-transparent border-none"
-              style={{ color: config.primaryColor }}
+          return (
+            <div
+              key={rf.def.key}
+              className="border-b"
+              style={{ borderColor: config.borderColor }}
             >
-              <span className="flex items-center gap-1.5">
-                {rf.def.label}
-                {selectedCount > 0 && (
-                  <span
-                    className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-                    style={{ backgroundColor: config.primaryColor, color: "#fff" }}
-                  >
-                    {selectedCount}
-                  </span>
-                )}
-              </span>
-              <DownOutlined
-                className="text-[9px] transition-transform duration-200"
-                style={{
-                  color: config.secondaryColor,
-                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                }}
-              />
-            </button>
-            {isOpen && (
-              <div className="pb-3">
-                {rf.def.filterType === "checkbox" && (
-                  <CheckboxFilter
-                    filterKey={rf.def.key}
-                    options={rf.options}
-                    selected={activeFilters[rf.def.key] || []}
-                    onChange={onFilterChange}
-                  />
-                )}
-                {rf.def.filterType === "range" && rf.range && (
-                  <RangeFilter
-                    range={rf.range}
-                    activeRange={priceRange}
-                    onChange={onPriceRangeChange}
-                  />
-                )}
-                {rf.def.filterType === "boolean" && (
-                  <BooleanFilter
-                    filterKey={rf.def.key}
-                    label={rf.def.label}
-                    selected={activeFilters[rf.def.key] || []}
-                    onChange={onFilterChange}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+              <button
+                onClick={() => toggle(rf.def.key)}
+                className="w-full flex items-center justify-between py-3 text-xs font-medium cursor-pointer bg-transparent border-none"
+                style={{ color: config.primaryColor }}
+              >
+                <span className="flex items-center gap-1.5">
+                  {rf.def.label}
+                  {selectedCount > 0 && (
+                    <span
+                      className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: config.primaryColor, color: "#fff" }}
+                    >
+                      {selectedCount}
+                    </span>
+                  )}
+                </span>
+                <DownOutlined
+                  className="text-[9px] transition-transform duration-200"
+                  style={{
+                    color: config.secondaryColor,
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+              {isOpen && (
+                <div className="pb-3">
+                  {rf.def.filterType === "checkbox" && (
+                    <CheckboxFilter
+                      filterKey={rf.def.key}
+                      options={rf.options}
+                      selected={activeFilters[rf.def.key] || []}
+                      onChange={onFilterChange}
+                    />
+                  )}
+                  {rf.def.filterType === "range" && rf.range && (
+                    <RangeFilter
+                      range={rf.range}
+                      activeRange={priceRange}
+                      onChange={onPriceRangeChange}
+                    />
+                  )}
+                  {rf.def.filterType === "boolean" && (
+                    <BooleanFilter
+                      filterKey={rf.def.key}
+                      label={rf.def.label}
+                      selected={activeFilters[rf.def.key] || []}
+                      onChange={onFilterChange}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
