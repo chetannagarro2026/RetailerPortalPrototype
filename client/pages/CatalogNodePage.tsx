@@ -156,7 +156,8 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
             top: "calc(var(--header-height) + var(--nav-height) + 24px)",
             maxHeight:
               "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
-            borderRight: `1px solid ${config.borderColor}`,
+            border: `1px solid ${config.borderColor}`,
+            borderRadius: 8,
           }}
         >
           <CategoryTree activeNodeId="" rootNodeId="root" />
@@ -469,7 +470,8 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
               top: "calc(var(--header-height) + var(--nav-height) + 24px)",
               maxHeight:
                 "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
-              borderRight: `1px solid ${config.borderColor}`,
+              border: `1px solid ${config.borderColor}`,
+              borderRadius: 8,
             }}
           >
             <CategoryTree
