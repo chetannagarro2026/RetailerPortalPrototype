@@ -117,8 +117,10 @@ function GlobalCatalogPage({ modeInfo }: { modeInfo: CatalogModeInfo }) {
 
   return (
     <div className="w-full px-6 py-4">
-      {/* Breadcrumb */}
-      <GlobalBreadcrumb modeInfo={modeInfo} />
+      {/* Breadcrumb — aligned with content area (past sidebar) */}
+      <div style={{ paddingLeft: 264 }}>
+        <GlobalBreadcrumb modeInfo={modeInfo} />
+      </div>
 
       {/* Brand header */}
       {isBrandMode && brandStats && (
@@ -453,7 +455,9 @@ function HybridCollectionPage({ slugPath }: { slugPath: string[] }) {
 
   return (
     <div className="w-full px-6 py-4">
-      <CatalogBreadcrumb node={node} />
+      <div style={{ paddingLeft: 264 }}>
+        <CatalogBreadcrumb node={node} />
+      </div>
 
       <div className="flex" style={{ gap: 24 }}>
         {/* Left Sidebar: Tree + Filters */}
@@ -585,7 +589,11 @@ export default function CatalogNodePage() {
   if (isSubcategoryLanding) {
     return (
       <div className="w-full px-6 py-4">
-        {node.level > 0 && <CatalogBreadcrumb node={node} />}
+        {node.level > 0 && (
+          <div style={{ paddingLeft: 264 }}>
+            <CatalogBreadcrumb node={node} />
+          </div>
+        )}
         <div className="mb-6">
           <h1
             className="text-xl font-semibold mb-1"
