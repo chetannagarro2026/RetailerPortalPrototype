@@ -205,25 +205,14 @@ export default function HybridFamilyTable({
         )}
       </div>
 
-      {/* Quick Add Panel — fixed floating panel */}
+      {/* Quick Add Panel — sticky on right side */}
       {quickAddProduct && (
-        <div
-          className="fixed flex flex-col shadow-xl rounded-xl overflow-hidden"
-          style={{
-            top: "calc(var(--header-height) + var(--nav-height) + 16px)",
-            right: 16,
-            bottom: 40,
-            width: panelWidth,
-            border: `1px solid ${config.borderColor}`,
-            backgroundColor: "#fff",
-            zIndex: 50,
-          }}
-        >
-          {/* Drag handle (left edge) */}
+        <>
+          {/* Drag handle */}
           <div
             onMouseDown={onDragStart}
-            className="absolute left-0 top-0 bottom-0 flex items-center justify-center cursor-col-resize group"
-            style={{ width: 8, zIndex: 1 }}
+            className="shrink-0 flex items-center justify-center cursor-col-resize group"
+            style={{ width: 8 }}
             title="Drag to resize"
           >
             <div
@@ -231,13 +220,24 @@ export default function HybridFamilyTable({
               style={{ backgroundColor: config.borderColor }}
             />
           </div>
-          <QuickAddPanel
-            key={quickAddProduct.id}
-            product={quickAddProduct}
-            familyLink={`/product/${quickAddProduct.id}`}
-            onClose={handleClosePanel}
-          />
-        </div>
+          <div
+            className="shrink-0 sticky self-start flex flex-col shadow-xl rounded-xl overflow-hidden"
+            style={{
+              top: "calc(var(--header-height) + var(--nav-height) + 16px)",
+              height: "calc(100vh - var(--header-height) - var(--nav-height) - 48px)",
+              width: panelWidth,
+              border: `1px solid ${config.borderColor}`,
+              backgroundColor: "#fff",
+            }}
+          >
+            <QuickAddPanel
+              key={quickAddProduct.id}
+              product={quickAddProduct}
+              familyLink={`/product/${quickAddProduct.id}`}
+              onClose={handleClosePanel}
+            />
+          </div>
+        </>
       )}
     </div>
   );
