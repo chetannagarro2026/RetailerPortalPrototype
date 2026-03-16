@@ -1,150 +1,288 @@
-import { TagOutlined, CheckCircleFilled, GiftOutlined } from "@ant-design/icons";
+import { TagOutlined, CheckCircleFilled, GiftOutlined, RightOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import Tag from "../ui/Tag";
 import { cartPromotions, type CartPromotion } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
+import PromotionsDrawer from "./PromotionsDrawer";
 
-interface AppliedCartPromo {
-  promoId: string;
-  discountAmount?: number;
+export interface CartPromoState {
+  appliedPromoId: string | null;
+  appliedPromo: CartPromotion | null;
+  discountAmount: number;
 }
 
-export default function CartPromotionsSection() {
+interface Props {
+  appliedPromoId: string | null;
+  onApply: (id: string) => void;
+  onRemove: () => void;
+}
+
+export default function CartPromotionsSection({ appliedPromoId, onApply, onRemove }: Props) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
-  const { totalValue, totalUnits } = useOrder();
-  const [appliedPromoId, setAppliedPromoId] = useState<string | null>(null);
+  const { totalValue } = useOrder();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   if (!isAuthenticated || cartPromotions.length === 0) return null;
 
+  // Categorize promotions
+  const eligible = cartPromotions.filter(
+    (p) => totalValue >= p.thresholdAmount && p.id !== appliedPromoId,
+  );
+  const almostUnlocked = cartPromotions
+    .filter((p) => {
+      if (totalValue >= p.thresholdAmount) return false;
+      if (p.id === appliedPromoId) return false;
+      const remaining = p.thresholdAmount - totalValue;
+      return remaining / p.thresholdAmount <= 0.3;
+    })
+    .sort((a, b) => a.thresholdAmount - b.thresholdAmount);
+
+  const appliedPromo = appliedPromoId
+    ? cartPromotions.find((p) => p.id === appliedPromoId) ?? null
+    : null;
+
+  // Pick the best "ready to apply" promo (highest discount)
+  const readyPromo = eligible.sort((a, b) => {
+    const aVal = a.discountAmount ?? 0;
+    const bVal = b.discountAmount ?? 0;
+    return bVal - aVal;
+  })[0] ?? null;
+
+  // Pick the closest "almost unlocked" promo
+  const almostPromo = almostUnlocked[0] ?? null;
+
+  // Count remaining promotions not shown in the card
+  const shownIds = new Set<string>();
+  if (appliedPromo) shownIds.add(appliedPromo.id);
+  if (readyPromo) shownIds.add(readyPromo.id);
+  if (almostPromo) shownIds.add(almostPromo.id);
+  const remainingCount = cartPromotions.length - shownIds.size;
+
+  return (
+    <>
+      <div
+        className="rounded-xl p-5 mb-5"
+        style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+      >
+        <h3
+          className="text-sm font-semibold mb-4 flex items-center gap-2"
+          style={{ color: config.primaryColor }}
+        >
+          <TagOutlined className="text-xs" style={{ color: "#16A34A" }} />
+          Cart Promotions
+        </h3>
+
+        <div className="space-y-3">
+          {/* Show applied promo if exists */}
+          {appliedPromo && (
+            <AppliedPromoCard promo={appliedPromo} onRemove={onRemove} />
+          )}
+
+          {/* Promotion 1: Ready to Apply */}
+          {readyPromo && (
+            <ReadyPromoCard promo={readyPromo} onApply={() => onApply(readyPromo.id)} />
+          )}
+
+          {/* Promotion 2: Almost Unlocked */}
+          {almostPromo && (
+            <AlmostUnlockedCard promo={almostPromo} cartTotal={totalValue} />
+          )}
+
+          {/* No promos to show at all */}
+          {!appliedPromo && !readyPromo && !almostPromo && (
+            <p className="text-xs py-2" style={{ color: config.secondaryColor }}>
+              Add more items to unlock promotions.
+            </p>
+          )}
+        </div>
+
+        {/* View More link */}
+        {remainingCount > 0 && (
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="mt-4 text-xs font-medium cursor-pointer flex items-center gap-1 w-full justify-center py-1.5"
+            style={{
+              color: config.primaryColor,
+              border: "none",
+              background: "none",
+            }}
+          >
+            View {remainingCount} More Available Offer{remainingCount !== 1 ? "s" : ""}
+            <RightOutlined className="text-[9px]" />
+          </button>
+        )}
+      </div>
+
+      <PromotionsDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        promotions={cartPromotions}
+        cartTotal={totalValue}
+        appliedPromoId={appliedPromoId}
+        onApply={(id) => {
+          onApply(id);
+        }}
+        onRemove={onRemove}
+      />
+    </>
+  );
+}
+
+// ── Applied Promo Card ──────────────────────────────────────────────
+
+function AppliedPromoCard({
+  promo,
+  onRemove,
+}: {
+  promo: CartPromotion;
+  onRemove: () => void;
+}) {
+  const config = activeBrandConfig;
+
   return (
     <div
-      className="rounded-xl p-5 mb-5"
-      style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
+      className="rounded-lg p-4 transition-colors"
+      style={{
+        border: "2px solid #EA580C",
+        backgroundColor: "#FFF7ED",
+      }}
     >
-      <h3 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: config.primaryColor }}>
-        <TagOutlined className="text-xs" style={{ color: "#16A34A" }} />
-        Cart Promotions
-      </h3>
-
-      <div className="space-y-3">
-        {cartPromotions.map((promo) => (
-          <CartPromoCard
-            key={promo.id}
-            promo={promo}
-            cartTotal={totalValue}
-            cartUnits={totalUnits}
-            isApplied={appliedPromoId === promo.id}
-            onApply={() => setAppliedPromoId(promo.id)}
-            onRemove={() => setAppliedPromoId(null)}
-          />
-        ))}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            {promo.type === "spend-free-units" ? (
+              <GiftOutlined className="text-xs" style={{ color: "#EA580C" }} />
+            ) : (
+              <TagOutlined className="text-xs" style={{ color: "#EA580C" }} />
+            )}
+            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+              GET {promo.label}
+            </span>
+            <CheckCircleFilled className="text-xs" style={{ color: "#EA580C" }} />
+          </div>
+          <p className="text-[11px] mb-1" style={{ color: config.secondaryColor }}>
+            {promo.description}
+          </p>
+          <p className="text-[11px] font-medium" style={{ color: "#EA580C" }}>
+            Promotion applied to your order
+          </p>
+        </div>
+        <div className="shrink-0">
+          <button
+            onClick={onRemove}
+            className="text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+            style={{
+              backgroundColor: "transparent",
+              color: "#DC2626",
+              border: "1px solid #FECACA",
+            }}
+          >
+            Remove
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function CartPromoCard({
+// ── Ready to Apply Card ─────────────────────────────────────────────
+
+function ReadyPromoCard({
+  promo,
+  onApply,
+}: {
+  promo: CartPromotion;
+  onApply: () => void;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="rounded-lg p-4 transition-colors"
+      style={{
+        border: `1px solid ${config.borderColor}`,
+        backgroundColor: "#F0FDF4",
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            {promo.type === "spend-free-units" ? (
+              <GiftOutlined className="text-xs" style={{ color: "#16A34A" }} />
+            ) : (
+              <TagOutlined className="text-xs" style={{ color: "#16A34A" }} />
+            )}
+            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+              GET {promo.label}
+            </span>
+          </div>
+          <p className="text-[11px] mb-1" style={{ color: config.secondaryColor }}>
+            {promo.description}
+          </p>
+          <p className="text-[11px] font-medium" style={{ color: "#16A34A" }}>
+            Eligible ✔
+          </p>
+        </div>
+        <div className="shrink-0">
+          <button
+            onClick={onApply}
+            className="text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+            style={{
+              backgroundColor: config.primaryColor,
+              color: "#fff",
+              border: "none",
+            }}
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Almost Unlocked Card ────────────────────────────────────────────
+
+function AlmostUnlockedCard({
   promo,
   cartTotal,
-  cartUnits,
-  isApplied,
-  onApply,
-  onRemove,
 }: {
   promo: CartPromotion;
   cartTotal: number;
-  cartUnits: number;
-  isApplied: boolean;
-  onApply: () => void;
-  onRemove: () => void;
 }) {
   const config = activeBrandConfig;
-  const isEligible = cartTotal >= promo.thresholdAmount;
   const remaining = promo.thresholdAmount - cartTotal;
 
   return (
     <div
       className="rounded-lg p-4 transition-colors"
       style={{
-        border: isApplied
-          ? "2px solid #EA580C"
-          : `1px solid ${config.borderColor}`,
-        backgroundColor: isApplied ? "#FFF7ED" : isEligible ? "#F0FDF4" : config.cardBg,
+        border: `1px solid ${config.borderColor}`,
+        backgroundColor: config.cardBg,
       }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          {/* Label */}
-          <div className="flex items-center gap-2 mb-1">
-            {promo.type === "spend-free-units" ? (
-              <GiftOutlined className="text-xs" style={{ color: isApplied ? "#EA580C" : "#16A34A" }} />
-            ) : (
-              <TagOutlined className="text-xs" style={{ color: isApplied ? "#EA580C" : "#16A34A" }} />
-            )}
-            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-              GET {promo.label}
-            </span>
-            {isApplied && (
-              <CheckCircleFilled className="text-xs" style={{ color: "#EA580C" }} />
-            )}
-          </div>
-
-          {/* Description */}
-          <p className="text-[11px] mb-1" style={{ color: config.secondaryColor }}>
-            {promo.description}
-          </p>
-
-          {/* Progress indicator */}
-          {!isEligible && (
-            <p className="text-[11px] font-medium" style={{ color: "#D97706" }}>
-              Add ${remaining.toFixed(2)} more to unlock this promotion
-            </p>
-          )}
-          {isEligible && !isApplied && (
-            <p className="text-[11px] font-medium" style={{ color: "#16A34A" }}>
-              You're eligible for this promotion!
-            </p>
-          )}
-        </div>
-
-        {/* Action */}
-        <div className="shrink-0">
-          {isApplied ? (
-            <button
-              onClick={onRemove}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
-              style={{
-                backgroundColor: "transparent",
-                color: "#DC2626",
-                border: "1px solid #FECACA",
-              }}
-            >
-              Remove
-            </button>
-          ) : isEligible ? (
-            <button
-              onClick={onApply}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
-              style={{
-                backgroundColor: config.primaryColor,
-                color: "#fff",
-                border: "none",
-              }}
-            >
-              Apply
-            </button>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          {promo.type === "spend-free-units" ? (
+            <GiftOutlined className="text-xs" style={{ color: "#D97706" }} />
           ) : (
-            <Tag variant="neutral" size="compact">Locked</Tag>
+            <TagOutlined className="text-xs" style={{ color: "#D97706" }} />
           )}
+          <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+            GET {promo.label}
+          </span>
         </div>
-      </div>
+        <p className="text-[11px] mb-1" style={{ color: config.secondaryColor }}>
+          {promo.description}
+        </p>
+        <p className="text-[11px] font-medium mb-2" style={{ color: "#D97706" }}>
+          Add ${remaining.toFixed(2)} more to unlock
+        </p>
 
-      {/* Progress bar */}
-      {!isApplied && (
-        <div className="mt-2.5">
+        {/* Progress bar */}
+        <div>
           <div
             className="h-1.5 rounded-full overflow-hidden"
             style={{ backgroundColor: config.borderColor }}
@@ -153,7 +291,7 @@ function CartPromoCard({
               className="h-full rounded-full transition-all duration-300"
               style={{
                 width: `${Math.min(100, (cartTotal / promo.thresholdAmount) * 100)}%`,
-                backgroundColor: isEligible ? "#16A34A" : "#D97706",
+                backgroundColor: "#D97706",
               }}
             />
           </div>
@@ -166,7 +304,7 @@ function CartPromoCard({
             </span>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

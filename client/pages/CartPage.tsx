@@ -8,6 +8,8 @@ import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 import CartPromotionsSection from "../components/cart/CartPromotionsSection";
+import { cartPromotions } from "../data/catalogData";
+import { useState } from "react";
 
 export default function CartPage() {
   const config = activeBrandConfig;
@@ -15,16 +17,29 @@ export default function CartPage() {
   const { items, totalUnits, totalValue, updateQuantity, removeItem, clearOrder } = useOrder();
   const { isAuthenticated, showSignInModal } = useAuth();
   const { isExceeded } = useCreditState();
+  const [appliedPromoId, setAppliedPromoId] = useState<string | null>(null);
 
   const formatCurrency = (val: number) =>
     "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
-  // Calculate total savings across all items
-  const totalSavings = items.reduce((sum, item) => {
+  // Calculate product-level savings (SKU discounts, special price savings)
+  const productSavings = items.reduce((sum, item) => {
     if (item.isFreeItem) return sum;
     const listPrice = item.listPrice ?? item.unitPrice;
     return sum + (listPrice - item.unitPrice) * item.quantity;
   }, 0);
+
+  // Calculate cart promotion discount
+  const appliedPromo = appliedPromoId
+    ? cartPromotions.find((p) => p.id === appliedPromoId) ?? null
+    : null;
+  const cartPromoDiscount =
+    appliedPromo && totalValue >= appliedPromo.thresholdAmount
+      ? (appliedPromo.discountAmount ?? 0)
+      : 0;
+
+  const totalSavings = productSavings + cartPromoDiscount;
+  const grandTotal = totalValue - cartPromoDiscount;
 
   if (items.length === 0) {
     return (
@@ -82,7 +97,11 @@ export default function CartPage() {
         {/* Right: Cart Promotions + Order + Credit Summary */}
         <div className="space-y-5">
           {/* Cart Promotions */}
-          <CartPromotionsSection />
+          <CartPromotionsSection
+            appliedPromoId={appliedPromoId}
+            onApply={(id) => setAppliedPromoId(id)}
+            onRemove={() => setAppliedPromoId(null)}
+          />
 
           {/* Order Summary */}
           <div
@@ -93,10 +112,33 @@ export default function CartPage() {
               Order Summary
             </h3>
             <div className="space-y-3">
+              {/* Subtotal */}
               <div className="flex justify-between text-sm">
                 <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
                 <span className="font-medium" style={{ color: config.primaryColor }}>{formatCurrency(totalValue)}</span>
               </div>
+
+              {/* Product Promotions */}
+              {productSavings > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#16A34A" }}>Product Promotions</span>
+                  <span className="font-semibold" style={{ color: "#16A34A" }}>
+                    -{formatCurrency(productSavings)}
+                  </span>
+                </div>
+              )}
+
+              {/* Cart Promotion */}
+              {cartPromoDiscount > 0 && appliedPromo && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#EA580C" }}>Cart Promotion ({appliedPromo.label})</span>
+                  <span className="font-semibold" style={{ color: "#EA580C" }}>
+                    -{formatCurrency(cartPromoDiscount)}
+                  </span>
+                </div>
+              )}
+
+              {/* Total Savings */}
               {totalSavings > 0 && (
                 <div className="flex justify-between text-sm">
                   <span style={{ color: "#16A34A" }}>Total Savings</span>
@@ -105,15 +147,19 @@ export default function CartPage() {
                   </span>
                 </div>
               )}
+
+              {/* Shipping */}
               <div className="flex justify-between text-sm">
                 <span style={{ color: config.secondaryColor }}>Estimated Shipping</span>
                 <span className="text-xs font-medium" style={{ color: "#16A34A" }}>Calculated at checkout</span>
               </div>
+
+              {/* Grand Total */}
               <div className="border-t pt-3" style={{ borderColor: config.borderColor }}>
                 <div className="flex justify-between">
                   <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>Grand Total</span>
                   <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-                    {formatCurrency(totalValue)}
+                    {formatCurrency(grandTotal)}
                   </span>
                 </div>
               </div>
