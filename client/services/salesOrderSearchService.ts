@@ -251,7 +251,7 @@ export async function fetchSalesOrdersWithPagination(
     customerOrderId: null,
     duration: null,
     customerName: null,
-    retailerAccountId: "9038",
+    retailerAccountId: retailerAccountId,
   };
 
   const data = await apiPost<SalesOrderSearchResponse>(apiConfig.endpoints.salesOrderSearch, payload);
@@ -290,7 +290,7 @@ export async function fetchSalesOrderStatusCounts(
     customerOrderId: null,
     duration: null,
     customerName: null,
-    retailerAccountId: "9038",
+    retailerAccountId: retailerAccountId,
   };
 
   const data = await apiPost<SalesOrderStatusCountResponse>(apiConfig.endpoints.salesOrderCountStatus, payload);
@@ -299,16 +299,30 @@ export async function fetchSalesOrderStatusCounts(
 
 /**
  * Map sales order status to step index
+ * Steps: 0=Pending, 1=Approved, 2=Shipped, 3=Completed
  */
 function mapRequestStateToStep(requestState: string): number {
-  const stateMap: Record<string, number> = {
-    UNPROCESSED: 0,
-    RECEIVED: 1,
-    ACCEPTED: 2,
-    PROCESSED: 3,
-    CANCELLED: 0,
-  };
-  return stateMap[requestState] ?? 0;
+  // Pending: PARTIALLY_PROCESSING, ON_HOLD, RECEIVED, RESOLVED, UNPROCESSED
+  const pending = ["PARTIALLY_PROCESSING", "ON_HOLD", "RECEIVED", "RESOLVED", "UNPROCESSED"];
+  // Unprocessed: UNPROCESSED
+  const unprocessed = ["UNPROCESSED"];
+  // Approved: PROCESSING, ACCEPTED, PARTIALLY_PROCESSED
+  const approved = ["PROCESSING", "ACCEPTED", "PARTIALLY_PROCESSED"];
+  // Shipped: PROCESSED, INVOICE_CREATED, PARTIALLY_COMPLETED
+  const shipped = ["PROCESSED", "INVOICE_CREATED", "PARTIALLY_COMPLETED"];
+  // Completed: COMPLETED
+  const completed = ["COMPLETED"];
+  // Cancelled: CANCELLED
+  const cancelled = ["CANCELLED"];
+  
+  if (pending.includes(requestState)) return 0;
+  if (unprocessed.includes(requestState)) return 1;
+  if (approved.includes(requestState)) return 2;
+  if (shipped.includes(requestState)) return 3;
+  if (completed.includes(requestState)) return 4;
+  if (cancelled.includes(requestState)) return 5;
+  // Cancelled orders remain at step 0
+  return 0;
 }
 
 /**
@@ -327,7 +341,8 @@ function calculateTotalValue(lineItems: SalesOrderLineItem[]): number {
 export function mapSalesOrderToUpdate(order: SalesOrder): POUpdate {
   return {
     type: "po",
-    poNumber: `SO-${order.salesOrderId}`,
+    poNumber: `${order.applicationOrderId}`,
+    salesOrderId: order.salesOrderId,
     orderDate: new Date(order.orderDate).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",

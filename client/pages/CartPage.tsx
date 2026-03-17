@@ -2,6 +2,7 @@ import { Button, InputNumber } from "antd";
 import { DeleteOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { activeBrandConfig, formatPrice, formatCurrency } from "../config/brandConfig";
+import { amountToWords } from "../lib/utils";
 import { useOrder } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
@@ -103,12 +104,15 @@ export default function CartPage() {
                 <span className="text-xs font-medium" style={{ color: "#16A34A" }}>Calculated at checkout</span>
               </div>
               <div className="border-t pt-3" style={{ borderColor: config.borderColor }}>
-                <div className="flex justify-between">
+                <div className="flex justify-between mb-1">
                   <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>Estimated Total</span>
                   <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
                     {formatCurrency(totalValue)}
                   </span>
                 </div>
+                <p className="text-[10px] italic" style={{ color: config.secondaryColor }}>
+                  ({amountToWords(totalValue)})
+                </p>
               </div>
             </div>
 
@@ -208,7 +212,7 @@ function CartItemList({
               )}
               <div className="min-w-0">
                 <Link
-                  to={`/product/${encodeURIComponent(item.productId)}/sku/${encodeURIComponent(item.id)}`}
+                  to={`/product/${encodeURIComponent(item.upc)}`}
                   className="text-sm font-medium truncate block no-underline hover:underline"
                   style={{ color: config.primaryColor }}
                 >

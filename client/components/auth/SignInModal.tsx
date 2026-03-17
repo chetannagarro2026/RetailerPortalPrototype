@@ -1,5 +1,5 @@
 import { LoginOutlined, UserOutlined, CloseOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { useAuth } from "../../context/AuthContext";
 
@@ -9,6 +9,7 @@ const DEFAULT_MESSAGE =
 export default function SignInModal() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
+  const location = useLocation();
   const { signInModalVisible, signInModalMessage, hideSignInModal } = useAuth();
 
   if (!signInModalVisible) return null;
@@ -17,7 +18,8 @@ export default function SignInModal() {
 
   const handleSignIn = () => {
     hideSignInModal();
-    navigate("/sign-in");
+    // Pass current location to sign-in page so it can redirect back after login
+    navigate("/sign-in", { state: { from: location.pathname + location.search } });
   };
 
   return (

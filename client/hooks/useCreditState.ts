@@ -1,7 +1,7 @@
 import { useOrder } from "../context/OrderContext";
 
 // Mock credit data — would come from API in production
-const CREDIT_LIMIT = 150000;
+const CREDIT_LIMIT = 100000000; // $10 crores
 const CREDIT_USED = 92000;
 
 export interface CreditState {

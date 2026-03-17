@@ -106,7 +106,7 @@ export default function CartDropdown({ visible, onClose }: CartDropdownProps) {
                           value={item.quantity}
                           onChange={(val) => val && updateQuantity(item.id, val)}
                           controls={false}
-                          style={{ width: 65, height: 28, borderRadius: 0, textAlign: "center" }}
+                          style={{ width: 75, height: 28, borderRadius: 0, textAlign: "center" }}
                         />
                         <Button
                           size="small"

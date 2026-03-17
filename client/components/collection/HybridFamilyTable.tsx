@@ -29,7 +29,10 @@ export default function HybridFamilyTable({
   const [quickAddProduct, setQuickAddProduct] = useState<CatalogProduct | null>(null);
 
   const handleQuickAdd = useCallback((product: CatalogProduct) => {
-    setQuickAddProduct(product);
+    // Toggle: close panel if same product is clicked again, otherwise open with new product
+    setQuickAddProduct((current) => 
+      current?.id === product.id ? null : product
+    );
   }, []);
 
   const handleClosePanel = useCallback(() => {
@@ -53,20 +56,20 @@ export default function HybridFamilyTable({
     <div
       className="flex gap-0"
       style={panelOpen ? {
-        // height: "calc(100vh - var(--header-height) - var(--nav-height) - 200px)",
-        overflow: "hidden",
+        maxWidth: "100%",
+        overflowX: "auto",
       } : undefined}
     >
       {/* Main table area */}
       <div
         className="flex-1 min-w-0"
-        style={panelOpen ? { overflow: "auto" } : undefined}
+        style={panelOpen ? { overflow: "auto", minWidth: 540 } : undefined}
       >
         <div
-          className="rounded-xl overflow-hidden"
-          style={{ border: `1px solid ${config.borderColor}`, minWidth: panelOpen ? undefined : 900 }}
+          className="rounded-xl overflow-auto"
+          style={{ border: `1px solid ${config.borderColor}`, minWidth: panelOpen ? 540 : 800 }}
         >
-          <table className="w-full border-collapse text-xs" style={{ tableLayout: "fixed" }}>
+          <table className="w-full border-collapse text-xs" style={{ tableLayout: "fixed", overflowX: "scroll" }}>
             <thead>
               <tr style={{ backgroundColor: config.cardBg }}>
                 <th
@@ -148,7 +151,7 @@ export default function HybridFamilyTable({
         <div
           className="shrink-0 ml-4 flex flex-col shadow-lg rounded-xl overflow-hidden"
           style={{
-            width: 360,
+            maxWidth: "370px",
             height: "100%",
             border: `1px solid ${config.borderColor}`,
             backgroundColor: "#fff",
@@ -257,24 +260,26 @@ function ProductRow({
         className="px-4 py-3 text-right"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
-        <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-          {isAuthenticated 
-            ? formatPrice(product.price)
-            : formatPrice(product.originalPrice || product.price)
-          }
-        </span>
-        {isAuthenticated && product.originalPrice && product.originalPrice > product.price && (
-          <span className="text-[10px] line-through ml-1.5" style={{ color: config.secondaryColor }}>
-            {formatPrice(product.originalPrice)}
+        <div className="flex items-center justify-end whitespace-nowrap gap-1.5">
+          <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+            {isAuthenticated 
+              ? formatPrice(product.price)
+              : formatPrice(product.originalPrice || product.price)
+            }
           </span>
-        )}
+          {isAuthenticated && product.originalPrice && product.originalPrice > product.price && (
+            <span className="text-[10px] line-through" style={{ color: config.secondaryColor }}>
+              {formatPrice(product.originalPrice)}
+            </span>
+          )}
+        </div>
         {!isAuthenticated && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 showSignInModal("Sign in to view Special Price and promotions.");
               }}
-              className="block text-[9px] mt-0.5 cursor-pointer bg-transparent border-none p-0 underline ml-auto"
+              className="text-[9px] mt-0.5 cursor-pointer bg-transparent border-none p-0 underline w-full text-right"
               style={{ color: "#2563EB" }}
             >
               Login to view Special Price
@@ -289,7 +294,7 @@ function ProductRow({
           style={{ borderBottom: `1px solid ${config.borderColor}` }}
         >
           {product.originalPrice && product.originalPrice > product.price ? (
-            <div>
+            <div className="flex items-center justify-end whitespace-nowrap">
               <span className="text-sm font-semibold" style={{ color: "#16A34A" }}>
                 {formatPrice(product.originalPrice - product.price)}
               </span>

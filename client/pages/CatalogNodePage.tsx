@@ -15,7 +15,7 @@ import {
 import { useCategoryContext, type EnrichedCategoryTree } from "../context/CategoryContext";
 import { fetchProductsByCategory, fetchBestPrices, type PriceRequestItem } from "../services/productService";
 import { fetchCategoryByCode, type CategoryItem } from "../services/categoryService";
-import { useCatalogState } from "../hooks/useCatalogState";
+import { useCatalogState, type SortKey } from "../hooks/useCatalogState";
 import { filterAttributeRegistry } from "../data/catalogData";
 import CatalogBreadcrumb from "../components/catalog/CatalogBreadcrumb";
 import SubcategoryCardGrid from "../components/catalog/SubcategoryCardGrid";
@@ -140,17 +140,47 @@ function GlobalBrandPage({ brandCode }: { brandCode: string }) {
 
   const [viewMode, setViewMode] = useState<CollectionViewMode>("table");
   const [tablePage, setTablePage] = useState(1);
+  const [sortBy, setSortBy] = useState<SortKey>("relevance");
 
   const handleCategoryClick = useCallback((categoryId: string) => {
     setSelectedCategoryId(categoryId);
     setTablePage(1);
   }, []);
 
+  // Apply sorting to products
+  const sortProducts = useCallback((productsToSort: typeof apiProducts) => {
+    const sorted = [...productsToSort];
+    switch (sortBy) {
+      case "price-asc":
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case "alpha-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "alpha-desc":
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "newest":
+        sorted.reverse();
+        break;
+      case "relevance":
+      default:
+        // relevance = original API order, no sorting needed
+        break;
+    }
+    return sorted;
+  }, [sortBy]);
+
+  const sortedProducts = useMemo(() => sortProducts(apiProducts), [apiProducts, sortProducts]);
+
   const PAGE_SIZE = 20;
   const paginatedProducts = useMemo(() => {
     const start = (tablePage - 1) * PAGE_SIZE;
-    return apiProducts.slice(start, start + PAGE_SIZE);
-  }, [apiProducts, tablePage]);
+    return sortedProducts.slice(start, start + PAGE_SIZE);
+  }, [sortedProducts, tablePage]);
 
   // Helper to get selected category data
   const selectedCategory = useMemo(() => {
@@ -207,7 +237,7 @@ function GlobalBrandPage({ brandCode }: { brandCode: string }) {
   return (
     <div className="max-w-content-wide mx-auto px-6 py-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 flex-wrap mb-4">
+      {/* <nav className="flex items-center gap-1.5 flex-wrap mb-4">
         <Link
           to="/"
           className="text-xs no-underline transition-colors hover:underline"
@@ -231,18 +261,18 @@ function GlobalBrandPage({ brandCode }: { brandCode: string }) {
         <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
           {brandName}
         </span>
-      </nav>
+      </nav> */}
 
       {/* Brand header */}
       <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold mb-0.5" style={{ color: config.primaryColor }}>
+        {/* <div>
+          <h1 className="text-xl font-semibold mb-0.5 mr-2" style={{ color: config.primaryColor }}>
             {selectedCategory ? selectedCategory.label : brandName}
           </h1>
           <p className="text-xs" style={{ color: config.secondaryColor }}>
             {apiProducts.length.toLocaleString()} {apiProducts.length === 1 ? "Product" : "Products"}
           </p>
-        </div>
+        </div> */}
         <div className="flex items-center gap-2">
           {selectedCategoryId && (
             <button
@@ -295,52 +325,29 @@ function GlobalBrandPage({ brandCode }: { brandCode: string }) {
 
         {/* Right: Content */}
         <div className="flex-1 min-w-0">
-          {/* View mode toggle */}
-          <div className="flex items-center justify-between mb-5">
-            <p className="text-xs" style={{ color: config.secondaryColor }}>
-              Showing {apiProducts.length.toLocaleString()} products
-            </p>
-            <div className="flex items-center gap-3">
-              <div
-                className="flex rounded-lg overflow-hidden"
-                style={{ border: `1px solid ${config.borderColor}` }}
-              >
-                {(["table", "grid"] as const).map((key, i) => (
-                  <button
-                    key={key}
-                    onClick={() => setViewMode(key)}
-                    className="px-2.5 py-1 text-[11px] font-medium cursor-pointer transition-colors"
-                    style={{
-                      backgroundColor: viewMode === key ? config.primaryColor : "#fff",
-                      color: viewMode === key ? "#fff" : config.secondaryColor,
-                      border: "none",
-                      borderLeft: i > 0 ? `1px solid ${config.borderColor}` : "none",
-                    }}
-                  >
-                    {key === "table" ? "Table" : "Grid"}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          <CollectionHeader
+            title={selectedCategory ? selectedCategory.label : brandName}
+            familyCount={apiProducts.length}
+            totalFamilies={apiProducts.length}
+            subcategoryCount={0}
+            hasActiveFilters={false}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
 
           {/* Loading state */}
           {productsLoading || pricesLoading ? (
             <div className="flex justify-center items-center" style={{ minHeight: "500px" }}>
               <Spin size="large" />
             </div>
-          ) : apiProducts.length === 0 ? (
+          ) : sortedProducts.length === 0 ? (
             <div
-              className="rounded-xl flex items-center justify-center"
-              style={{ 
-                border: `1px dashed ${config.borderColor}`, 
-                backgroundColor: config.cardBg,
-                minHeight: "500px"
-              }}
+              className="text-center py-16 text-sm rounded-xl"
+              style={{ color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
             >
-              <span className="text-sm" style={{ color: config.secondaryColor }}>
-                No products found.
-              </span>
+              No products found.
             </div>
           ) : (
             /* Content: Table or Grid */
@@ -348,14 +355,14 @@ function GlobalBrandPage({ brandCode }: { brandCode: string }) {
               {viewMode === "table" ? (
                 <HybridFamilyTable
                   products={paginatedProducts}
-                  total={apiProducts.length}
+                  total={sortedProducts.length}
                   page={tablePage}
                   onPageChange={setTablePage}
                 />
               ) : (
                 <FamilyCardGrid
                   products={paginatedProducts}
-                  total={apiProducts.length}
+                  total={sortedProducts.length}
                   page={tablePage}
                   onPageChange={setTablePage}
                 />

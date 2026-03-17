@@ -15,6 +15,7 @@ export interface POUpdate {
   orderDate: string;
   totalValue: number;
   currentStep: number; // 0-4: Placed, Confirmed, Billed, Shipped, Delivered
+  salesOrderId: number;
 }
 
 export interface ReturnUpdate {

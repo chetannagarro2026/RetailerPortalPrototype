@@ -81,7 +81,7 @@ export const centricBrandsConfig: BrandConfig = {
   quickMatrixVariantLimit: 12,
 
   navItems: [
-    { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },
+    { key: "collections", label: "Catalog", path: "/collections", hasMegaMenu: true },
     { key: "purchase-orders", label: "Purchase Orders", path: "/purchase-orders" },
     { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "my-account", label: "My Account", path: "/account", hasDropdown: true },
@@ -108,7 +108,7 @@ export const jnjVisionConfig: BrandConfig = {
   currencyPosition: "before",
   currencyCode: "INR",
 
-  searchPlaceholder: "Search by Style Code, Collection, Brand...",
+  searchPlaceholder: "Search by Category, Product name, Brand...",
 
   categoryCardVariant: "hero",
   productCardVariant: "standard",
@@ -119,7 +119,7 @@ export const jnjVisionConfig: BrandConfig = {
   quickMatrixVariantLimit: 12,
 
   navItems: [
-    { key: "collections", label: "Collections", path: "/collections", hasMegaMenu: true },
+    { key: "collections", label: "Catalog", path: "/collections", hasMegaMenu: true },
     { key: "purchase-orders", label: "Purchase Orders", path: "/purchase-orders" },
     { key: "bulk-order", label: "Bulk Order", path: "/bulk-order" },
     { key: "my-account", label: "My Account", path: "/account", hasDropdown: true },

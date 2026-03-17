@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Button, Input, Steps, Checkbox, App, Spin } from "antd";
 import {
   ArrowLeftOutlined,
@@ -10,11 +10,12 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { activeBrandConfig, formatPrice, formatCurrency } from "../config/brandConfig";
+import { amountToWords } from "../lib/utils";
 import { useOrder } from "../context/OrderContext";
 import { useOrderHistory, type PurchaseOrder, type SavedAddress } from "../context/OrderHistoryContext";
 import { useAuth } from "../context/AuthContext";
 import { useCreditState } from "../hooks/useCreditState";
-import { fetchBusinessAccountsByIdList } from "../services/businessAccountService";
+import { fetchBusinessAccountsByIdList, getDistributorIdForAccount } from "../services/businessAccountService";
 import { createSalesOrder, type SalesOrderResponse } from "../services/salesOrderService";
 import { getSourcing, getDeliveryEstimatesForCart, type SourcingResponse, type DeliveryEstimateResponse } from "../services/sourcingService";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
@@ -88,12 +89,16 @@ function ShippingStep({
   onNext,
   isValid,
   isLoading,
+  onAddressConfirmed,
+  deliveryEstimatesLoaded,
 }: {
   shipping: ShippingForm;
   onChange: (s: ShippingForm) => void;
   onNext: () => void;
   isValid: boolean;
   isLoading?: boolean;
+  onAddressConfirmed?: (shipping: ShippingForm) => void;
+  deliveryEstimatesLoaded?: boolean;
 }) {
   const config = activeBrandConfig;
   const { addAddress } = useOrderHistory();
@@ -144,7 +149,7 @@ function ShippingStep({
       if (!addr) return;
       setSelectedAddressId(addrId);
       setShowNewForm(false);
-      onChange({
+      const updatedShipping = {
         contactName: addr.contactName,
         companyName: addr.companyName,
         address: addr.address,
@@ -153,9 +158,14 @@ function ShippingStep({
         zip: addr.zip,
         phone: addr.phone,
         notes: "",
-      });
+      };
+      onChange(updatedShipping);
+      // Trigger sourcing and delivery estimates fetch
+      if (onAddressConfirmed) {
+        onAddressConfirmed(updatedShipping);
+      }
     },
-    [addresses, onChange],
+    [addresses, onChange, onAddressConfirmed],
   );
 
   // Pre-fill on mount if default exists and shipping is empty
@@ -176,6 +186,11 @@ function ShippingStep({
     const updated = { ...newForm, [field]: value };
     setNewForm(updated);
     onChange(updated);
+    
+    // Trigger sourcing/delivery estimates when zip is entered in new address form
+    if (field === "zip" && value.trim().length > 0 && showNewForm && onAddressConfirmed) {
+      onAddressConfirmed(updated);
+    }
   };
 
   const handleNext = () => {
@@ -338,17 +353,16 @@ function ShippingStep({
         <Button
           type="primary"
           size="large"
-          disabled={!isValid || isLoading}
-          loading={isLoading}
-          onClick={handleNext}
+          disabled={!isValid}
+          onClick={onNext}
           style={{
             height: 44,
             fontWeight: 600,
             borderRadius: 8,
-            backgroundColor: isValid && !isLoading ? config.primaryColor : undefined,
+            backgroundColor: (!isValid || !deliveryEstimatesLoaded) ? undefined : config.primaryColor,
           }}
         >
-          {isLoading ? "Getting Delivery Estimates..." : "Continue to Review"}
+          {!deliveryEstimatesLoaded ? "Select Address to Continue" : "Continue to Review"}
         </Button>
       </div>
     </div>
@@ -367,6 +381,7 @@ function ReviewStep({
   onSubmit,
   isExceeded,
   isSubmitting,
+  isLoadingDeliveryEstimates,
 }: {
   items: ReturnType<typeof useOrder>["items"];
   totalUnits: number;
@@ -377,6 +392,7 @@ function ReviewStep({
   onSubmit: () => void;
   isExceeded: boolean;
   isSubmitting: boolean;
+  isLoadingDeliveryEstimates?: boolean;
 }) {
   const config = activeBrandConfig;
 
@@ -437,14 +453,14 @@ function ReviewStep({
                     {formatCurrency(item.quantity * item.unitPrice)}
                   </span>
                 </div>
-                {deliveryEstimate && (
+                {/* {deliveryEstimate && ( */}
                   <div className="flex items-center gap-1.5 pl-0.5">
                     <ClockCircleOutlined className="text-xs" style={{ color: config.primaryColor }} />
                     <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
-                      Est. Delivery: {deliveryEstimate.estimatedDeliveryDate}
+                      {isLoadingDeliveryEstimates ? "...loading delivery estimate" : deliveryEstimate ? `Est. Delivery: ${deliveryEstimate.estimatedDeliveryDate}` : "Delivery estimate unavailable"}
                     </span>
                   </div>
-                )}
+                {/* )} */}
               </div>
             );
           })}
@@ -463,7 +479,7 @@ function ReviewStep({
 
       {/* Actions */}
       <div className="flex items-center justify-between">
-        <Button onClick={onBack} style={{ borderRadius: 8 }} disabled={isSubmitting}>
+        <Button onClick={onBack} style={{ borderRadius: 8, height: 44 }} disabled={isSubmitting}>
           <ArrowLeftOutlined className="text-xs" /> Back
         </Button>
         <Button
@@ -503,6 +519,8 @@ export default function CheckoutPage() {
   const [isSourcing, setIsSourcing] = useState(false);
   const [sourcingData, setSourcingData] = useState<SourcingResponse | null>(null);
   const [deliveryEstimates, setDeliveryEstimates] = useState<Record<string, DeliveryEstimateResponse>>({});
+  const [deliveryEstimatesLoaded, setDeliveryEstimatesLoaded] = useState(false);
+  const [distributorId, setDistributorId] = useState<number | null>(null);
 
   // Calculate total savings
   const totalSavings = isAuthenticated
@@ -541,11 +559,21 @@ export default function CheckoutPage() {
     shipping.state.trim() &&
     shipping.zip.trim();
 
+  // Fetch distributor ID on mount
+  useEffect(() => {
+    if (user?.accountId) {
+      getDistributorIdForAccount(Number(user.accountId)).then((id) => {
+        setDistributorId(id);
+      });
+    }
+  }, [user?.accountId]);
+
   // Handle moving from shipping to review step with sourcing API call
-  const handleNextStep = async () => {
-    if (!isShippingValid) return;
+  const handleAddressConfirmed = useCallback(async (confirmedShipping: ShippingForm) => {
+    if (!confirmedShipping.zip.trim()) return;
     
     setIsSourcing(true);
+    setDeliveryEstimatesLoaded(false);
     try {
       // Call sourcing API
       const sourcingRequest = {
@@ -555,7 +583,7 @@ export default function CheckoutPage() {
           productCategory: "Kids", // Static as per requirement
         })),
         facilityIds: [],
-        channelCode: "CENTRIC_USA_ECOM",
+        channelCode: "JJV_IN_ECOM",
         distributionGroupId: "",
         orderType: "SHIP",
         ecommerceId: 9026,
@@ -564,31 +592,34 @@ export default function CheckoutPage() {
           customerEmailId: "lonnie.madrigal@example.com",
           customerId: 233554,
         },
-        shippingAddressZipCode: shipping.zip,
+        shippingAddressZipCode: confirmedShipping.zip,
         shippingMode: "standard",
         isOrderGiftWrap: false,
+        retailerAccountId: user?.accountId || "",
       };
 
       const sourcingResponse = await getSourcing(sourcingRequest);
       setSourcingData(sourcingResponse);
 
       // Call delivery estimate API for each item
-      if (sourcingResponse.isAvailable && sourcingResponse.sfsAvailabilityDetails.length > 0) {
-        const estimates = await getDeliveryEstimatesForCart(
-          items.map(item => ({ upc: item.upc, quantity: item.quantity })),
-          shipping.zip,
-          sourcingResponse
-        );
-        setDeliveryEstimates(estimates);
-      }
-
-      setStep(1);
+      const estimates = await getDeliveryEstimatesForCart(
+        items.map(item => ({ upc: item.upc, quantity: item.quantity })),
+        confirmedShipping.zip,
+        sourcingResponse
+      );
+      setDeliveryEstimates(estimates);
+      setDeliveryEstimatesLoaded(true);
     } catch (error) {
       console.error("Failed to get sourcing/delivery info:", error);
       message.error("Failed to get delivery estimates. Please try again.");
+      setDeliveryEstimatesLoaded(false);
     } finally {
       setIsSourcing(false);
     }
+  }, [items, user?.accountId, message, distributorId]);
+
+  const handleNextStep = () => {
+    setStep(1);
   };
 
   const handleSubmit = async () => {
@@ -612,7 +643,7 @@ export default function CheckoutPage() {
           zip: shipping.zip,
           phone: shipping.phone,
         },
-        accountId: user?.accountId || "",
+        accountId: distributorId ? String(distributorId) : (user?.accountId || ""),
         retailerAccountId: user?.accountId || "",
         orderNumber,
       });
@@ -652,8 +683,9 @@ export default function CheckoutPage() {
 
       addOrder(purchaseOrder);
       clearOrder();
+      console.log(apiResponse);
       
-      message.success(`Order #${apiResponse.omsOrderId} submitted successfully!`);
+      message.success(`Order #${apiResponse.applicationOrderID} submitted successfully!`);
       navigate("/order-confirmation", { state: { ...purchaseOrder, apiResponse } });
     } catch (error) {
       console.error("Failed to submit order:", error);
@@ -702,6 +734,8 @@ export default function CheckoutPage() {
               onNext={handleNextStep}
               isValid={!!isShippingValid}
               isLoading={isSourcing}
+              onAddressConfirmed={handleAddressConfirmed}
+              deliveryEstimatesLoaded={deliveryEstimatesLoaded}
             />
           )}
           {step === 1 && (
@@ -715,6 +749,7 @@ export default function CheckoutPage() {
               onSubmit={handleSubmit}
               isExceeded={credit.isExceeded}
               isSubmitting={isSubmitting}
+              isLoadingDeliveryEstimates={isSourcing}
             />
           )}
         </div>
@@ -737,9 +772,14 @@ export default function CheckoutPage() {
                 <span className="font-medium" style={{ color: "#16A34A" }}>−{formatCurrency(totalSavings)}</span>
               </div>
             )}
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm mb-3">
               <span style={{ color: config.secondaryColor }}>Payment Method</span>
               <span className="font-medium" style={{ color: config.primaryColor }}>Credit Account</span>
+            </div>
+            <div className="border-t pt-3" style={{ borderColor: config.borderColor }}>
+              <p className="text-[10px] italic" style={{ color: config.secondaryColor }}>
+                ({amountToWords(totalValue)})
+              </p>
             </div>
           </div>
           <CreditSummaryBlock />

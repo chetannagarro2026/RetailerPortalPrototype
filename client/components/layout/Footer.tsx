@@ -97,7 +97,7 @@ export default function Footer() {
       >
         <div className="max-w-content-wide mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span className="text-xs text-gray-400">
-            © 2026 Retailer Portal
+            © 2026 Whoolesale Portal
           </span>
           <div className="flex items-center gap-4">
             {legalLinks.map((link) => (

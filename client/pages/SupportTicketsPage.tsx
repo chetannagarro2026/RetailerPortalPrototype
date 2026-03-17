@@ -59,6 +59,7 @@ export default function SupportTicketsPage({ onCreateTicket }: Props) {
           pageSize: PAGE_SIZE,
           orderBy: "DESC" as const,
           sortBy: "modifiedOn",
+          accountId: "9042"
         };
 
         // Add status filter if not "All"

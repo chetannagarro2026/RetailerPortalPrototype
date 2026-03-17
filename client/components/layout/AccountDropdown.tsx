@@ -84,6 +84,8 @@ export default function AccountDropdown({ visible, onClose }: AccountDropdownPro
           padding: "8px 0",
           top: "100%",
           marginTop: 4,
+          overflowY: "auto",
+          maxHeight: "450px",
         }}
       >
         {isAuthenticated ? (

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileTextOutlined, ShoppingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import { activeBrandConfig } from "../config/brandConfig";
@@ -10,37 +10,44 @@ import StatusSegmentedFilter from "../components/purchase-orders/StatusSegmented
 
 // ── Status mapping ──────────────────────────────────────────────────
 
-const FILTER_KEYS = ["All", "Pending", "Approved", "Shipped", "Rejected"] as const;
+const FILTER_KEYS = ["All", "Pending", "Unprocessed", "Approved", "Shipped", "Completed", "Cancelled"] as const;
 type FilterKey = (typeof FILTER_KEYS)[number];
 
 // Map UI filter to API request states
 const filterToApiStates: Record<FilterKey, string[]> = {
   All: [],
-  Pending: ["PROCESSING", "ON_HOLD", "UNPROCESSED"],
-  Approved: ["PROCESSED", "ACCEPTED", "RECEIVED"],
-  Shipped: ["COMPLETED", "PARTIALLY_COMPLETED"],
-  Rejected: ["CANCELLED", "REJECTED"],
+  Pending: ["PARTIALLY_PROCESSING", "ON_HOLD", "RECEIVED", "RESOLVED"],
+  Unprocessed: ["UNPROCESSED"],
+  Approved: ["PROCESSING", "ACCEPTED", "PARTIALLY_PROCESSED"],
+  Shipped: ["PROCESSED", "INVOICE_CREATED", "PARTIALLY_COMPLETED"],
+  Completed: ["COMPLETED"],
+  Cancelled: ["CANCELLED"]
 };
 
 // Map API status to UI display
 const mapStatusToLabel = (requestState: string): string => {
-  const processing = ["PROCESSING", "ON_HOLD", "UNPROCESSED"];
-  const approved = ["PROCESSED", "ACCEPTED", "RECEIVED"];
-  const shipped = ["COMPLETED", "PARTIALLY_COMPLETED"];
-  const rejected = ["CANCELLED", "REJECTED"];
+  const pending = ["PARTIALLY_PROCESSING", "ON_HOLD", "RECEIVED", "RESOLVED"];
+  const unprocessed = ["UNPROCESSED"];
+  const approved = ["PROCESSING", "ACCEPTED", "PARTIALLY_PROCESSED"];
+  const shipped = ["PROCESSED", "INVOICE_CREATED", "PARTIALLY_COMPLETED"];
+  const completed = ["COMPLETED"];
+  const cancelled = ["CANCELLED", "REJECTED"];
 
-  if (processing.includes(requestState)) return "Pending";
-  if (approved.includes(requestState)) return "Approved";
+  if (pending.includes(requestState)) return "Pending";
+  if (unprocessed.includes(requestState)) return "Unprocessed";
   if (shipped.includes(requestState)) return "Shipped";
-  if (rejected.includes(requestState)) return "Rejected";
+  if (completed.includes(requestState)) return "Completed";
+  if (cancelled.includes(requestState)) return "Cancelled";
   return "Pending";
 };
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: "#D97706",
+  Unprocessed: "#D97706",
   Approved: "#2563EB",
-  Shipped: "#16A34A",
-  Rejected: "#DC2626",
+  Shipped: "#7C3AED",
+  Completed: "#16A34A",
+  Cancelled: "#DC2626",
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -61,6 +68,7 @@ export default function PurchaseOrdersPage() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("All");
   const [currentPage, setCurrentPage] = useState(0);
   const [accumulatedOrders, setAccumulatedOrders] = useState<SalesOrder[]>([]);
@@ -91,14 +99,16 @@ export default function PurchaseOrdersPage() {
   // Calculate counts per filter
   const counts = useMemo(() => {
     if (!statusCounts) {
-      return { All: 0, Pending: 0, Approved: 0, Shipped: 0, Rejected: 0 };
+      return { All: 0, Pending: 0, Unprocessed: 0, Approved: 0, Shipped: 0, Completed: 0, Cancelled: 0 };
     }
     return {
       All: statusCounts.ALL || 0,
-      Pending: (statusCounts.PROCESSING || 0) + (statusCounts.ON_HOLD || 0) + (statusCounts.UNPROCESSED || 0),
-      Approved: (statusCounts.PROCESSED || 0) + (statusCounts.ACCEPTED || 0) + (statusCounts.RECEIVED || 0),
-      Shipped: (statusCounts.COMPLETED || 0) + (statusCounts.PARTIALLY_COMPLETED || 0),
-      Rejected: (statusCounts.CANCELLED || 0) + (statusCounts.REJECTED || 0),
+      Pending: (statusCounts.PARTIALLY_PROCESSING || 0) + (statusCounts.ON_HOLD || 0) + (statusCounts.RECEIVED || 0) + (statusCounts.RESOLVED || 0),
+      Unprocessed: (statusCounts.UNPROCESSED || 0),
+      Approved: (statusCounts.PROCESSING || 0) + (statusCounts.ACCEPTED || 0) + (statusCounts.PARTIALLY_PROCESSED || 0),
+      Shipped: (statusCounts.PROCESSED || 0) + (statusCounts.INVOICE_CREATED || 0) + (statusCounts.PARTIALLY_COMPLETED || 0),
+      Completed: (statusCounts.COMPLETED || 0),
+      Cancelled: (statusCounts.CANCELLED || 0),
     };
   }, [statusCounts]);
 
@@ -123,9 +133,10 @@ export default function PurchaseOrdersPage() {
     }
   }, [orders, currentPage]);
 
-  // Reset when filter changes
+  // Reset when filter changes - handled in handleFilterChange
+  // This effect is kept as a safety fallback
   useEffect(() => {
-    setCurrentPage(0);
+    // Only reset if values are stale (avoid double reset from handleFilterChange)
     setAccumulatedOrders([]);
   }, [activeFilter]);
 
@@ -151,6 +162,15 @@ export default function PurchaseOrdersPage() {
   }, [ordersLoading, hasMore]);
 
   const handleFilterChange = (filter: string) => {
+    if (filter !== activeFilter) {
+      // Remove all cached salesOrders queries to force fresh fetch
+      queryClient.removeQueries({
+        queryKey: ["salesOrders"],
+      });
+      // Synchronously reset page and orders when filter changes
+      setCurrentPage(0);
+      setAccumulatedOrders([]);
+    }
     setActiveFilter(filter as FilterKey);
   };
 
@@ -347,7 +367,7 @@ function OrdersTable({
               {totalItems}
             </span>
             <span
-              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-block w-fit ml-auto"
+              className="text-[11px] font-medium px-2 py-0.5 rounded whitespace-nowrap inline-block min-w-[80px] text-center ml-auto"
               style={{ color: statusColor, backgroundColor: "transparent", border: `1px solid ${statusColor}` }}
             >
               {status}

@@ -198,3 +198,23 @@ export function getCurrentBusinessAccount(
 ): Promise<BusinessAccount> {
   return fetchBusinessAccountById(accountId);
 }
+
+/**
+ * Get distributor ID from business account's linked accounts
+ * @param accountId - Account ID to fetch
+ * @returns Promise with distributor account ID or null if not found
+ */
+export async function getDistributorIdForAccount(
+  accountId: number
+): Promise<number | null> {
+  try {
+    const account = await fetchBusinessAccountById(accountId);
+    const distributorLink = account.linkedAccounts?.find(
+      (link) => link.parentAccountType === "DISTRIBUTOR"
+    );
+    return distributorLink?.parentAccountId ?? null;
+  } catch (error) {
+    console.error("Failed to fetch distributor ID:", error);
+    return null;
+  }
+}

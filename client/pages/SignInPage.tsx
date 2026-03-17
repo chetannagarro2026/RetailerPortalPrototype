@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LoginOutlined, UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +7,11 @@ import { useAuth } from "../context/AuthContext";
 export default function SignInPage() {
   const config = activeBrandConfig;
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
+  
+  // Get the page to redirect to after login (default to home)
+  const from = (location.state as any)?.from || "/";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -46,7 +50,8 @@ export default function SignInPage() {
 
     try {
       await signIn(username, password);
-      navigate("/");
+      // Redirect to the page user was on, or home if none specified
+      navigate(from);
     } catch (error: any) {
       setErrors({ general: error.message || "Authentication failed. Please check your credentials." });
     } finally {

@@ -340,7 +340,7 @@ export default function BulkOrder() {
           Bulk Order
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: "#4B5563" }}>
-          Enter item codes (SKUs) and quantities to add directly to your cart.
+          Enter item codes (UPCs) and quantities to add directly to your cart.
           Valid items are added immediately — no preview step required.
         </p>
         <p

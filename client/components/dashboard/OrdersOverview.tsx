@@ -82,7 +82,7 @@ export default function OrdersOverview() {
         id: order.salesOrderId.toString(),
         poNumber: order.applicationOrderId,
         date: order.orderDate,
-        brand: "Centric Brands", // Static as requested
+        brand: "Johnson & Johnson Vision", // Static as requested
         amount: totalQuantity,
         status,
         statusColor: getStatusColor(status),

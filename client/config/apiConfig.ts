@@ -28,8 +28,8 @@ const EXTERNAL_SOURCING_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_SOURCIN
 const EXTERNAL_DELIVERY_BASE = `${AZURE_APIM_BASE}${import.meta.env.VITE_DELIVERY_API_PATH || "/deliverydateestimate/dev/api/v1"}`;
 
 // Price API configuration
-const PRICE_CHANNEL_CODE = import.meta.env.VITE_PRICE_CHANNEL_CODE || "CENTRIC_USA_ECOM";
-const PRICE_ACCOUNT_ID = import.meta.env.VITE_PRICE_ACCOUNT_ID || 9028;
+const PRICE_CHANNEL_CODE = import.meta.env.VITE_PRICE_CHANNEL_CODE;
+const PRICE_ACCOUNT_ID = import.meta.env.VITE_PRICE_ACCOUNT_ID;
 
 // Catalog configuration
 const BRANDS_CATALOG_CODE = import.meta.env.VITE_BRANDS_CATALOG_CODE; 

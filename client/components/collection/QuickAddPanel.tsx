@@ -6,6 +6,7 @@ import { activeBrandConfig, formatPrice } from "../../config/brandConfig";
 import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
 import { useCreditState } from "../../hooks/useCreditState";
+import { numberToWords } from "../../lib/utils";
 import type { CatalogProduct } from "../../data/catalogData";
 
 interface QuickAddPanelProps {
@@ -78,28 +79,28 @@ export default function QuickAddPanel({
 
   return (
     <div
-      className="flex flex-col h-full"
+      className="flex flex-col h-full mb-2"
       style={{ backgroundColor: "#fff" }}
     >
       {/* Header */}
       <div
-        className="flex items-start justify-between px-5 py-4 shrink-0"
+        className="flex items-start justify-between px-4 py-2.5 shrink-0"
         style={{ borderBottom: `1px solid ${config.borderColor}` }}
       >
         <div className="min-w-0 flex-1">
           <h3
-            className="text-base font-semibold mb-1 leading-tight"
+            className="text-sm font-semibold mb-0.5 leading-tight"
             style={{ color: config.primaryColor }}
           >
             Quick Add
           </h3>
           <p className="text-[11px]" style={{ color: config.secondaryColor }}>
-            Add this product to your cart
+            Add to cart
           </p>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-md cursor-pointer transition-colors hover:bg-gray-100"
+          className="p-1 rounded-md cursor-pointer transition-colors hover:bg-gray-100"
           style={{ border: "none", background: "transparent", color: config.secondaryColor }}
           aria-label="Close panel"
         >
@@ -108,12 +109,12 @@ export default function QuickAddPanel({
       </div>
 
       {/* Product Info */}
-      <div className="flex-1 overflow-auto px-5 py-4">
-        <div className="flex gap-4 mb-6">
+      <div className="flex-1 overflow-auto px-4 py-3">
+        <div className="flex gap-3 mb-3">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-24 h-24 object-contain rounded-xl flex-shrink-0"
+            className="w-20 h-20 object-contain rounded-lg flex-shrink-0"
             onError={(e) => {
               e.currentTarget.src = "https://via.placeholder.com/96x96?text=No+Img";
             }}
@@ -121,18 +122,18 @@ export default function QuickAddPanel({
           <div className="min-w-0 flex-1">
             <Tooltip title={product.name} placement="topLeft">
               <h4
-                className="text-sm font-semibold mb-1 leading-snug line-clamp-2"
+                className="text-sm font-semibold mb-0.5 leading-snug line-clamp-2"
                 style={{ color: config.primaryColor }}
               >
                 {product.name}
               </h4>
             </Tooltip>
             {product.brand && (
-              <p className="text-[10px] mb-2" style={{ color: config.secondaryColor }}>
+              <p className="text-[10px] mb-1" style={{ color: config.secondaryColor }}>
                 {product.brand}
               </p>
             )}
-            <p className="text-[10px] font-mono mb-2" style={{ color: config.secondaryColor }}>
+            <p className="text-[10px] font-mono mb-1" style={{ color: config.secondaryColor }}>
               UPC: {product.upc}
             </p>
             <div className="flex items-center gap-2">
@@ -151,20 +152,20 @@ export default function QuickAddPanel({
 
         {/* Price Section */}
         <div
-          className="rounded-xl p-4 mb-4"
+          className="rounded-lg p-3 mb-3"
           style={{ backgroundColor: config.cardBg }}
         >
-          <div className="flex items-baseline justify-between mb-1">
+          <div className="flex items-baseline justify-between mb-0.5">
             <span className="text-[11px] font-medium" style={{ color: config.secondaryColor }}>
               Unit Price
             </span>
-            <span className="text-lg font-bold" style={{ color: config.primaryColor }}>
+            <span className="text-base font-bold" style={{ color: config.primaryColor }}>
               {formatPrice(product.price)}
             </span>
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
             <>
-              <div className="flex items-baseline justify-between mb-2">
+              <div className="flex items-baseline justify-between mb-0.5">
                 <span className="text-[10px]" style={{ color: config.secondaryColor }}>
                   Original
                 </span>
@@ -173,15 +174,15 @@ export default function QuickAddPanel({
                 </span>
               </div>
               {isAuthenticated && (
-                <div className="flex items-baseline justify-between">
+                <div className="flex items-baseline justify-between gap-1">
                   <span className="text-[10px]" style={{ color: config.secondaryColor }}>
                     You Save
                   </span>
-                  <div className="text-right">
-                    <span className="text-sm font-semibold" style={{ color: "#16A34A" }}>
+                  <div className="text-right flex items-baseline gap-0.5">
+                    <span className="text-xs font-semibold" style={{ color: "#16A34A" }}>
                       {formatPrice(product.originalPrice - product.price)}
                     </span>
-                    <span className="text-sm font-semibold ml-1" style={{ color: "#16A34A" }}>
+                    <span className="text-xs font-semibold" style={{ color: "#16A34A" }}>
                       ({Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%)
                     </span>
                   </div>
@@ -190,79 +191,83 @@ export default function QuickAddPanel({
             </>
           )}
           {product.unitMeasure && (
-            <p className="text-[10px] mt-2" style={{ color: config.secondaryColor }}>
+            <p className="text-[9px] mt-1" style={{ color: config.secondaryColor }}>
               {product.unitMeasure}
             </p>
           )}
         </div>
 
-        {/* Quantity Selector */}
-        <div className="mb-4">
-          <label
-            className="block text-[11px] font-semibold mb-2"
-            style={{ color: config.primaryColor }}
-          >
-            Quantity
-          </label>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleDecrement}
-              disabled={quantity <= minQty || isOutOfStock}
-              className="w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: config.cardBg,
-                border: `1px solid ${config.borderColor}`,
-                color: config.primaryColor,
-              }}
+        {/* Quantity & Subtotal Row */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Quantity Selector */}
+          <div>
+            <label
+              className="block text-[10px] font-semibold mb-1.5"
+              style={{ color: config.primaryColor }}
             >
-              <MinusOutlined className="text-sm" />
-            </button>
-            <InputNumber
-              size="large"
-              min={minQty}
-              step={step}
-              value={quantity}
-              onChange={handleQtyChange}
-              disabled={isOutOfStock}
-              className="flex-1 text-center"
-              controls={false}
-              style={{ textAlign: 'center' }}
-            />
-            <button
-              onClick={handleIncrement}
-              disabled={isOutOfStock}
-              className="w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: config.cardBg,
-                border: `1px solid ${config.borderColor}`,
-                color: config.primaryColor,
-              }}
-            >
-              <PlusOutlined className="text-sm" />
-            </button>
+              Quantity
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDecrement}
+                disabled={quantity <= minQty || isOutOfStock}
+                className="w-8 h-8 flex items-center justify-center rounded-md cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: config.cardBg,
+                  border: `1px solid ${config.borderColor}`,
+                  color: config.primaryColor,
+                }}
+              >
+                <MinusOutlined className="text-xs" />
+              </button>
+              <InputNumber
+                size="small"
+                min={minQty}
+                step={step}
+                value={quantity}
+                onChange={handleQtyChange}
+                disabled={isOutOfStock}
+                className="flex-1 text-center text-xs"
+                controls={false}
+                style={{ textAlign: 'center' }}
+              />
+              <button
+                onClick={handleIncrement}
+                disabled={isOutOfStock}
+                className="w-8 h-8 flex items-center justify-center rounded-md cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: config.cardBg,
+                  border: `1px solid ${config.borderColor}`,
+                  color: config.primaryColor,
+                }}
+              >
+                <PlusOutlined className="text-xs" />
+              </button>
+            </div>
+            <p className="text-[9px] mt-1 italic" style={{ color: config.secondaryColor }}>
+              ({numberToWords(quantity)} {quantity === 1 ? 'Unit' : 'Units'})
+            </p>
+            {step > 1 && (
+              <p className="text-[9px] mt-0.5" style={{ color: config.secondaryColor }}>
+                Packs of {step}
+              </p>
+            )}
+            {minQty > 1 && (
+              <p className="text-[9px] mt-0.5" style={{ color: config.secondaryColor }}>
+                Min: {minQty}
+              </p>
+            )}
           </div>
-          {step > 1 && (
-            <p className="text-[10px] mt-2" style={{ color: config.secondaryColor }}>
-              Sold in packs of {step}
-            </p>
-          )}
-          {minQty > 1 && (
-            <p className="text-[10px] mt-1" style={{ color: config.secondaryColor }}>
-              Minimum order: {minQty} units
-            </p>
-          )}
-        </div>
 
-        {/* Subtotal */}
-        <div
-          className="rounded-xl p-4"
-          style={{ backgroundColor: config.primaryColor + "08" }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium" style={{ color: config.primaryColor }}>
+          {/* Subtotal */}
+          <div
+            className="rounded-lg p-3 flex flex-col justify-between"
+            style={{ backgroundColor: config.primaryColor + "08" }}
+          >
+            <span className="text-xs font-medium" style={{ color: config.primaryColor }}>
               Subtotal
             </span>
-            <span className="text-xl font-bold" style={{ color: config.primaryColor }}>
+            <span className="text-lg font-bold" style={{ color: config.primaryColor }}>
               {formatPrice(subtotal)}
             </span>
           </div>
@@ -272,42 +277,40 @@ export default function QuickAddPanel({
       {/* Credit warning */}
       {wouldExceedCredit && (
         <div
-          className="flex items-center gap-2 px-5 py-3 text-[11px] font-medium shrink-0"
+          className="flex items-center gap-2 px-4 py-2 text-[9px] font-medium shrink-0"
           style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}
         >
-          <WarningOutlined />
-          Adding this item would exceed your available credit.
+          <WarningOutlined className="text-xs flex-shrink-0" />
+          <span>Exceeds available credit</span>
         </div>
       )}
 
       {/* Footer */}
       <div
-        className="px-5 py-4 shrink-0"
+        className="px-4 py-3 shrink-0"
         style={{ borderTop: `1px solid ${config.borderColor}`, backgroundColor: config.cardBg }}
       >
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || wouldExceedCredit}
-            className="flex-1 inline-flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-xl cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: config.primaryColor,
-              color: "#fff",
-              border: "none",
-            }}
-          >
-            <ShoppingCartOutlined className="text-base" />
-            Add to Cart
-          </button>
-        </div>
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock || wouldExceedCredit}
+          className="w-full inline-flex items-center justify-center gap-2 text-xs font-semibold py-2.5 rounded-lg cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: config.primaryColor,
+            color: "#fff",
+            border: "none",
+          }}
+        >
+          <ShoppingCartOutlined className="text-sm" />
+          Add to Cart
+        </button>
         <Link
           to={familyLink}
-          className="block text-center text-[11px] font-medium mt-3 py-2 no-underline transition-colors hover:underline"
+          className="block text-center text-[11px] font-medium mt-2 py-1.5 no-underline transition-colors hover:underline"
           style={{
             color: config.secondaryColor,
           }}
         >
-          View Full Product Details →
+          View Product Details →
         </Link>
       </div>
     </div>

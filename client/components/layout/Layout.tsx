@@ -47,6 +47,8 @@ export default function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();
   const isMinimalPage = pathname === "/sign-in";
 
+  const childComponent = <div style={{minWidth: "90vw"}}>{children}</div>
+
   return (
     <ConfigProvider theme={antdTheme}>
       <div className="min-h-screen bg-white flex flex-col">
@@ -59,7 +61,7 @@ export default function Layout({ children }: LayoutProps) {
             <Navigation />
           </>
         )}
-        <main className="flex-1 flex flex-col">{children}</main>
+        <main className="flex-1 flex flex-col">{childComponent}</main>
         {isMinimalPage ? <LegalStrip /> : <Footer />}
         <SignInModal />
       </div>

@@ -1,8 +1,9 @@
 import { RightOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { activeBrandConfig } from "../../../config/brandConfig";
 import type { POUpdate } from "../UpdatesSection";
 
-const STEPS = ["Placed", "Confirmed", "Billed", "Shipped", "Delivered"];
+const STEPS = ["Pending", "Unprocessed", "Approved", "Shipped", "Completed", "Cancelled"];
 
 interface POCardProps {
   data: POUpdate;
@@ -10,6 +11,7 @@ interface POCardProps {
 
 export default function POCard({ data }: POCardProps) {
   const config = activeBrandConfig;
+  const navigate = useNavigate();
 
   return (
     <div
@@ -36,9 +38,9 @@ export default function POCard({ data }: POCardProps) {
       <p className="text-sm font-semibold mb-0.5" style={{ color: config.primaryColor }}>
         {data.poNumber}
       </p>
-      <p className="text-xs mb-4" style={{ color: config.secondaryColor }}>
+      {/* <p className="text-xs mb-4" style={{ color: config.secondaryColor }}>
         ${data.totalValue.toLocaleString("en-US")}
-      </p>
+      </p> */}
 
       {/* Step Progress */}
       <div className="flex items-center gap-0.5 mb-1.5">
@@ -60,7 +62,8 @@ export default function POCard({ data }: POCardProps) {
       {/* CTA */}
       <div className="mt-auto">
         <button
-          className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+          onClick={() => navigate(`/purchase-orders/${data.salesOrderId}`)}
+          className="text-xs font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 hover:gap-1.5 transition-all"
           style={{ color: config.primaryColor }}
         >
           View Details <RightOutlined className="text-[9px]" />

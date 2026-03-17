@@ -105,7 +105,7 @@ export function flattenNotifications(events: NotificationEvent[]): GroupedNotifi
       notificationType: notification.notificationType,
       notificationLevel: notification.notificationLevel,
       isActive: notification.isActive === 1,
-      templateName: notification.template.templateName,
+      templateName: notification?.template?.templateName ?? null,
     })),
   }));
 }
@@ -126,3 +126,58 @@ export function getNotificationTypeLabel(type: string): string {
   };
   return labels[type] || type;
 }
+
+/**
+ * Update notification event status
+ * @param eventId - The event ID to update
+ * @param eventName - Event name
+ * @param eventDescription - Event description
+ * @param eventNotifications - Array of notifications to update
+ * @param accessToken - Bearer token for authentication
+ */
+export async function updateEventNotificationStatus(
+  eventId: number,
+  eventName: string,
+  eventDescription: string,
+  eventNotifications: Array<{
+    templateId: number;
+    notificationType: string;
+    notificationLevel: string;
+    isActive: boolean;
+  }>,
+  accessToken: string
+): Promise<void> {
+  try {
+    const payload = {
+      eventName,
+      eventDescription,
+      eventNotifications: eventNotifications.map((n) => ({
+        templateId: n.templateId,
+        notificationType: n.notificationType,
+        notificationLevel: n.notificationLevel,
+        isActive: n.isActive ? 1 : 0,
+      })),
+    };
+
+    const response = await fetch(
+      `https://ndoms-dev-apim.azure-api.net/notification/dev/v1/events/updateEventandTemplate/${eventId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          "Ocp-Apim-Subscription-Key": API_SUBSCRIPTION_KEY,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to update notification: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Failed to update event notification status:", error);
+    throw error;
+  }
+}
+

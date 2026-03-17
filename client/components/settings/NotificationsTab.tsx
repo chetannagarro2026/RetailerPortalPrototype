@@ -7,6 +7,7 @@ import {
   fetchNotificationEvents,
   flattenNotifications,
   getNotificationTypeLabel,
+  updateEventNotificationStatus,
   type GroupedNotification,
 } from "../../services/notificationService";
 
@@ -51,23 +52,50 @@ export default function NotificationsTab({ setDirty }: Props) {
   // Keep parent dirty state in sync
   useEffect(() => () => setDirty(false), [setDirty]);
 
-  const handleToggle = (eventId: number, notificationId: number) => {
-    setNotifications((prev) =>
-      prev.map((event) =>
-        event.eventId === eventId
-          ? {
-              ...event,
-              notifications: event.notifications.map((n) =>
-                n.eventNotificationId === notificationId
-                  ? { ...n, isActive: !n.isActive }
-                  : n
-              ),
-            }
-          : event
-      )
-    );
+  const handleToggle = async (eventId: number, notificationId: number) => {
+    setToggling(notificationId);
+    try {
+      // Find the event being updated
+      const event = notifications.find((e) => e.eventId === eventId);
+      if (!event || !accessToken) return;
 
-    showToast("success", "Preference updated");
+      // Create updated notifications array
+      const updatedNotifications = event.notifications.map((n) =>
+        n.eventNotificationId === notificationId
+          ? { ...n, isActive: !n.isActive }
+          : n
+      );
+
+      // Call API to update
+      await updateEventNotificationStatus(
+        eventId,
+        event.eventName,
+        event.eventDescription,
+        updatedNotifications.map((n) => ({
+          templateId: 0, // Will be filled from original data
+          notificationType: n.notificationType,
+          notificationLevel: n.notificationLevel,
+          isActive: n.isActive,
+        })),
+        accessToken
+      );
+
+      // Update local state after successful API call
+      setNotifications((prev) =>
+        prev.map((e) =>
+          e.eventId === eventId
+            ? { ...e, notifications: updatedNotifications }
+            : e
+        )
+      );
+
+      showToast("success", "Preference updated successfully");
+    } catch (error) {
+      console.error("Failed to toggle notification:", error);
+      showToast("error", "Failed to update preference");
+    } finally {
+      setToggling(null);
+    }
   };
 
   if (loading) {
@@ -115,6 +143,7 @@ export default function NotificationsTab({ setDirty }: Props) {
             onToggle={(notificationId) =>
               handleToggle(event.eventId, notificationId)
             }
+            togglingId={toggling}
           />
         ))}
       </div>
@@ -128,10 +157,12 @@ function EventNotificationRow({
   event,
   isLast,
   onToggle,
+  togglingId,
 }: {
   event: GroupedNotification;
   isLast: boolean;
   onToggle: (notificationId: number) => void;
+  togglingId: number | null;
 }) {
   const config = activeBrandConfig;
 
@@ -173,6 +204,8 @@ function EventNotificationRow({
               <ToggleSwitch
                 checked={notification.isActive}
                 onChange={() => onToggle(notification.eventNotificationId)}
+                disabled={togglingId !== null && togglingId !== notification.eventNotificationId}
+                isLoading={togglingId === notification.eventNotificationId}
                 size="small"
               />
             </div>
@@ -189,11 +222,13 @@ function ToggleSwitch({
   checked,
   onChange,
   disabled,
+  isLoading,
   size = "default",
 }: {
   checked: boolean;
   onChange: () => void;
   disabled?: boolean;
+  isLoading?: boolean;
   size?: "default" | "small";
 }) {
   const config = activeBrandConfig;
@@ -206,8 +241,8 @@ function ToggleSwitch({
     <button
       role="switch"
       aria-checked={checked}
-      onClick={disabled ? undefined : onChange}
-      className="relative rounded-full border-none p-0 transition-colors"
+      onClick={disabled || isLoading ? undefined : onChange}
+      className="relative rounded-full border-none p-0 transition-colors flex items-center justify-center"
       style={{
         width: w,
         height: h,
@@ -216,19 +251,23 @@ function ToggleSwitch({
           : checked
           ? config.primaryColor
           : "#D1D5DB",
-        cursor: disabled ? "not-allowed" : "pointer",
+        cursor: disabled || isLoading ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
       }}
     >
-      <span
-        className="absolute rounded-full bg-white transition-all shadow-sm"
-        style={{
-          width: dot,
-          height: dot,
-          top: 2,
-          left: offset,
-        }}
-      />
+      {isLoading ? (
+        <LoadingOutlined style={{ fontSize: size === "small" ? 12 : 14, color: "#fff" }} />
+      ) : (
+        <span
+          className="absolute rounded-full bg-white transition-all shadow-sm"
+          style={{
+            width: dot,
+            height: dot,
+            top: 2,
+            left: offset,
+          }}
+        />
+      )}
     </button>
   );
 }

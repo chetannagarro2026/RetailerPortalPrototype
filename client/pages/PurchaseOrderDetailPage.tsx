@@ -3,46 +3,39 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftOutlined, FileTextOutlined, CustomerServiceOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
-import { activeBrandConfig } from "../config/brandConfig";
+import { activeBrandConfig, formatPrice } from "../config/brandConfig";
 import { fetchSalesOrderById, type SalesOrderDetail } from "../services/salesOrderSearchService";
 import CreateTicketDrawer from "../components/support/CreateTicketDrawer";
 
 // ── Status mapping ──────────────────────────────────────────────────
 
 const mapStatusToLabel = (status: string): string => {
-  const statusMap: Record<string, string> = {
-    PROCESSING: "Processing",
-    ON_HOLD: "On Hold",
-    UNPROCESSED: "Pending",
-    PROCESSED: "Approved",
-    ACCEPTED: "Accepted",
-    RECEIVED: "Received",
-    COMPLETED: "Shipped",
-    PARTIALLY_COMPLETED: "Partially Shipped",
-    CANCELLED: "Cancelled",
-    REJECTED: "Rejected",
-  };
-  return statusMap[status] || status;
+  const pending = ["PARTIALLY_PROCESSING", "ON_HOLD", "RECEIVED", "RESOLVED"];
+  const unprocessed = ["UNPROCESSED"];
+  const approved = ["PROCESSING", "ACCEPTED", "PARTIALLY_PROCESSED"];
+  const shipped = ["PROCESSED", "INVOICE_CREATED", "PARTIALLY_COMPLETED"];
+  const completed = ["COMPLETED"];
+  const cancelled = ["CANCELLED", "REJECTED"];
+
+  if (pending.includes(status)) return "Pending";
+  if (unprocessed.includes(status)) return "Unprocessed";
+  if (approved.includes(status)) return "Approved";
+  if (shipped.includes(status)) return "Shipped";
+  if (completed.includes(status)) return "Completed";
+  if (cancelled.includes(status)) return "Cancelled";
+  return "Pending";
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  Processing: "#2563EB",
-  "On Hold": "#D97706",
   Pending: "#D97706",
-  Approved: "#059669",
-  Accepted: "#059669",
-  Received: "#059669",
-  Shipped: "#16A34A",
-  "Partially Shipped": "#7C3AED",
+  Unprocessed: "#D97706",
+  Approved: "#2563EB",
+  Shipped: "#7C3AED",
+  Completed: "#16A34A",
   Cancelled: "#DC2626",
-  Rejected: "#DC2626",
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
-
-function formatCurrency(val: number, currency: string = "USD"): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(val);
-}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -179,7 +172,7 @@ function OrderDetailMeta({
 
   const fields = [
     { label: "Status", value: displayStatus, isStatus: true },
-    { label: "Total", value: formatCurrency(order.orderTotalAmount, order.currencyCode) },
+    { label: "Total", value: formatPrice(order.orderTotalAmount) },
     { label: "Items", value: String(order.salesOrderLineItems?.length || 0) },
     { label: "Delivery", value: order.deliveryMode?.replace(/_/g, " ") || "Standard" },
   ];
@@ -321,11 +314,13 @@ function OrderDetailItems({ order }: { order: SalesOrderDetail }) {
                 {item.sourceSystemItemDescription || `Item ${item.lineID}`}
               </p>
               <p className="text-xs" style={{ color: config.secondaryColor }}>
-                UPC: {item.upcID}{variantDesc ? ` · ${variantDesc}` : ""} · Qty: {item.requestedQuantity}
+                UPC: {item.upcID}
+                {/* {variantDesc ? ` · ${variantDesc}` : ""} */}
+                 · Qty: {item.requestedQuantity}
               </p>
             </div>
             <span className="text-sm font-medium shrink-0 ml-4" style={{ color: config.primaryColor }}>
-              {formatCurrency(item.unitPriceSellingAmount * item.requestedQuantity, item.unitPriceSellingAmountCurrencyCode)}
+              {formatPrice(item.unitPriceSellingAmount * item.requestedQuantity)}
             </span>
           </div>
         );

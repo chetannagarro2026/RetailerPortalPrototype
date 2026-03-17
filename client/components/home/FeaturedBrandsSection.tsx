@@ -47,12 +47,13 @@ function BrandCard({ brand }: { brand: Brand }) {
       className="block no-underline rounded-xl bg-white transition-shadow hover:shadow-md"
       style={{ border: `1px solid ${config.borderColor}` }}
     >
-      <div className="flex flex-col items-center justify-center px-4 py-6" style={{ minHeight: 180 }}>
+      <div className="flex flex-col items-center justify-center px-4 py-6" style={{ minHeight:280 }}>
         {brand.imageUrl ? (
           <img 
             src={`${imageBaseUrl}${brand.imageUrl}`} 
             alt={displayName} 
-            className="w-16 h-16 object-contain mb-3 rounded-lg" 
+            className="object-contain mb-3 rounded-lg" 
+            style={{ height: "100%" }}
           />
         ) : (
           <div className="mb-3">
@@ -113,7 +114,7 @@ export default function FeaturedBrandsSection() {
         style={{ border: `1px solid ${config.borderColor}`, minHeight: 160, backgroundColor: config.cardBg }}
       >
         <span className="text-sm" style={{ color: config.secondaryColor }}>
-          Loading brands...
+          Loading featured categories...
         </span>
       </div>
     );
@@ -127,7 +128,7 @@ export default function FeaturedBrandsSection() {
         style={{ border: `1px dashed ${config.borderColor}`, minHeight: 160, backgroundColor: config.cardBg }}
       >
         <span className="text-sm" style={{ color: config.secondaryColor }}>
-          Unable to load brands at this time.
+          Unable to load featured categories at this time.
         </span>
       </div>
     );
@@ -140,7 +141,7 @@ export default function FeaturedBrandsSection() {
         style={{ border: `1px dashed ${config.borderColor}`, minHeight: 160, backgroundColor: config.cardBg }}
       >
         <span className="text-sm" style={{ color: config.secondaryColor }}>
-          No brands available at this time.
+          No featured categories available at this time.
         </span>
       </div>
     );
@@ -155,10 +156,10 @@ export default function FeaturedBrandsSection() {
             className="text-[10px] font-semibold uppercase tracking-widest mb-1"
             style={{ color: config.secondaryColor }}
           >
-            Browse by Brand
+            Browse by Categories
           </p>
           <h2 className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-            Featured Brands
+            Featured Categories
           </h2>
         </div>
         <Link
@@ -170,8 +171,8 @@ export default function FeaturedBrandsSection() {
         </Link>
       </div>
 
-      {/* Brand Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {/* Category Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
         {brands.map((brand) => (
           <BrandCard key={brand.slug} brand={brand} />
         ))}

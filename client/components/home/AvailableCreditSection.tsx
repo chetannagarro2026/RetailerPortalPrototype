@@ -1,5 +1,6 @@
 import { RightOutlined, InfoCircleOutlined, DollarOutlined } from "@ant-design/icons";
 import { activeBrandConfig, formatCurrency } from "../../config/brandConfig";
+import { useCreditState } from "@/hooks/useCreditState";
 
 // Mock data — would come from API
 const creditData = {
@@ -21,6 +22,11 @@ function getBarColor(percent: number): string {
 }
 
 export default function AvailableCreditSection() {
+
+  const { creditLimit, creditUsed } = useCreditState();
+
+  creditData.creditLimit = creditLimit;
+  creditData.utilized = creditUsed; 
   const config = activeBrandConfig;
   const available = creditData.creditLimit - creditData.utilized;
   const utilization = Math.round((creditData.utilized / creditData.creditLimit) * 100);
