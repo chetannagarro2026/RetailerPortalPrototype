@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { InputNumber } from "antd";
-import { DownOutlined, RightOutlined, ShoppingCartOutlined, SearchOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined, ShoppingCartOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
@@ -400,8 +400,8 @@ function SkuPromoBadgeCell({
         className="inline-flex items-center gap-1 text-[10px] font-semibold rounded px-2 py-0.5 cursor-pointer"
         style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
       >
-        <SearchOutlined style={{ fontSize: 10 }} />
-        View {promotions.length} {promotions.length === 1 ? "promotion" : "promotions"}
+        <TagOutlined style={{ fontSize: 10 }} />
+        {promotions.length} {promotions.length === 1 ? "Promotion" : "Promotions"}
       </button>
       <PromotionInfoDrawer
         open={drawerOpen}

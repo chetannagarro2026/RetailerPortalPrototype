@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { InputNumber } from "antd";
-import { ShoppingCartOutlined, AppstoreOutlined, SearchOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, AppstoreOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
@@ -396,8 +396,8 @@ function PromotionsBadge({
         className="inline-flex items-center gap-1 text-[10px] font-semibold rounded px-2 py-0.5 cursor-pointer mt-1"
         style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
       >
-        <SearchOutlined style={{ fontSize: 12 }} />
-        View {promoCount} {promoCount === 1 ? "promotion" : "promotions"}
+        <TagOutlined style={{ fontSize: 12 }} />
+        {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
       </button>
       <PromotionInfoDrawer
         open={drawerOpen}

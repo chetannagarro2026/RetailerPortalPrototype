@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
-import { ShoppingCartOutlined, SearchOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
 import { useOrder } from "../context/OrderContext";
@@ -197,8 +197,8 @@ function SkuHeader({ product, variant }: { product: CatalogProduct; variant: Pro
                 className="inline-flex items-center gap-1 text-xs font-semibold rounded px-2.5 py-1 cursor-pointer"
                 style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
               >
-                <SearchOutlined style={{ fontSize: 12 }} />
-                View {promoCount} {promoCount === 1 ? "promotion" : "promotions"} available
+                <TagOutlined style={{ fontSize: 12 }} />
+                {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
               </button>
               <PromotionInfoDrawer
                 open={drawerOpen}

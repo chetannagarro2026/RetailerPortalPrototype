@@ -5,7 +5,7 @@ import {
   RightOutlined,
   DownOutlined,
   ShoppingCartOutlined,
-  SearchOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import NeutralInfoChip from "../ui/NeutralInfoChip";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -493,8 +493,8 @@ function PromoViewPill({ promoCount, product }: { promoCount: number; product: C
         className="inline-flex items-center gap-1 text-[10px] font-semibold rounded px-2 py-0.5 cursor-pointer"
         style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
       >
-        <SearchOutlined style={{ fontSize: 12 }} />
-        View {promoCount} {promoCount === 1 ? "promotion" : "promotions"}
+        <TagOutlined style={{ fontSize: 12 }} />
+        {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
       </button>
       <PromotionInfoDrawer
         open={drawerOpen}
