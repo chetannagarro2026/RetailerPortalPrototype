@@ -31,6 +31,17 @@ export default function PromotionInfoDrawer({
       onClose={onClose}
       styles={{ body: { padding: "16px 20px", display: "flex", flexDirection: "column" } }}
     >
+      {/* Info note — just below title */}
+      <div
+        className="flex items-center gap-1.5 pb-3 mb-3"
+        style={{ borderBottom: `1px solid ${config.borderColor}` }}
+      >
+        <CheckCircleFilled style={{ fontSize: 14, color: "#0D7A4A", flexShrink: 0 }} />
+        <span className="text-xs font-medium" style={{ color: "#0D7A4A" }}>
+          Best promotion is applied automatically when added to cart
+        </span>
+      </div>
+
       <div className="flex-1 space-y-3">
         {promotions.length === 0 && (
           <p className="text-xs py-4" style={{ color: config.secondaryColor }}>
@@ -41,17 +52,6 @@ export default function PromotionInfoDrawer({
         {promotions.map((promo) => (
           <PromoInfoCard key={promo.id} promo={promo} />
         ))}
-      </div>
-
-      {/* Footer note */}
-      <div
-        className="flex items-center gap-1.5 pt-4 mt-4"
-        style={{ borderTop: `1px solid ${config.borderColor}` }}
-      >
-        <CheckCircleFilled style={{ fontSize: 14, color: "#0D7A4A" }} />
-        <span className="text-xs font-medium" style={{ color: "#0D7A4A" }}>
-          Best promotion is applied automatically when added to cart
-        </span>
       </div>
     </Drawer>
   );
