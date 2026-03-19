@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { InputNumber } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { App } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
@@ -7,7 +8,7 @@ import type { SkuFilters } from "./SkuFilterPanel";
 import { useAuth } from "../../context/AuthContext";
 import { useOrder } from "../../context/OrderContext";
 import { resolveVariantPricing } from "../../utils/pricing";
-import SkuTableGroup from "./SkuTableGroup";
+import SkuTableGroup, { getColSpan } from "./SkuTableGroup";
 
 interface SkuGroupedTablesProps {
   product: CatalogProduct;
@@ -49,34 +50,39 @@ export default function SkuGroupedTables({
 
   // ── Batch qty state ─────────────────────────────────────────────
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({});
+  const [headerQty, setHeaderQty] = useState<number | null>(null);
 
   // Reset qty map when variants change (e.g. filter change)
   useEffect(() => {
     setQtyMap({});
+    setHeaderQty(null);
   }, [variants]);
 
   const handleQtyChange = useCallback((variantId: string, qty: number) => {
     setQtyMap((prev) => ({ ...prev, [variantId]: qty }));
   }, []);
 
+  // "Set all to" — fills all rows across all groups
   const handleSetAllQty = useCallback(
-    (variantIds: string[], qty: number, stockMap: Record<string, number>) => {
+    (val: number | null) => {
+      const n = val ?? 0;
+      setHeaderQty(val);
       setQtyMap((prev) => {
         const next = { ...prev };
-        for (const id of variantIds) {
-          const stock = stockMap[id] ?? 0;
+        for (const v of variants) {
+          const stock = v.stockQty ?? 0;
           if (stock === 0) {
-            next[id] = 0; // skip OOS
-          } else if (qty > stock) {
-            next[id] = stock; // cap at available stock
+            next[v.id] = 0;
+          } else if (n > stock) {
+            next[v.id] = stock;
           } else {
-            next[id] = qty;
+            next[v.id] = n;
           }
         }
         return next;
       });
     },
-    [],
+    [variants],
   );
 
   // ── Derived batch info ──────────────────────────────────────────
@@ -147,10 +153,12 @@ export default function SkuGroupedTables({
 
     addItems(itemsToAdd);
     setQtyMap({});
+    setHeaderQty(null);
   }, [hasInvalidRows, stagedEntries, variants, product, isAuthenticated, addItems]);
 
-  const handleClearAll = useCallback(() => {
+  const handleClearAllQty = useCallback(() => {
     setQtyMap({});
+    setHeaderQty(null);
   }, []);
 
   // ── Grouping logic ─────────────────────────────────────────────
@@ -160,6 +168,8 @@ export default function SkuGroupedTables({
     () => variantAttributes.filter((a) => a.name !== groupingAttr).map((a) => a.name),
     [variantAttributes, groupingAttr],
   );
+
+  const totalColSpan = getColSpan(columns, isAuthenticated);
 
   const groups = useMemo<VariantGroup[]>(() => {
     if (!groupingAttr) {
@@ -197,6 +207,12 @@ export default function SkuGroupedTables({
 
   const fmt = (val: number) =>
     "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const thStyle = (align: string = "left") => ({
+    color: config.secondaryColor,
+    borderBottom: `2px solid ${config.borderColor}`,
+    textAlign: align as any,
+  });
 
   return (
     <div className="relative">
@@ -256,21 +272,138 @@ export default function SkuGroupedTables({
         </div>
       ) : (
         <>
-          {/* Grouped Tables */}
-          {groups.map((group) => (
-            <SkuTableGroup
-              key={group.label || "__ungrouped"}
-              groupLabel={group.label || null}
-              variants={group.variants}
-              columns={columns}
-              product={product}
-              expandedId={expandedId}
-              onToggleExpand={onToggleExpand}
-              qtyMap={qtyMap}
-              onQtyChange={handleQtyChange}
-              onSetAllQty={handleSetAllQty}
-            />
-          ))}
+          {/* ── Single Continuous Table ──────────────────────────── */}
+          <div
+            className="overflow-x-auto rounded-[10px]"
+            style={{ border: `1px solid ${config.borderColor}` }}
+          >
+            <table className="w-full border-collapse text-xs">
+              {/* Sticky Column Headers — appears once */}
+              <thead>
+                <tr style={{ backgroundColor: config.cardBg }}>
+                  {/* Chevron */}
+                  <th
+                    className="w-8 px-2 py-2.5 text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ borderBottom: `2px solid ${config.borderColor}` }}
+                  />
+
+                  {/* Dynamic variant attribute columns */}
+                  {columns.map((col) => (
+                    <th
+                      key={col}
+                      className="text-left px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                      style={thStyle("left")}
+                    >
+                      {col}
+                    </th>
+                  ))}
+
+                  {/* SKU */}
+                  <th
+                    className="text-left px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                    style={thStyle("left")}
+                  >
+                    SKU
+                  </th>
+
+                  {/* Stock */}
+                  <th
+                    className="text-center px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                    style={thStyle("center")}
+                  >
+                    Stock
+                  </th>
+
+                  {/* List Price */}
+                  <th
+                    className="text-right px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                    style={thStyle("right")}
+                  >
+                    List Price
+                  </th>
+
+                  {/* Special Price — auth only */}
+                  {isAuthenticated && (
+                    <th
+                      className="text-right px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                      style={thStyle("right")}
+                    >
+                      Special Price
+                    </th>
+                  )}
+
+                  {/* Promotions — auth only */}
+                  {isAuthenticated && (
+                    <th
+                      className="text-center px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                      style={thStyle("center")}
+                    >
+                      Promotions
+                    </th>
+                  )}
+
+                  {/* Qty — stacked label + fused "All" prefix input */}
+                  <th className="px-2 py-2 text-center whitespace-nowrap" style={thStyle("center")}>
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className="text-[11px] font-semibold uppercase tracking-wider"
+                        style={{ color: config.secondaryColor }}
+                      >
+                        Qty
+                      </span>
+                      {/* Fused "All" prefix + number input */}
+                      <div
+                        className="flex items-stretch overflow-hidden"
+                        style={{
+                          border: `1px solid ${config.borderColor}`,
+                          borderRadius: 4,
+                          backgroundColor: "#fff",
+                        }}
+                      >
+                        <span
+                          className="flex items-center text-[10px] px-1.5"
+                          style={{
+                            color: config.secondaryColor,
+                            backgroundColor: config.cardBg,
+                            borderRight: `1px solid ${config.borderColor}`,
+                          }}
+                        >
+                          All
+                        </span>
+                        <InputNumber
+                          size="small"
+                          min={0}
+                          value={headerQty}
+                          onChange={handleSetAllQty}
+                          controls={false}
+                          variant="borderless"
+                          style={{ width: 40, fontSize: 11, textAlign: "center" }}
+                        />
+                      </div>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+
+              {/* Table Body — groups interspersed with label rows */}
+              <tbody>
+                {groups.map((group) => (
+                  <SkuTableGroup
+                    key={group.label || "__ungrouped"}
+                    groupLabel={group.label || null}
+                    variants={group.variants}
+                    columns={columns}
+                    product={product}
+                    expandedId={expandedId}
+                    onToggleExpand={onToggleExpand}
+                    qtyMap={qtyMap}
+                    onQtyChange={handleQtyChange}
+                    totalColSpan={totalColSpan}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* Spacer so content isn't hidden behind sticky bar */}
           {showBar && <div style={{ height: 64 }} />}
@@ -285,7 +418,7 @@ export default function SkuGroupedTables({
         totalPrice={totalPrice}
         belowMinCount={belowMinRows.length}
         aboveStockCount={aboveStockRows.length}
-        onClear={handleClearAll}
+        onClear={handleClearAllQty}
         onAddAll={handleAddAll}
         disabled={hasInvalidRows}
         fmt={fmt}
@@ -327,13 +460,11 @@ function StickyBatchBar({
   useEffect(() => {
     if (visible) {
       setMounted(true);
-      // Trigger slide-up on next frame
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setAnimateIn(true));
       });
     } else {
       setAnimateIn(false);
-      // Wait for slide-down animation before unmounting
       const timer = setTimeout(() => setMounted(false), 150);
       return () => clearTimeout(timer);
     }

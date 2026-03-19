@@ -20,17 +20,8 @@ interface SkuTableGroupProps {
   qtyMap: Record<string, number>;
   /** Called when a single row's qty changes */
   onQtyChange: (variantId: string, qty: number) => void;
-  /** Called when the header "Set all to" input is used — fills all rows in this group */
-  onSetAllQty: (variantIds: string[], qty: number, stockMap: Record<string, number>) => void;
-}
-
-// ── Column count helper ─────────────────────────────────────────────
-
-function getColSpan(columns: string[], isAuthenticated: boolean): number {
-  // Chevron + attrs + SKU + Stock + ListPrice + Qty = 1 + cols + 4
-  // Auth: + SpecialPrice + Promotions = 1 + cols + 6
-  if (!isAuthenticated) return 1 + columns.length + 4;
-  return 1 + columns.length + 6;
+  /** Total column count for colspan on group label row */
+  totalColSpan: number;
 }
 
 export default function SkuTableGroup({
@@ -42,143 +33,68 @@ export default function SkuTableGroup({
   onToggleExpand,
   qtyMap,
   onQtyChange,
-  onSetAllQty,
+  totalColSpan,
 }: SkuTableGroupProps) {
   const config = activeBrandConfig;
-  const { isAuthenticated } = useAuth();
-  const [headerQty, setHeaderQty] = useState<number | null>(null);
-
-  if (variants.length === 0) return null;
-
   const minQty = product.minOrderQty || 1;
   const casePack = product.casePackQty || 0;
 
-  // Build a stock map for the header "Set all" control
-  const stockMap: Record<string, number> = {};
-  const variantIds: string[] = [];
-  for (const v of variants) {
-    stockMap[v.id] = v.stockQty ?? 0;
-    variantIds.push(v.id);
-  }
-
-  const handleHeaderQtyChange = (val: number | null) => {
-    const n = val ?? 0;
-    setHeaderQty(val);
-    onSetAllQty(variantIds, n, stockMap);
-  };
-
-  const thStyle = (align: string = "left") => ({
-    color: config.primaryColor,
-    borderBottom: `2px solid ${config.borderColor}`,
-    textAlign: align as any,
-  });
+  if (variants.length === 0) return null;
 
   return (
-    <div className="mb-6">
-      {/* Group Header */}
+    <>
+      {/* Group Label Row — lightweight inline divider */}
       {groupLabel && (
-        <div
-          className="px-4 py-2.5 rounded-t-lg text-xs font-semibold"
-          style={{ backgroundColor: config.primaryColor, color: "#fff" }}
-        >
-          {groupLabel}
-          <span className="font-normal ml-2 opacity-80">
-            ({variants.length} SKU{variants.length !== 1 ? "s" : ""})
-          </span>
-        </div>
+        <tr>
+          <td
+            colSpan={totalColSpan}
+            className="px-4 py-2.5"
+            style={{
+              backgroundColor: config.cardBg,
+              borderLeft: `3px solid ${config.primaryColor}`,
+              borderBottom: `1px solid ${config.borderColor}`,
+            }}
+          >
+            <span className="text-[13px] font-semibold" style={{ color: config.primaryColor }}>
+              {groupLabel}
+            </span>
+            <span className="text-[11px] font-normal ml-2.5" style={{ color: config.secondaryColor }}>
+              ({variants.length} SKU{variants.length !== 1 ? "s" : ""})
+            </span>
+          </td>
+        </tr>
       )}
 
-      {/* Table */}
-      <div
-        className="overflow-x-auto"
-        style={{
-          border: `1px solid ${config.borderColor}`,
-          borderRadius: groupLabel ? "0 0 10px 10px" : 10,
-        }}
-      >
-        <table className="w-full border-collapse text-xs">
-          <thead>
-            <tr style={{ backgroundColor: config.cardBg }}>
-              {/* Chevron */}
-              <th className="w-8 px-2 py-2.5" style={{ borderBottom: `2px solid ${config.borderColor}` }} />
-
-              {/* Dynamic variant attribute columns */}
-              {columns.map((col) => (
-                <th key={col} className="text-left px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("left")}>
-                  {col}
-                </th>
-              ))}
-
-              {/* SKU */}
-              <th className="text-left px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("left")}>
-                SKU
-              </th>
-
-              {/* Stock */}
-              <th className="text-center px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("center")}>
-                Stock
-              </th>
-
-              {/* List Price — always visible */}
-              <th className="text-right px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("right")}>
-                List Price
-              </th>
-
-              {/* Special Price — authenticated only */}
-              {isAuthenticated && (
-                <th className="text-right px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("right")}>
-                  Special Price
-                </th>
-              )}
-
-              {/* Promotions — authenticated only */}
-              {isAuthenticated && (
-                <th className="text-center px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("center")}>
-                  Promotions
-                </th>
-              )}
-
-              {/* Qty — compound header with "Set all to" input */}
-              <th className="px-2 py-2 text-center whitespace-nowrap" style={thStyle("center")}>
-                <div className="flex flex-row items-center justify-center gap-1">
-                  <InputNumber
-                    size="small"
-                    min={0}
-                    placeholder="All"
-                    value={headerQty}
-                    onChange={handleHeaderQtyChange}
-                    controls={false}
-                    style={{ width: 56, fontSize: 11 }}
-                  />
-                  <span className="font-semibold" style={{ color: config.primaryColor }}>Qty</span>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {variants.map((v) => {
-              const isExpanded = expandedId === v.id;
-              return (
-                <SkuRow
-                  key={v.id}
-                  variant={v}
-                  columns={columns}
-                  product={product}
-                  isExpanded={isExpanded}
-                  onToggle={() => onToggleExpand(isExpanded ? null : v.id)}
-                  qty={qtyMap[v.id] ?? 0}
-                  minQty={minQty}
-                  casePack={casePack}
-                  onQtyChange={(val) => onQtyChange(v.id, val)}
-                  colSpan={getColSpan(columns, isAuthenticated)}
-                />
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      {/* Data Rows */}
+      {variants.map((v) => {
+        const isExpanded = expandedId === v.id;
+        return (
+          <SkuRow
+            key={v.id}
+            variant={v}
+            columns={columns}
+            product={product}
+            isExpanded={isExpanded}
+            onToggle={() => onToggleExpand(isExpanded ? null : v.id)}
+            qty={qtyMap[v.id] ?? 0}
+            minQty={minQty}
+            casePack={casePack}
+            onQtyChange={(val) => onQtyChange(v.id, val)}
+            colSpan={totalColSpan}
+          />
+        );
+      })}
+    </>
   );
+}
+
+// ── Column count helper (exported for parent) ───────────────────────
+
+export function getColSpan(columns: string[], isAuthenticated: boolean): number {
+  // Chevron + attrs + SKU + Stock + ListPrice + Qty = 1 + cols + 4
+  // Auth: + SpecialPrice + Promotions = 1 + cols + 6
+  if (!isAuthenticated) return 1 + columns.length + 4;
+  return 1 + columns.length + 6;
 }
 
 // ── SKU Row ─────────────────────────────────────────────────────────
