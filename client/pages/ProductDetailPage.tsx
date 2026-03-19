@@ -225,7 +225,6 @@ export default function ProductDetailPage() {
                 onClearAll={handleClearAll}
                 expandedId={expandedId}
                 onToggleExpand={setExpandedId}
-                onOpenPromoPanel={handleOpenPromoPanel}
               />
             </div>
 

@@ -1,10 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { InputNumber } from "antd";
-import { DownOutlined, RightOutlined, ShoppingCartOutlined, TagOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined, TagOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
-import { useOrder } from "../../context/OrderContext";
 import { getVariantPromotions } from "../../context/PromotionContext";
 import { resolveVariantPricing } from "../../utils/pricing";
 import SkuAccordionContent from "./SkuAccordionContent";
@@ -17,16 +16,21 @@ interface SkuTableGroupProps {
   product: CatalogProduct;
   expandedId: string | null;
   onToggleExpand: (variantId: string | null) => void;
-  onOpenPromoPanel?: (variantId: string) => void;
+  /** Externally-managed qty map: variantId → qty */
+  qtyMap: Record<string, number>;
+  /** Called when a single row's qty changes */
+  onQtyChange: (variantId: string, qty: number) => void;
+  /** Called when the header "Set all to" input is used — fills all rows in this group */
+  onSetAllQty: (variantIds: string[], qty: number, stockMap: Record<string, number>) => void;
 }
 
 // ── Column count helper ─────────────────────────────────────────────
 
 function getColSpan(columns: string[], isAuthenticated: boolean): number {
-  // Guest:  Chevron + attrs + SKU + Stock + ListPrice + Qty + Add = 1 + cols + 5
-  // Auth:   + SpecialPrice + Promotions = 1 + cols + 7
-  if (!isAuthenticated) return 1 + columns.length + 5;
-  return 1 + columns.length + 7;
+  // Chevron + attrs + SKU + Stock + ListPrice + Qty = 1 + cols + 4
+  // Auth: + SpecialPrice + Promotions = 1 + cols + 6
+  if (!isAuthenticated) return 1 + columns.length + 4;
+  return 1 + columns.length + 6;
 }
 
 export default function SkuTableGroup({
@@ -36,12 +40,32 @@ export default function SkuTableGroup({
   product,
   expandedId,
   onToggleExpand,
-  onOpenPromoPanel,
+  qtyMap,
+  onQtyChange,
+  onSetAllQty,
 }: SkuTableGroupProps) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
+  const [headerQty, setHeaderQty] = useState<number | null>(null);
 
   if (variants.length === 0) return null;
+
+  const minQty = product.minOrderQty || 1;
+  const casePack = product.casePackQty || 0;
+
+  // Build a stock map for the header "Set all" control
+  const stockMap: Record<string, number> = {};
+  const variantIds: string[] = [];
+  for (const v of variants) {
+    stockMap[v.id] = v.stockQty ?? 0;
+    variantIds.push(v.id);
+  }
+
+  const handleHeaderQtyChange = (val: number | null) => {
+    const n = val ?? 0;
+    setHeaderQty(val);
+    onSetAllQty(variantIds, n, stockMap);
+  };
 
   const thStyle = (align: string = "left") => ({
     color: config.primaryColor,
@@ -114,14 +138,20 @@ export default function SkuTableGroup({
                 </th>
               )}
 
-              {/* Qty */}
-              <th className="text-center px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("center")}>
-                Qty
-              </th>
-
-              {/* Add to Cart */}
-              <th className="text-center px-3 py-2.5 font-semibold whitespace-nowrap" style={thStyle("center")}>
-                Add to Cart
+              {/* Qty — compound header with "Set all to" input */}
+              <th className="px-2 py-2 text-center whitespace-nowrap" style={thStyle("center")}>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="font-semibold" style={{ color: config.primaryColor }}>Qty</span>
+                  <InputNumber
+                    size="small"
+                    min={0}
+                    placeholder="All"
+                    value={headerQty}
+                    onChange={handleHeaderQtyChange}
+                    controls={false}
+                    style={{ width: 56, fontSize: 11 }}
+                  />
+                </div>
               </th>
             </tr>
           </thead>
@@ -136,7 +166,11 @@ export default function SkuTableGroup({
                   product={product}
                   isExpanded={isExpanded}
                   onToggle={() => onToggleExpand(isExpanded ? null : v.id)}
-                  onOpenPromoPanel={onOpenPromoPanel}
+                  qty={qtyMap[v.id] ?? 0}
+                  minQty={minQty}
+                  casePack={casePack}
+                  onQtyChange={(val) => onQtyChange(v.id, val)}
+                  colSpan={getColSpan(columns, isAuthenticated)}
                 />
               );
             })}
@@ -155,31 +189,27 @@ function SkuRow({
   product,
   isExpanded,
   onToggle,
-  onOpenPromoPanel,
+  qty,
+  minQty,
+  casePack,
+  onQtyChange,
+  colSpan,
 }: {
   variant: ProductVariant;
   columns: string[];
   product: CatalogProduct;
   isExpanded: boolean;
   onToggle: () => void;
-  onOpenPromoPanel?: (variantId: string) => void;
+  qty: number;
+  minQty: number;
+  casePack: number;
+  onQtyChange: (val: number) => void;
+  colSpan: number;
 }) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
   const isOOS = variant.availabilityStatus === "out-of-stock";
   const borderStyle = isExpanded ? "none" : `1px solid ${config.borderColor}`;
-
-  // Shared qty state between QtyCell and AddToCartCell
-  const minQty = product.minOrderQty || 1;
-  const step = product.casePackQty || 1;
-  const [qty, setQty] = useState(minQty);
-  const handleQtyChange = useCallback(
-    (val: number | null) => {
-      if (val === null) return;
-      setQty(Math.max(minQty, Math.round(val / step) * step || step));
-    },
-    [minQty, step],
-  );
 
   return (
     <>
@@ -236,27 +266,24 @@ function SkuRow({
         <SpecialPriceCell variant={variant} product={product} borderStyle={borderStyle} />
 
         {/* Promotions — auth only */}
-        <SkuPromoBadgeCell variant={variant} product={product} borderStyle={borderStyle} onOpenPromoPanel={onOpenPromoPanel} />
+        <SkuPromoBadgeCell variant={variant} product={product} borderStyle={borderStyle} />
 
-        {/* Qty */}
+        {/* Qty — with validation styling */}
         <QtyCell
           variant={variant}
           qty={qty}
           minQty={minQty}
-          step={step}
-          onQtyChange={handleQtyChange}
+          casePack={casePack}
+          onQtyChange={onQtyChange}
           borderStyle={borderStyle}
         />
-
-        {/* Add to Cart */}
-        <AddToCartCell variant={variant} product={product} qty={qty} borderStyle={borderStyle} />
       </tr>
 
       {/* Expanded Accordion */}
       {isExpanded && (
         <tr>
           <td
-            colSpan={getColSpan(columns, isAuthenticated)}
+            colSpan={colSpan}
             style={{ padding: 0, borderBottom: `1px solid ${config.borderColor}` }}
           >
             <SkuAccordionContent product={product} variant={variant} />
@@ -286,7 +313,6 @@ function StockCell({ variant, borderStyle }: { variant: ProductVariant; borderSt
     message = "Running Low";
     messageColor = "#D97706";
   }
-  // qty > 50 — no message
 
   return (
     <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
@@ -375,7 +401,6 @@ function SkuPromoBadgeCell({
   variant: ProductVariant;
   product: CatalogProduct;
   borderStyle: string;
-  onOpenPromoPanel?: (variantId: string) => void;
 }) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
@@ -413,95 +438,73 @@ function SkuPromoBadgeCell({
   );
 }
 
-// ── Qty Cell ────────────────────────────────────────────────────────
+// ── Qty Cell — with validation styling ──────────────────────────────
 
 function QtyCell({
   variant,
   qty,
   minQty,
-  step,
+  casePack,
   onQtyChange,
   borderStyle,
 }: {
   variant: ProductVariant;
   qty: number;
   minQty: number;
-  step: number;
-  onQtyChange: (val: number | null) => void;
+  casePack: number;
+  onQtyChange: (val: number) => void;
   borderStyle: string;
 }) {
   const isOOS = variant.availabilityStatus === "out-of-stock";
 
-  return (
-    <td className="px-2 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-      <InputNumber
-        size="small"
-        min={minQty}
-        step={step}
-        value={qty}
-        onChange={onQtyChange}
-        disabled={isOOS}
-        controls
-        style={{ width: 70 }}
-      />
-    </td>
-  );
-}
+  // Validation states
+  const isBelowMin = qty > 0 && qty < minQty;
+  const isCasePackWarn = casePack > 1 && qty > 0 && qty >= minQty && qty % casePack !== 0;
+  const isStaged = qty > 0 && qty >= minQty && !isCasePackWarn;
 
-// ── Add to Cart Cell ────────────────────────────────────────────────
-
-function AddToCartCell({
-  variant,
-  product,
-  qty,
-  borderStyle,
-}: {
-  variant: ProductVariant;
-  product: CatalogProduct;
-  qty: number;
-  borderStyle: string;
-}) {
-  const config = activeBrandConfig;
-  const { addItem } = useOrder();
-  const { isAuthenticated } = useAuth();
-  const isOOS = variant.availabilityStatus === "out-of-stock";
-  const pricing = resolveVariantPricing(variant, product);
-
-  const handleAdd = useCallback(() => {
-    const unitPrice = isAuthenticated ? pricing.finalPrice : pricing.listPrice;
-    addItem({
-      id: variant.id,
-      productId: product.id,
-      productName: product.name,
-      sku: variant.sku,
-      variantAttributes: variant.attributes,
-      quantity: qty,
-      unitPrice,
-      listPrice: pricing.listPrice,
-      specialPrice: isAuthenticated ? pricing.specialPrice : undefined,
-      promotionLabel: isAuthenticated ? pricing.promotionLabel : undefined,
-      imageUrl: product.imageUrl,
-    });
-  }, [variant, product, qty, addItem, isAuthenticated, pricing]);
+  // Input styling based on state
+  let inputBorder = undefined;
+  let inputBg = undefined;
+  if (isBelowMin) {
+    inputBorder = "#FCA5A5";
+    inputBg = "#FEF2F2";
+  } else if (isCasePackWarn) {
+    inputBorder = "#FDE68A";
+    inputBg = "#FFFBEB";
+  } else if (isStaged) {
+    inputBorder = "#9FE1CB";
+    inputBg = "#F0FDF4";
+  }
 
   return (
     <td className="px-2 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleAdd();
-        }}
-        disabled={isOOS}
-        className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{
-          backgroundColor: isOOS ? config.secondaryColor : config.primaryColor,
-          color: "#fff",
-          border: "none",
-        }}
-      >
-        <ShoppingCartOutlined className="text-[10px]" />
-        {isOOS ? "Unavailable" : "Add"}
-      </button>
+      <div className="inline-flex items-center gap-1.5">
+        <InputNumber
+          size="small"
+          min={0}
+          value={qty || undefined}
+          placeholder="0"
+          onChange={(val) => onQtyChange(val ?? 0)}
+          disabled={isOOS}
+          controls
+          style={{
+            width: 70,
+            borderColor: inputBorder,
+            backgroundColor: inputBg,
+          }}
+          className={isBelowMin ? "sku-qty-error" : isCasePackWarn ? "sku-qty-warn" : isStaged ? "sku-qty-staged" : ""}
+        />
+        {isBelowMin && (
+          <span className="text-[10px] font-medium" style={{ color: "#DC2626" }}>
+            Min: {minQty}
+          </span>
+        )}
+        {isCasePackWarn && (
+          <span className="text-[10px] font-medium" style={{ color: "#D97706" }}>
+            Case pack: {casePack}
+          </span>
+        )}
+      </div>
     </td>
   );
 }
