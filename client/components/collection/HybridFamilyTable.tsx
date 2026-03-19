@@ -5,17 +5,16 @@ import {
   RightOutlined,
   DownOutlined,
   ShoppingCartOutlined,
-  TagOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
-import { Tooltip } from "antd";
-import Tag from "../ui/Tag";
 import NeutralInfoChip from "../ui/NeutralInfoChip";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
-import { getFinalPriceRange, countProductPromotions, getProductPromotionLabels } from "../../utils/pricing";
+import { getFinalPriceRange, countProductPromotions } from "../../utils/pricing";
 import FamilyRowExpansion from "./FamilyRowExpansion";
 import QuickAddPanel from "./QuickAddPanel";
+import PromotionInfoDrawer from "../catalog/PromotionInfoDrawer";
 
 const TABLE_PAGE_SIZE = 20;
 
@@ -262,7 +261,7 @@ function FamilyRow({
   const familyLink = `/product/${product.id}`;
 
   const { isAuthenticated, showSignInModal } = useAuth();
-  const { priceRange, listPriceRange, hasOffers, skuCount, attrSummary, promoCount, promoLabels } = useMemo(
+  const { priceRange, listPriceRange, hasOffers, skuCount, attrSummary, promoCount } = useMemo(
     () => computeFamilyMeta(product, isAuthenticated),
     [product, isAuthenticated],
   );
@@ -361,26 +360,7 @@ function FamilyRow({
             )}
             <div className="font-medium" style={{ color: config.primaryColor, marginBottom: 4 }}>{priceRange}</div>
             {isAuthenticated && promoCount > 0 && (
-              <Tooltip
-                title={
-                  <div>
-                    <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
-                    {promoLabels.map((label: string, i: number) => (
-                      <div key={i} className="text-[11px]">&bull; {label}</div>
-                    ))}
-                    {promoCount > 3 && (
-                      <div className="text-[10px] mt-1 opacity-70">+{promoCount - 3} more</div>
-                    )}
-                  </div>
-                }
-                placement="bottom"
-              >
-                <span>
-                  <Tag variant="promotion" size="compact" icon={<TagOutlined style={{ fontSize: 10, fontWeight: 800 }} />}>
-                    {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
-                  </Tag>
-                </span>
-              </Tooltip>
+              <PromoViewPill promoCount={promoCount} product={product} />
             )}
             {!isAuthenticated && (
               <button
@@ -497,7 +477,31 @@ function computeFamilyMeta(product: CatalogProduct, isAuthenticated: boolean) {
   const attrSummary = parts.length > 0 ? parts.join(" · ") : "—";
 
   const promoCount = countProductPromotions(product);
-  const promoLabels = getProductPromotionLabels(product, 3);
 
-  return { priceRange, listPriceRange, hasOffers: range.hasOffers, skuCount, attrSummary, promoCount, promoLabels };
+  return { priceRange, listPriceRange, hasOffers: range.hasOffers, skuCount, attrSummary, promoCount };
+}
+
+// ── Promo View Pill (green, clickable → drawer) ─────────────────────
+
+function PromoViewPill({ promoCount, product }: { promoCount: number; product: CatalogProduct }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={(e) => { e.stopPropagation(); setDrawerOpen(true); }}
+        className="inline-flex items-center gap-1 text-[10px] font-semibold rounded px-2 py-0.5 cursor-pointer"
+        style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
+      >
+        <SearchOutlined style={{ fontSize: 12 }} />
+        View {promoCount} {promoCount === 1 ? "promotion" : "promotions"}
+      </button>
+      <PromotionInfoDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        productName={product.name}
+        promotions={product.promotions || []}
+      />
+    </>
+  );
 }

@@ -1,16 +1,17 @@
-import { TagOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { SearchOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import Tag, { DropdownIndicator } from "../ui/Tag";
 import type { CatalogProduct } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
 import { resolveProductPricing, getEffectiveTierPricing, countProductPromotions } from "../../utils/pricing";
+import PromotionInfoDrawer from "../catalog/PromotionInfoDrawer";
 
 interface PDPHeaderProps {
   product: CatalogProduct;
   onOpenPromotionPanel?: () => void;
 }
 
-export default function PDPHeader({ product, onOpenPromotionPanel }: PDPHeaderProps) {
+export default function PDPHeader({ product }: PDPHeaderProps) {
   const config = activeBrandConfig;
   const { isAuthenticated, showSignInModal } = useAuth();
   const pricing = resolveProductPricing(product);
@@ -63,16 +64,7 @@ export default function PDPHeader({ product, onOpenPromotionPanel }: PDPHeaderPr
 
       {/* Promotions Available Badge — below pricing */}
       {isAuthenticated && countProductPromotions(product) > 0 && (
-        <div style={{ marginTop: 12, marginBottom: 16 }}>
-          <Tag
-            variant="promotion"
-            icon={<TagOutlined />}
-            suffix={<DropdownIndicator />}
-            onClick={onOpenPromotionPanel}
-          >
-            {countProductPromotions(product)} {countProductPromotions(product) === 1 ? "Promotion" : "Promotions"} Available
-          </Tag>
-        </div>
+        <PdpPromoPill product={product} />
       )}
 
       {/* Order constraints */}
@@ -218,6 +210,32 @@ function PdpPricingBlock({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── PDP Promo Pill (green, clickable → drawer) ─────────────────────
+
+function PdpPromoPill({ product }: { product: CatalogProduct }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const promoCount = countProductPromotions(product);
+
+  return (
+    <div style={{ marginTop: 12, marginBottom: 16 }}>
+      <button
+        onClick={() => setDrawerOpen(true)}
+        className="inline-flex items-center gap-1 text-xs font-semibold rounded px-2.5 py-1 cursor-pointer"
+        style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
+      >
+        <SearchOutlined style={{ fontSize: 12 }} />
+        View {promoCount} {promoCount === 1 ? "promotion" : "promotions"} available
+      </button>
+      <PromotionInfoDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        productName={product.name}
+        promotions={product.promotions || []}
+      />
     </div>
   );
 }

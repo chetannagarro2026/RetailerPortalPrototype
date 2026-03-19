@@ -1,15 +1,14 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { InputNumber } from "antd";
-import { ShoppingCartOutlined, AppstoreOutlined, TagOutlined } from "@ant-design/icons";
-import Tag from "../ui/Tag";
-import { Tooltip } from "antd";
+import { ShoppingCartOutlined, AppstoreOutlined, SearchOutlined } from "@ant-design/icons";
 import { activeBrandConfig, type ProductCardVariant } from "../../config/brandConfig";
 import { type CatalogProduct } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
-import { resolveProductPricing, hasMixedPromotions, getEffectiveTierPricing, countProductPromotions, getProductPromotionLabels } from "../../utils/pricing";
+import { resolveProductPricing, hasMixedPromotions, getEffectiveTierPricing, countProductPromotions } from "../../utils/pricing";
 import QuickMatrix from "./QuickMatrix";
+import PromotionInfoDrawer from "./PromotionInfoDrawer";
 
 interface ProductCardProps {
   product: CatalogProduct;
@@ -380,37 +379,33 @@ function PricingBlock({
 
 function PromotionsBadge({
   product,
-  compact,
 }: {
   product: CatalogProduct;
   compact?: boolean;
 }) {
   const { isAuthenticated } = useAuth();
   const promoCount = countProductPromotions(product);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   if (!isAuthenticated || promoCount === 0) return null;
 
-  const labels = getProductPromotionLabels(product, 3);
-  const tooltipContent = (
-    <div>
-      <div className="text-[11px] font-semibold mb-1">Available Promotions</div>
-      {labels.map((label, i) => (
-        <div key={i} className="text-[11px]">&bull; {label}</div>
-      ))}
-      {promoCount > 3 && (
-        <div className="text-[10px] mt-1 opacity-70">+{promoCount - 3} more</div>
-      )}
-    </div>
-  );
-
   return (
-    <Tooltip title={tooltipContent} placement="bottom">
-      <span className="mt-1">
-        <Tag variant="promotion" size="compact" icon={<TagOutlined />}>
-          {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"}
-        </Tag>
-      </span>
-    </Tooltip>
+    <>
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDrawerOpen(true); }}
+        className="inline-flex items-center gap-1 text-[10px] font-semibold rounded px-2 py-0.5 cursor-pointer mt-1"
+        style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
+      >
+        <SearchOutlined style={{ fontSize: 12 }} />
+        View {promoCount} {promoCount === 1 ? "promotion" : "promotions"}
+      </button>
+      <PromotionInfoDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        productName={product.name}
+        promotions={product.promotions || []}
+      />
+    </>
   );
 }
 

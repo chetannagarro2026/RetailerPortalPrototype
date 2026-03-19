@@ -1,15 +1,14 @@
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { InputNumber, Button } from "antd";
-import { ShoppingCartOutlined, TagOutlined } from "@ant-design/icons";
-import Tag, { DropdownIndicator } from "../components/ui/Tag";
+import { ShoppingCartOutlined, SearchOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../config/brandConfig";
 import { getProductById, type CatalogProduct, type ProductVariant } from "../data/catalogData";
 import { useOrder } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
 import { resolveVariantPricing, getEffectiveTierPricing } from "../utils/pricing";
 import { getVariantPromotions } from "../context/PromotionContext";
-import SkuPromotionPanel from "../components/promotions/SkuPromotionPanel";
+import PromotionInfoDrawer from "../components/catalog/PromotionInfoDrawer";
 import FulfillmentPanel from "../components/product-family/FulfillmentPanel";
 
 export default function SkuDetailPage() {
@@ -21,9 +20,6 @@ export default function SkuDetailPage() {
   const product = productId ? getProductById(decodeURIComponent(productId)) : null;
   const variant = product?.variants?.find((v) => v.id === variantId) || null;
 
-  const [showPromoPanel, setShowPromoPanel] = useState(false);
-  const handleOpenPromoPanel = useCallback(() => setShowPromoPanel(true), []);
-  const handleClosePromoPanel = useCallback(() => setShowPromoPanel(false), []);
 
   if (!product || !variant) {
     return (
@@ -60,7 +56,7 @@ export default function SkuDetailPage() {
         </div>
 
         <div>
-          <SkuHeader product={product} variant={variant} onOpenPromoPanel={handleOpenPromoPanel} />
+          <SkuHeader product={product} variant={variant} />
           <SkuOrderSection product={product} variant={variant} addItem={addItem} />
           <FulfillmentSection variant={variant} />
           {product.specifications && product.specifications.length > 0 && (
@@ -69,31 +65,6 @@ export default function SkuDetailPage() {
         </div>
       </div>
 
-      {/* SKU Promotion Selection Panel */}
-      {isAuthenticated && showPromoPanel && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
-            onClick={handleClosePromoPanel}
-          />
-          <aside
-            className="fixed top-0 right-0 z-50 overflow-y-auto"
-            style={{
-              width: 420,
-              height: "100vh",
-              borderLeft: `1px solid ${config.borderColor}`,
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
-            }}
-          >
-            <SkuPromotionPanel
-              product={product}
-              variant={variant}
-              onClose={handleClosePromoPanel}
-            />
-          </aside>
-        </>
-      )}
     </div>
   );
 }
@@ -126,11 +97,13 @@ function SkuBreadcrumb({ product, variant }: { product: CatalogProduct; variant:
 
 // ── SKU Header ──────────────────────────────────────────────────────
 
-function SkuHeader({ product, variant, onOpenPromoPanel }: { product: CatalogProduct; variant: ProductVariant; onOpenPromoPanel?: () => void }) {
+function SkuHeader({ product, variant }: { product: CatalogProduct; variant: ProductVariant }) {
   const config = activeBrandConfig;
   const { isAuthenticated, showSignInModal } = useAuth();
   const pricing = resolveVariantPricing(variant, product);
-  const promoCount = isAuthenticated ? getVariantPromotions(variant.id, product).length : 0;
+  const skuPromotions = isAuthenticated ? getVariantPromotions(variant.id, product) : [];
+  const promoCount = skuPromotions.length;
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const variantDesc = Object.entries(variant.attributes)
     .map(([k, v]) => `${k}: ${v}`)
     .join(" · ");
@@ -219,14 +192,20 @@ function SkuHeader({ product, variant, onOpenPromoPanel }: { product: CatalogPro
           {/* Promotions Available badge — below pricing */}
           {promoCount > 0 && (
             <div style={{ marginTop: 12 }}>
-              <Tag
-                variant="promotion"
-                icon={<TagOutlined />}
-                suffix={<DropdownIndicator />}
-                onClick={onOpenPromoPanel}
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold rounded px-2.5 py-1 cursor-pointer"
+                style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
               >
-                {promoCount} {promoCount === 1 ? "Promotion" : "Promotions"} Available
-              </Tag>
+                <SearchOutlined style={{ fontSize: 12 }} />
+                View {promoCount} {promoCount === 1 ? "promotion" : "promotions"} available
+              </button>
+              <PromotionInfoDrawer
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                productName={`${product.name} — ${variant.sku}`}
+                promotions={skuPromotions}
+              />
             </div>
           )}
         </div>

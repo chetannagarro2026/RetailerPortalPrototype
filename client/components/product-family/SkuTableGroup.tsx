@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
 import { InputNumber } from "antd";
-import { DownOutlined, RightOutlined, TagOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined, ShoppingCartOutlined, SearchOutlined } from "@ant-design/icons";
 import { activeBrandConfig } from "../../config/brandConfig";
-import Tag, { DropdownIndicator } from "../ui/Tag";
 import type { CatalogProduct, ProductVariant } from "../../data/catalogData";
 import { useAuth } from "../../context/AuthContext";
 import { useOrder } from "../../context/OrderContext";
-import { usePromotions, getVariantPromotions } from "../../context/PromotionContext";
+import { getVariantPromotions } from "../../context/PromotionContext";
 import { resolveVariantPricing } from "../../utils/pricing";
 import SkuAccordionContent from "./SkuAccordionContent";
+import PromotionInfoDrawer from "../catalog/PromotionInfoDrawer";
 
 interface SkuTableGroupProps {
   groupLabel: string | null;
@@ -371,7 +371,6 @@ function SkuPromoBadgeCell({
   variant,
   product,
   borderStyle,
-  onOpenPromoPanel,
 }: {
   variant: ProductVariant;
   product: CatalogProduct;
@@ -380,12 +379,11 @@ function SkuPromoBadgeCell({
 }) {
   const config = activeBrandConfig;
   const { isAuthenticated } = useAuth();
-  const { getAppliedPromotion } = usePromotions();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   if (!isAuthenticated) return null;
 
   const promotions = getVariantPromotions(variant.id, product);
-  const appliedPromo = getAppliedPromotion(variant.id);
 
   if (promotions.length === 0) {
     return (
@@ -397,22 +395,20 @@ function SkuPromoBadgeCell({
 
   return (
     <td className="px-3 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-      <Tag
-        variant={appliedPromo ? "applied" : "promotion"}
-        size="compact"
-        icon={<TagOutlined />}
-        suffix={<DropdownIndicator />}
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenPromoPanel?.(variant.id);
-        }}
-        title={appliedPromo ? `Applied: ${appliedPromo.label}` : `${promotions.length} available`}
+      <button
+        onClick={(e) => { e.stopPropagation(); setDrawerOpen(true); }}
+        className="inline-flex items-center gap-1 text-[10px] font-semibold rounded px-2 py-0.5 cursor-pointer"
+        style={{ backgroundColor: "#E1F5EE", color: "#085041", border: "none" }}
       >
-        {appliedPromo
-          ? <>{appliedPromo.label} Applied</>
-          : <>{promotions.length} {promotions.length === 1 ? "Promotion" : "Promotions"}</>
-        }
-      </Tag>
+        <SearchOutlined style={{ fontSize: 10 }} />
+        View {promotions.length} {promotions.length === 1 ? "promotion" : "promotions"}
+      </button>
+      <PromotionInfoDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        productName={`${product.name} — ${variant.sku}`}
+        promotions={promotions}
+      />
     </td>
   );
 }
