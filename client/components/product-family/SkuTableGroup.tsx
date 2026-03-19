@@ -480,7 +480,7 @@ function QtyCell({
 
   return (
     <td className="px-2 py-2.5 text-center whitespace-nowrap" style={{ borderBottom: borderStyle }}>
-      <div className="inline-flex items-center gap-1.5">
+      <div className="inline-flex flex-col items-center gap-0.5">
         <InputNumber
           size="small"
           min={0}
@@ -497,17 +497,17 @@ function QtyCell({
           className={(isBelowMin || isAboveStock) ? "sku-qty-error" : isCasePackWarn ? "sku-qty-warn" : isStaged ? "sku-qty-staged" : ""}
         />
         {isBelowMin && (
-          <span className="text-[10px] font-medium" style={{ color: "#DC2626" }}>
+          <span className="text-[10px] font-medium leading-tight" style={{ color: "#DC2626" }}>
             Min: {minQty}
           </span>
         )}
         {isAboveStock && !isBelowMin && (
-          <span className="text-[10px] font-medium" style={{ color: "#DC2626" }}>
+          <span className="text-[10px] font-medium leading-tight" style={{ color: "#DC2626" }}>
             Max: {stock}
           </span>
         )}
         {isCasePackWarn && (
-          <span className="text-[10px] font-medium" style={{ color: "#D97706" }}>
+          <span className="text-[10px] font-medium leading-tight" style={{ color: "#D97706" }}>
             Case pack: {casePack}
           </span>
         )}
