@@ -667,13 +667,13 @@ const allPromotions: PromotionInfo[] = [
     id: "promo-10off", label: "10% OFF", description: "Get 10% off on eligible SKUs",
     type: "discount", discountPercent: 10, minQty: 1,
     validFrom: "2026-01-01", validTo: "2026-06-30", scope: "family",
-    rules: ["Minimum Quantity: 1", "Cannot combine with other promotions"],
+    rules: ["Minimum Quantity: 1"],
   },
   {
     id: "promo-15off", label: "15% OFF", description: "Get 15% off on eligible SKUs",
     type: "discount", discountPercent: 15, minQty: 5,
     validFrom: "2026-02-01", validTo: "2026-04-30", scope: "sku",
-    rules: ["Minimum Quantity: 5", "Cannot combine with other promotions"],
+    rules: ["Minimum Quantity: 5"],
   },
   {
     id: "promo-20off", label: "20% OFF", description: "Get 20% off on eligible SKUs",
