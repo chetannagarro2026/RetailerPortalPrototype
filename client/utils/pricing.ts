@@ -131,6 +131,74 @@ export function getEffectiveTierPricing(
   });
 }
 
+// ── Promotion Evaluation ────────────────────────────────────────────
+
+export interface EvaluatedPromotion {
+  promotion: import("../data/catalogData").PromotionInfo;
+  monetaryValue: number;
+  /** For BXGY: how many free units the buyer earns */
+  freeUnits: number;
+  label: string;
+}
+
+/**
+ * Evaluate all promotions for a product/SKU and return the best one.
+ * Returns null if no promotion qualifies.
+ */
+export function evaluateBestPromotion(
+  promotions: import("../data/catalogData").PromotionInfo[],
+  quantity: number,
+  unitPrice: number,
+  variantId?: string,
+): EvaluatedPromotion | null {
+  if (!promotions || promotions.length === 0 || quantity <= 0) return null;
+
+  const now = new Date();
+  const candidates: EvaluatedPromotion[] = [];
+
+  for (const promo of promotions) {
+    // Filter: minQty
+    if (promo.minQty && quantity < promo.minQty) continue;
+
+    // Filter: validity window
+    if (promo.validFrom && new Date(promo.validFrom) > now) continue;
+    if (promo.validTo && new Date(promo.validTo) < now) continue;
+
+    // Filter: eligible variants
+    if (promo.eligibleVariantIds && variantId && !promo.eligibleVariantIds.includes(variantId)) continue;
+
+    // Calculate monetary value
+    let monetaryValue = 0;
+    let freeUnits = 0;
+
+    switch (promo.type) {
+      case "discount": {
+        const pct = promo.discountPercent ?? 0;
+        monetaryValue = unitPrice * quantity * (pct / 100);
+        break;
+      }
+      case "bogo":
+      case "free-goods": {
+        const qualQty = promo.qualifyingQty ?? 1;
+        const freeQty = promo.freeQty ?? 1;
+        freeUnits = Math.floor(quantity / qualQty) * freeQty;
+        monetaryValue = freeUnits * unitPrice;
+        break;
+      }
+    }
+
+    if (monetaryValue > 0) {
+      candidates.push({ promotion: promo, monetaryValue, freeUnits, label: promo.label });
+    }
+  }
+
+  if (candidates.length === 0) return null;
+
+  // Pick highest monetary value
+  candidates.sort((a, b) => b.monetaryValue - a.monetaryValue);
+  return candidates[0];
+}
+
 export function formatCurrency(val: number): string {
   return "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

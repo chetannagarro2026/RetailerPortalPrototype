@@ -63,6 +63,9 @@ export default function OrderSummaryCard({
   const hasProductSavings = totalProductSavings > 0;
   const hasCartPromo = cartPromoDiscount > 0 && appliedPromo;
 
+  // Count of line items with an auto-applied promotion (exclude free goods rows)
+  const promoItemCount = promoItems.length;
+
   return (
     <div
       className="rounded-xl p-5"
@@ -84,49 +87,18 @@ export default function OrderSummaryCard({
         <span className="text-[11px] font-medium" style={{ color: "#16A34A" }}>Calculated at checkout</span>
       </div>
 
-      {/* Product Promotions section */}
+      {/* Product Promotions — single collapsed row */}
       {hasProductSavings && (
         <>
           <div className="my-2.5" style={{ borderTop: `1px solid ${config.borderColor}` }} />
 
           <div className="flex justify-between py-1.5 text-xs">
-            <span className="font-medium" style={{ color: "#16A34A" }}>Product Promotions</span>
+            <span className="font-medium" style={{ color: "#16A34A" }}>
+              Product Promotions ({promoItemCount} {promoItemCount === 1 ? "product" : "products"})
+            </span>
             <span className="font-semibold" style={{ color: "#16A34A" }}>
               −{fmt(totalProductSavings)}
             </span>
-          </div>
-
-          {/* Detail rows */}
-          <div className="pl-3">
-            {promoItems.map((item) => {
-              const listPrice = item.listPrice ?? item.unitPrice;
-              const saving = (listPrice - item.unitPrice) * item.quantity;
-              if (saving <= 0) return null;
-              return (
-                <div key={item.id} className="flex justify-between text-[11px] py-0.5">
-                  <span style={{ color: config.secondaryColor }}>
-                    {item.productName} · {item.promotionLabel}
-                  </span>
-                  <span style={{ color: config.secondaryColor }}>−{fmt(saving)}</span>
-                </div>
-              );
-            })}
-            {freeItems.map((item) => {
-              const parentItem = items.find(
-                (i) => !i.isFreeItem && i.productId === item.productId,
-              );
-              const unitVal = parentItem?.unitPrice ?? item.listPrice ?? 0;
-              const saving = unitVal * item.quantity;
-              if (saving <= 0) return null;
-              return (
-                <div key={item.id} className="flex justify-between text-[11px] py-0.5">
-                  <span style={{ color: config.secondaryColor }}>
-                    {item.productName} · {item.promotionLabel || "Buy X Get Y"}
-                  </span>
-                  <span style={{ color: config.secondaryColor }}>−{fmt(saving)}</span>
-                </div>
-              );
-            })}
           </div>
         </>
       )}
