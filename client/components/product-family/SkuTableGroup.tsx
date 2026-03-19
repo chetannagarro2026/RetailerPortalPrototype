@@ -140,7 +140,7 @@ export default function SkuTableGroup({
 
               {/* Qty — compound header with "Set all to" input */}
               <th className="px-2 py-2 text-center whitespace-nowrap" style={thStyle("center")}>
-                <div className="flex flex-col items-center gap-1">
+                <div className="flex flex-row items-center justify-center gap-1">
                   <span className="font-semibold" style={{ color: config.primaryColor }}>Qty</span>
                   <InputNumber
                     size="small"
