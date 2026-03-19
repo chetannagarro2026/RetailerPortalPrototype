@@ -1,35 +1,22 @@
-import { Button, InputNumber } from "antd";
-import { DeleteOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import Tag from "../components/ui/Tag";
-import { Link, useNavigate } from "react-router-dom";
+import { Button } from "antd";
+import { ShoppingOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder, type OrderLineItem } from "../context/OrderContext";
 import { useAuth } from "../context/AuthContext";
-import { useCreditState } from "../hooks/useCreditState";
 import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 import CartPromotionsSection from "../components/cart/CartPromotionsSection";
+import CartLineItem from "../components/cart/CartLineItem";
+import OrderSummaryCard from "../components/cart/OrderSummaryCard";
 import { cartPromotions } from "../data/catalogData";
 import { useState } from "react";
 
 export default function CartPage() {
   const config = activeBrandConfig;
-  const navigate = useNavigate();
   const { items, totalUnits, totalValue, updateQuantity, removeItem, clearOrder } = useOrder();
-  const { isAuthenticated, showSignInModal } = useAuth();
-  const { isExceeded } = useCreditState();
+  const { isAuthenticated } = useAuth();
   const [appliedPromoId, setAppliedPromoId] = useState<string | null>(null);
 
-  const formatCurrency = (val: number) =>
-    "$" + val.toLocaleString("en-US", { minimumFractionDigits: 2 });
-
-  // Calculate product-level savings (SKU discounts, special price savings)
-  const productSavings = items.reduce((sum, item) => {
-    if (item.isFreeItem) return sum;
-    const listPrice = item.listPrice ?? item.unitPrice;
-    return sum + (listPrice - item.unitPrice) * item.quantity;
-  }, 0);
-
-  // Calculate cart promotion discount
   const appliedPromo = appliedPromoId
     ? cartPromotions.find((p) => p.id === appliedPromoId) ?? null
     : null;
@@ -38,12 +25,9 @@ export default function CartPage() {
       ? (appliedPromo.discountAmount ?? 0)
       : 0;
 
-  const totalSavings = productSavings + cartPromoDiscount;
-  const grandTotal = totalValue - cartPromoDiscount;
-
   if (items.length === 0) {
     return (
-      <div className="max-w-content mx-auto px-4 py-4 text-center">
+      <div className="max-w-content mx-auto px-6 py-8 text-center">
         <ShoppingOutlined className="text-5xl mb-4" style={{ color: config.secondaryColor }} />
         <h1 className="text-xl font-semibold mb-2" style={{ color: config.primaryColor }}>
           Your cart is empty
@@ -63,7 +47,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-content mx-auto px-4 py-4">
+    <div className="max-w-content mx-auto px-6 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -74,12 +58,7 @@ export default function CartPage() {
             {items.length} item{items.length !== 1 ? "s" : ""} · {totalUnits} total units
           </p>
         </div>
-        <Button
-          size="small"
-          danger
-          onClick={clearOrder}
-          className="text-xs"
-        >
+        <Button size="small" danger onClick={clearOrder} className="text-xs">
           Clear Cart
         </Button>
       </div>
@@ -94,111 +73,22 @@ export default function CartPage() {
           />
         </div>
 
-        {/* Right: Cart Promotions + Order + Credit Summary */}
-        <div className="space-y-5">
-          {/* Cart Promotions */}
+        {/* Right: Sidebar */}
+        <div className="space-y-5" style={{ position: "sticky", top: 124, alignSelf: "start" }}>
           <CartPromotionsSection
             appliedPromoId={appliedPromoId}
             onApply={(id) => setAppliedPromoId(id)}
             onRemove={() => setAppliedPromoId(null)}
           />
 
-          {/* Order Summary */}
-          <div
-            className="rounded-xl p-5"
-            style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
-          >
-            <h3 className="text-sm font-semibold mb-4" style={{ color: config.primaryColor }}>
-              Order Summary
-            </h3>
-            <div className="space-y-3">
-              {/* Subtotal */}
-              <div className="flex justify-between text-sm">
-                <span style={{ color: config.secondaryColor }}>Subtotal ({totalUnits} units)</span>
-                <span className="font-medium" style={{ color: config.primaryColor }}>{formatCurrency(totalValue)}</span>
-              </div>
+          <OrderSummaryCard
+            items={items}
+            totalUnits={totalUnits}
+            totalValue={totalValue}
+            appliedPromo={appliedPromo}
+            cartPromoDiscount={cartPromoDiscount}
+          />
 
-              {/* Product Promotions */}
-              {productSavings > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "#16A34A" }}>Product Promotions</span>
-                  <span className="font-semibold" style={{ color: "#16A34A" }}>
-                    -{formatCurrency(productSavings)}
-                  </span>
-                </div>
-              )}
-
-              {/* Cart Promotion */}
-              {cartPromoDiscount > 0 && appliedPromo && (
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "#EA580C" }}>Cart Promotion ({appliedPromo.label})</span>
-                  <span className="font-semibold" style={{ color: "#EA580C" }}>
-                    -{formatCurrency(cartPromoDiscount)}
-                  </span>
-                </div>
-              )}
-
-              {/* Total Savings */}
-              {totalSavings > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "#16A34A" }}>Total Savings</span>
-                  <span className="font-semibold" style={{ color: "#16A34A" }}>
-                    -{formatCurrency(totalSavings)}
-                  </span>
-                </div>
-              )}
-
-              {/* Shipping */}
-              <div className="flex justify-between text-sm">
-                <span style={{ color: config.secondaryColor }}>Estimated Shipping</span>
-                <span className="text-xs font-medium" style={{ color: "#16A34A" }}>Calculated at checkout</span>
-              </div>
-
-              {/* Grand Total */}
-              <div className="border-t pt-3" style={{ borderColor: config.borderColor }}>
-                <div className="flex justify-between">
-                  <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>Grand Total</span>
-                  <span className="text-lg font-semibold" style={{ color: config.primaryColor }}>
-                    {formatCurrency(grandTotal)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <Button
-              type="primary"
-              block
-              size="large"
-              disabled={isAuthenticated && isExceeded}
-              onClick={() => {
-                if (!isAuthenticated) {
-                  showSignInModal("To complete your purchase and use your credit account, please sign in.");
-                  return;
-                }
-                navigate("/checkout");
-              }}
-              className="mt-5"
-              style={{
-                height: 44,
-                fontWeight: 600,
-                borderRadius: 8,
-                backgroundColor: (isAuthenticated && isExceeded) ? undefined : config.primaryColor,
-              }}
-            >
-              {isAuthenticated && isExceeded ? "Credit Limit Exceeded" : "Proceed to Checkout"}
-            </Button>
-
-            <Link
-              to="/catalog"
-              className="flex items-center justify-center gap-1.5 text-xs font-medium mt-3 no-underline"
-              style={{ color: config.secondaryColor }}
-            >
-              <ArrowLeftOutlined className="text-[10px]" />
-              Continue Shopping
-            </Link>
-          </div>
-
-          {/* Credit Summary — authenticated only */}
           {isAuthenticated && <CreditSummaryBlock />}
         </div>
       </div>
@@ -227,7 +117,11 @@ function CartItemList({
       {/* Table Header */}
       <div
         className="grid grid-cols-[1fr_120px_100px_40px] gap-4 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider"
-        style={{ backgroundColor: config.cardBg, color: config.secondaryColor, borderBottom: `1px solid ${config.borderColor}` }}
+        style={{
+          backgroundColor: config.cardBg,
+          color: config.secondaryColor,
+          borderBottom: `1px solid ${config.borderColor}`,
+        }}
       >
         <span>Product</span>
         <span className="text-center">Quantity</span>
@@ -236,145 +130,15 @@ function CartItemList({
       </div>
 
       {/* Items */}
-      {items.map((item, idx) => {
-        const isFree = item.isFreeItem;
-        return (
-          <CartLineItem
-            key={item.id}
-            item={item}
-            isFree={!!isFree}
-            isLast={idx === items.length - 1}
-            onUpdateQuantity={onUpdateQuantity}
-            onRemove={onRemove}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Cart Line Item ──────────────────────────────────────────────────
-
-function CartLineItem({
-  item,
-  isFree,
-  isLast,
-  onUpdateQuantity,
-  onRemove,
-}: {
-  item: OrderLineItem;
-  isFree: boolean;
-  isLast: boolean;
-  onUpdateQuantity: (id: string, qty: number) => void;
-  onRemove: (id: string) => void;
-}) {
-  const config = activeBrandConfig;
-  const variantDesc = Object.values(item.variantAttributes || {}).join(" · ");
-  const lineTotal = isFree ? 0 : item.quantity * item.unitPrice;
-  const lineSavings = isFree ? 0 : (item.listPrice && item.listPrice > item.unitPrice)
-    ? (item.listPrice - item.unitPrice) * item.quantity
-    : 0;
-
-  return (
-    <div
-      className="grid grid-cols-[1fr_120px_100px_40px] gap-4 px-5 py-4 items-center"
-      style={{
-        borderBottom: !isLast ? `1px solid ${config.borderColor}` : "none",
-        backgroundColor: isFree ? "#F0FDF4" : "transparent",
-      }}
-    >
-      {/* Product Info */}
-      <div className="flex items-center gap-3 min-w-0">
-        {item.imageUrl && (
-          <img
-            src={item.imageUrl}
-            alt={item.productName}
-            className="w-12 h-12 rounded-lg object-cover shrink-0"
-          />
-        )}
-        <div className="min-w-0">
-          <Link
-            to={`/product/${encodeURIComponent(item.productId)}/sku/${encodeURIComponent(item.id)}`}
-            className="text-sm font-medium truncate block no-underline hover:underline"
-            style={{ color: config.primaryColor }}
-          >
-            {item.productName}
-            {isFree && (
-              <Tag variant="freeGoods" size="compact" className="ml-1.5">Free Item</Tag>
-            )}
-          </Link>
-          <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-            {item.sku}{variantDesc ? ` · ${variantDesc}` : ""}
-          </p>
-
-          {/* Pricing — matches PDP pattern */}
-          {isFree ? (
-            <p className="text-xs mt-0.5 font-medium" style={{ color: "#16A34A" }}>
-              Free Item (Promotion)
-            </p>
-          ) : (
-            <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-                ${item.unitPrice.toFixed(2)}
-              </span>
-              {item.listPrice && item.listPrice > item.unitPrice && (
-                <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
-                  ${item.listPrice.toFixed(2)}
-                </span>
-              )}
-              {lineSavings > 0 && (
-                <span className="text-[10px]" style={{ color: "#16A34A" }}>
-                  Save ${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </span>
-              )}
-              {item.promotionLabel && (
-                <Tag variant="applied" size="compact">{item.promotionLabel} applied</Tag>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Quantity */}
-      <div className="flex justify-center">
-        {isFree ? (
-          <span className="text-xs font-medium" style={{ color: "#16A34A" }}>{item.quantity}</span>
-        ) : (
-          <InputNumber
-            size="small"
-            min={1}
-            value={item.quantity}
-            onChange={(val) => val && onUpdateQuantity(item.id, val)}
-            style={{ width: 80 }}
-          />
-        )}
-      </div>
-
-      {/* Line Total */}
-      <div className="text-right">
-        <span className="text-sm font-medium" style={{ color: isFree ? "#16A34A" : config.primaryColor }}>
-          {isFree ? "$0.00" : `$${lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-        </span>
-      </div>
-
-      {/* Remove */}
-      <div className="flex justify-center">
-        <button
-          onClick={() => onRemove(item.id)}
-          className="p-1.5 rounded-md transition-colors cursor-pointer"
-          style={{ color: config.secondaryColor, border: "none", background: "none" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#DC2626";
-            e.currentTarget.style.backgroundColor = "#FEF2F2";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = config.secondaryColor;
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-        >
-          <DeleteOutlined className="text-sm" />
-        </button>
-      </div>
+      {items.map((item, idx) => (
+        <CartLineItem
+          key={item.id}
+          item={item}
+          isLast={idx === items.length - 1}
+          onUpdateQuantity={onUpdateQuantity}
+          onRemove={onRemove}
+        />
+      ))}
     </div>
   );
 }
