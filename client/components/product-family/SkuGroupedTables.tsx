@@ -342,44 +342,36 @@ export default function SkuGroupedTables({
                     </th>
                   )}
 
-                  {/* Qty — stacked label + fused "All" prefix input */}
-                  <th className="px-2 py-2 text-center whitespace-nowrap" style={thStyle("center")}>
-                    <div className="flex flex-col items-center gap-1">
+                  {/* Qty — single-line fused prefix input */}
+                  <th className="px-2 py-2.5 text-center whitespace-nowrap" style={thStyle("center")}>
+                    <div
+                      className="inline-flex items-stretch overflow-hidden"
+                      style={{
+                        border: `1px solid ${config.borderColor}`,
+                        borderRadius: 4,
+                        backgroundColor: "#fff",
+                      }}
+                    >
                       <span
-                        className="text-[11px] font-semibold uppercase tracking-wider"
-                        style={{ color: config.secondaryColor }}
-                      >
-                        Qty
-                      </span>
-                      {/* Fused "All" prefix + number input */}
-                      <div
-                        className="flex items-stretch overflow-hidden"
+                        className="flex items-center text-[10px] font-semibold px-2 py-1"
                         style={{
-                          border: `1px solid ${config.borderColor}`,
-                          borderRadius: 4,
-                          backgroundColor: "#fff",
+                          color: config.secondaryColor,
+                          backgroundColor: config.cardBg,
+                          borderRight: `1px solid ${config.borderColor}`,
                         }}
                       >
-                        <span
-                          className="flex items-center text-[10px] px-1.5"
-                          style={{
-                            color: config.secondaryColor,
-                            backgroundColor: config.cardBg,
-                            borderRight: `1px solid ${config.borderColor}`,
-                          }}
-                        >
-                          All
-                        </span>
-                        <InputNumber
-                          size="small"
-                          min={0}
-                          value={headerQty}
-                          onChange={handleSetAllQty}
-                          controls={false}
-                          variant="borderless"
-                          style={{ width: 40, fontSize: 11, textAlign: "center" }}
-                        />
-                      </div>
+                        QTY
+                      </span>
+                      <InputNumber
+                        size="small"
+                        min={0}
+                        placeholder="All"
+                        value={headerQty}
+                        onChange={handleSetAllQty}
+                        controls={false}
+                        variant="borderless"
+                        style={{ width: 40, fontSize: 11, textAlign: "center" }}
+                      />
                     </div>
                   </th>
                 </tr>
