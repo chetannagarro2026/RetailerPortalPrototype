@@ -101,12 +101,20 @@ export default function SkuGroupedTables({
     return sum;
   }, [stagedEntries, variants, product, isAuthenticated]);
 
-  // Validation: find rows below minimum
-  const invalidRows = useMemo(() => {
+  // Validation: find rows below minimum or above stock
+  const belowMinRows = useMemo(() => {
     return stagedEntries.filter(([, q]) => q > 0 && q < minQty);
   }, [stagedEntries, minQty]);
 
-  const hasInvalidRows = invalidRows.length > 0;
+  const aboveStockRows = useMemo(() => {
+    return stagedEntries.filter(([variantId, q]) => {
+      const v = variants.find((vv) => vv.id === variantId);
+      const stock = v?.stockQty ?? 0;
+      return q > 0 && stock > 0 && q > stock;
+    });
+  }, [stagedEntries, variants]);
+
+  const hasInvalidRows = belowMinRows.length > 0 || aboveStockRows.length > 0;
   const showBar = stagedCount > 0;
 
   // ── Commit handler ─────────────────────────────────────────────
@@ -275,7 +283,8 @@ export default function SkuGroupedTables({
         stagedCount={stagedCount}
         totalUnits={totalUnits}
         totalPrice={totalPrice}
-        invalidCount={invalidRows.length}
+        belowMinCount={belowMinRows.length}
+        aboveStockCount={aboveStockRows.length}
         onClear={handleClearAll}
         onAddAll={handleAddAll}
         disabled={hasInvalidRows}
@@ -292,7 +301,8 @@ function StickyBatchBar({
   stagedCount,
   totalUnits,
   totalPrice,
-  invalidCount,
+  belowMinCount,
+  aboveStockCount,
   onClear,
   onAddAll,
   disabled,
@@ -302,7 +312,8 @@ function StickyBatchBar({
   stagedCount: number;
   totalUnits: number;
   totalPrice: number;
-  invalidCount: number;
+  belowMinCount: number;
+  aboveStockCount: number;
   onClear: () => void;
   onAddAll: () => void;
   disabled: boolean;
@@ -351,9 +362,14 @@ function StickyBatchBar({
           <span className="text-xs ml-3" style={{ color: "#8b9cc0" }}>
             {totalUnits} units · {fmt(totalPrice)}
           </span>
-          {invalidCount > 0 && (
+          {belowMinCount > 0 && (
             <span className="text-xs ml-3" style={{ color: "#FCA5A5" }}>
-              {invalidCount} SKU{invalidCount !== 1 ? "s" : ""} below minimum order
+              {belowMinCount} SKU{belowMinCount !== 1 ? "s" : ""} below minimum order
+            </span>
+          )}
+          {aboveStockCount > 0 && (
+            <span className="text-xs ml-3" style={{ color: "#FCA5A5" }}>
+              {aboveStockCount} SKU{aboveStockCount !== 1 ? "s" : ""} exceeds available stock
             </span>
           )}
         </div>

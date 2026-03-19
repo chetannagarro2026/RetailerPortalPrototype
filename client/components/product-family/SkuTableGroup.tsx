@@ -456,16 +456,18 @@ function QtyCell({
   borderStyle: string;
 }) {
   const isOOS = variant.availabilityStatus === "out-of-stock";
+  const stock = variant.stockQty ?? 0;
 
   // Validation states
   const isBelowMin = qty > 0 && qty < minQty;
-  const isCasePackWarn = casePack > 1 && qty > 0 && qty >= minQty && qty % casePack !== 0;
-  const isStaged = qty > 0 && qty >= minQty && !isCasePackWarn;
+  const isAboveStock = qty > 0 && qty > stock && stock > 0;
+  const isCasePackWarn = casePack > 1 && qty > 0 && qty >= minQty && !isAboveStock && qty % casePack !== 0;
+  const isStaged = qty > 0 && qty >= minQty && !isCasePackWarn && !isAboveStock;
 
   // Input styling based on state
   let inputBorder = undefined;
   let inputBg = undefined;
-  if (isBelowMin) {
+  if (isBelowMin || isAboveStock) {
     inputBorder = "#FCA5A5";
     inputBg = "#FEF2F2";
   } else if (isCasePackWarn) {
@@ -492,11 +494,16 @@ function QtyCell({
             borderColor: inputBorder,
             backgroundColor: inputBg,
           }}
-          className={isBelowMin ? "sku-qty-error" : isCasePackWarn ? "sku-qty-warn" : isStaged ? "sku-qty-staged" : ""}
+          className={(isBelowMin || isAboveStock) ? "sku-qty-error" : isCasePackWarn ? "sku-qty-warn" : isStaged ? "sku-qty-staged" : ""}
         />
         {isBelowMin && (
           <span className="text-[10px] font-medium" style={{ color: "#DC2626" }}>
             Min: {minQty}
+          </span>
+        )}
+        {isAboveStock && !isBelowMin && (
+          <span className="text-[10px] font-medium" style={{ color: "#DC2626" }}>
+            Max: {stock}
           </span>
         )}
         {isCasePackWarn && (
