@@ -64,11 +64,19 @@ function PromoInfoCard({ promo }: { promo: PromotionInfo }) {
   const hasBenefits = promo.benefits && promo.benefits.length > 0;
   const benefitCount = promo.benefits?.length ?? 0;
 
+  // For multi-benefit cards: only show validity + scope chips (no shared conditions)
+  // For single-benefit cards: show all chips as before
   const conditionChips: string[] = [];
-  if (promo.minQty && promo.minQty > 1) conditionChips.push(`Min: ${promo.minQty} units`);
-  if (promo.qualifyingQty && promo.freeQty && !hasBenefits) {
-    conditionChips.push(`Buy ${promo.qualifyingQty} Get ${promo.freeQty} Free`);
+
+  if (!hasBenefits) {
+    // Single-benefit: keep existing chip logic
+    if (promo.minQty && promo.minQty > 1) conditionChips.push(`Min: ${promo.minQty} units`);
+    if (promo.qualifyingQty && promo.freeQty) {
+      conditionChips.push(`Buy ${promo.qualifyingQty} Get ${promo.freeQty} Free`);
+    }
   }
+
+  // Validity + scope always shown
   if (promo.validFrom || promo.validTo) {
     const from = promo.validFrom ? new Date(promo.validFrom).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
     const to = promo.validTo ? new Date(promo.validTo).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
@@ -126,7 +134,8 @@ function PromoInfoCard({ promo }: { promo: PromotionInfo }) {
           </p>
         )}
 
-        {promo.rules && promo.rules.length > 0 && (
+        {/* Rules — only for single-benefit cards */}
+        {!hasBenefits && promo.rules && promo.rules.length > 0 && (
           <div className="mt-1.5">
             {promo.rules.map((rule, i) => (
               <p key={i} className="text-[11px]" style={{ color: config.secondaryColor }}>
@@ -163,9 +172,9 @@ function PromoInfoCard({ promo }: { promo: PromotionInfo }) {
   );
 }
 
-// ── Benefits Section ────────────────────────────────────────────────
+// ── Benefits Section (shared — exported for CartPromotionsSection) ──
 
-function BenefitsSection({ benefits }: { benefits: PromotionBenefit[] }) {
+export function BenefitsSection({ benefits }: { benefits: PromotionBenefit[] }) {
   const config = activeBrandConfig;
 
   return (
@@ -199,58 +208,95 @@ function BenefitsSection({ benefits }: { benefits: PromotionBenefit[] }) {
 
 // ── Benefit Row ─────────────────────────────────────────────────────
 
-const benefitIconMap: Record<string, typeof PercentageOutlined> = {
+const BENEFIT_ICON_MAP: Record<string, typeof PercentageOutlined> = {
   discount: PercentageOutlined,
+  "flat-discount": PercentageOutlined,
+  "flat-amount": PercentageOutlined,
   bogo: SwapOutlined,
   "free-goods": PlusOutlined,
 };
 
-function BenefitRow({ benefit, isLast }: { benefit: PromotionBenefit; isLast: boolean }) {
+const BENEFIT_ICON_STYLE: Record<string, { bg: string; color: string }> = {
+  discount: { bg: "#DCFCE7", color: "#0D7A4A" },
+  "flat-discount": { bg: "#e0f5ea", color: "#1a7a4a" },
+  "flat-amount": { bg: "#e0f5ea", color: "#1a7a4a" },
+  bogo: { bg: "#DCFCE7", color: "#0D7A4A" },
+  "free-goods": { bg: "#faeeda", color: "#854F0B" },
+};
+
+export function BenefitRow({ benefit, isLast }: { benefit: PromotionBenefit; isLast: boolean }) {
   const config = activeBrandConfig;
-  const Icon = benefitIconMap[benefit.type] ?? PercentageOutlined;
+  const Icon = BENEFIT_ICON_MAP[benefit.type] ?? PercentageOutlined;
+  const iconStyle = BENEFIT_ICON_STYLE[benefit.type] ?? { bg: "#DCFCE7", color: "#0D7A4A" };
 
   return (
     <div
-      className="flex items-start gap-2.5 py-2.5"
+      className="py-2.5"
       style={{
         borderBottom: !isLast ? `0.5px solid ${config.borderColor}` : "none",
       }}
     >
-      {/* Icon */}
-      <div
-        className="flex items-center justify-center shrink-0 rounded-full"
-        style={{
-          width: 22,
-          height: 22,
-          backgroundColor: "#DCFCE7",
-          color: "#0D7A4A",
-          marginTop: 1,
-        }}
-      >
-        <Icon style={{ fontSize: 11 }} />
-      </div>
+      {/* Row 1: Icon + Name + Cap */}
+      <div className="flex items-center gap-2.5">
+        <div
+          className="flex items-center justify-center shrink-0 rounded-full"
+          style={{
+            width: 22,
+            height: 22,
+            backgroundColor: iconStyle.bg,
+            color: iconStyle.color,
+          }}
+        >
+          <Icon style={{ fontSize: 11 }} />
+        </div>
 
-      {/* Text */}
-      <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold" style={{ color: config.primaryColor }}>
+        <span className="flex-1 text-[13px] font-semibold min-w-0" style={{ color: config.primaryColor }}>
           {benefit.label}
-        </p>
-        {benefit.description && (
-          <p className="text-xs mt-0.5" style={{ color: config.secondaryColor }}>
-            {benefit.description}
-          </p>
+        </span>
+
+        {benefit.cap && (
+          <span className="shrink-0 text-[11px]" style={{ color: config.secondaryColor }}>
+            {benefit.cap}
+          </span>
         )}
       </div>
 
-      {/* Cap/Limit — right aligned */}
-      {benefit.cap && (
-        <span
-          className="shrink-0 text-[11px] mt-0.5"
-          style={{ color: config.secondaryColor }}
-        >
-          {benefit.cap}
-        </span>
+      {/* Row 2: Description */}
+      {benefit.description && (
+        <p className="text-xs mt-0.5" style={{ color: config.secondaryColor, marginLeft: 34 }}>
+          {benefit.description}
+        </p>
       )}
+
+      {/* Row 3: Condition */}
+      <div style={{ marginLeft: 34, marginTop: 4 }}>
+        {benefit.condition ? (
+          <span
+            className="inline-flex items-center text-[11px] rounded-md"
+            style={{
+              border: `0.5px solid ${config.borderColor}`,
+              backgroundColor: "#fff",
+              color: config.secondaryColor,
+              padding: "3px 8px",
+            }}
+          >
+            <span
+              className="text-[10px] uppercase font-semibold mr-1"
+              style={{ color: config.secondaryColor, opacity: 0.7 }}
+            >
+              CONDITION
+            </span>
+            {benefit.condition}
+          </span>
+        ) : (
+          <span
+            className="text-[11px] italic"
+            style={{ color: config.secondaryColor, opacity: 0.5 }}
+          >
+            No additional condition
+          </span>
+        )}
+      </div>
     </div>
   );
 }

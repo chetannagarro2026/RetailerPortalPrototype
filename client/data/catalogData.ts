@@ -45,14 +45,17 @@ export interface VariantAttribute {
 
 /** A single benefit within a promotion */
 export interface PromotionBenefit {
-  type: "discount" | "free-goods" | "bogo";
+  type: "discount" | "free-goods" | "bogo" | "flat-discount" | "flat-amount";
   label: string;
   description?: string;
   discountPercent?: number;
+  discountAmount?: number;
   freeQty?: number;
   qualifyingQty?: number;
   /** Optional cap/limit text, e.g. "Max $200" */
   cap?: string;
+  /** Per-benefit condition text, e.g. "Min quantity 5" */
+  condition?: string;
 }
 
 /** Promotion metadata */
@@ -87,6 +90,15 @@ export interface CartPromotion {
   thresholdAmount: number;
   discountAmount?: number;
   freeUnits?: number;
+  /** Multi-benefit cart promotions */
+  benefits?: PromotionBenefit[];
+  /** Promo code for display */
+  promoCode?: string;
+  /** Validity dates */
+  validFrom?: string;
+  validTo?: string;
+  /** Scope label */
+  scope?: string;
 }
 
 /** Predefined cart promotions */
@@ -186,6 +198,24 @@ export const cartPromotions: CartPromotion[] = [
     type: "spend-free-units",
     thresholdAmount: 6000,
     freeUnits: 30,
+  },
+  // ── Multi-benefit cart promotion ──────────────────────────────────
+  {
+    id: "cart-promo-multi-1",
+    label: "Cart Super Saver",
+    description: "10% off cart, $25 flat discount, plus a free gift",
+    type: "spend-discount",
+    thresholdAmount: 1000,
+    discountAmount: 25,
+    promoCode: "SUPERSAVE",
+    validFrom: "2026-03-01",
+    validTo: "2026-06-30",
+    scope: "Cart Level",
+    benefits: [
+      { type: "flat-discount", label: "10% OFF cart total", description: "10% off applied to your entire cart", discountPercent: 10, condition: "Min cart value $1,000" },
+      { type: "flat-amount", label: "$25 OFF", description: "Flat $25 deducted from order total", discountAmount: 25, condition: "Min cart value $1,500" },
+      { type: "free-goods", label: "Free Good", description: "1× complimentary product added to cart", freeQty: 1 },
+    ],
   },
 ];
 
@@ -731,8 +761,8 @@ const allPromotions: PromotionInfo[] = [
     promoCode: "MEGA2026",
     rules: ["Minimum Quantity: 1"],
     benefits: [
-      { type: "discount", label: "10% OFF", description: "10% discount on eligible units", discountPercent: 10, cap: "Max $200" },
-      { type: "bogo", label: "Buy 1 Get 1 Free", description: "Purchase one unit and receive one free", freeQty: 1, qualifyingQty: 1 },
+      { type: "discount", label: "10% OFF", description: "10% discount on eligible units", discountPercent: 10, cap: "Max $200", condition: "Min product value $10,000" },
+      { type: "bogo", label: "Buy 5 Get 1 Free", description: "Every 5 units purchased earns 1 free unit", freeQty: 1, qualifyingQty: 5, condition: "Min quantity 5" },
       { type: "free-goods", label: "Free Accessory", description: "Receive a complimentary accessory with purchase", freeQty: 1 },
     ],
   },
@@ -745,8 +775,8 @@ const allPromotions: PromotionInfo[] = [
     promoCode: "BUNDLE15",
     rules: ["Minimum Quantity: 5"],
     benefits: [
-      { type: "discount", label: "15% OFF", description: "15% discount on all qualifying items", discountPercent: 15 },
-      { type: "free-goods", label: "Buy 5 Get 1 Free", description: "Every 5 units purchased earns 1 free unit", freeQty: 1, qualifyingQty: 5 },
+      { type: "discount", label: "15% OFF", description: "15% discount on all qualifying items", discountPercent: 15, condition: "Min quantity 5" },
+      { type: "free-goods", label: "Buy 5 Get 1 Free", description: "Every 5 units purchased earns 1 free unit", freeQty: 1, qualifyingQty: 5, condition: "Min quantity 5" },
     ],
   },
 ];

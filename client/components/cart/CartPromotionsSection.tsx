@@ -5,12 +5,12 @@ import {
   RightOutlined,
   PercentageOutlined,
 } from "@ant-design/icons";
-import { Drawer } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
 import { cartPromotions, type CartPromotion } from "../../data/catalogData";
 import { useOrder } from "../../context/OrderContext";
 import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
+import { BenefitsSection } from "../catalog/PromotionInfoDrawer";
 import PromotionsDrawer from "./PromotionsDrawer";
 
 interface Props {
@@ -27,7 +27,6 @@ export default function CartPromotionsSection({ appliedPromoId, onApply, onRemov
 
   if (!isAuthenticated || cartPromotions.length === 0) return null;
 
-  // Categorize promotions
   const eligible = cartPromotions
     .filter((p) => totalValue >= p.thresholdAmount && p.id !== appliedPromoId)
     .sort((a, b) => (b.discountAmount ?? 0) - (a.discountAmount ?? 0));
@@ -48,7 +47,6 @@ export default function CartPromotionsSection({ appliedPromoId, onApply, onRemov
   const readyPromo = eligible[0] ?? null;
   const almostPromo = almostUnlocked[0] ?? null;
 
-  // Count remaining promotions not shown
   const shownIds = new Set<string>();
   if (appliedPromo) shownIds.add(appliedPromo.id);
   if (readyPromo) shownIds.add(readyPromo.id);
@@ -61,7 +59,6 @@ export default function CartPromotionsSection({ appliedPromoId, onApply, onRemov
         className="rounded-xl overflow-hidden"
         style={{ border: `1px solid ${config.borderColor}`, backgroundColor: "#fff" }}
       >
-        {/* Panel header */}
         <div
           className="flex items-center gap-2 px-5 py-4"
           style={{ borderBottom: `1px solid ${config.borderColor}` }}
@@ -72,24 +69,10 @@ export default function CartPromotionsSection({ appliedPromoId, onApply, onRemov
           </span>
         </div>
 
-        {/* Cards */}
         <div className="py-1">
-          {/* Applied card */}
-          {appliedPromo && (
-            <AppliedPromoCard promo={appliedPromo} onRemove={onRemove} />
-          )}
-
-          {/* Ready to Apply card */}
-          {readyPromo && (
-            <ReadyPromoCard promo={readyPromo} onApply={() => onApply(readyPromo.id)} />
-          )}
-
-          {/* Almost Unlocked card */}
-          {almostPromo && (
-            <AlmostUnlockedCard promo={almostPromo} cartTotal={totalValue} />
-          )}
-
-          {/* Fallback */}
+          {appliedPromo && <AppliedPromoCard promo={appliedPromo} onRemove={onRemove} />}
+          {readyPromo && <ReadyPromoCard promo={readyPromo} onApply={() => onApply(readyPromo.id)} />}
+          {almostPromo && <AlmostUnlockedCard promo={almostPromo} cartTotal={totalValue} />}
           {!appliedPromo && !readyPromo && !almostPromo && (
             <p className="text-xs py-4 px-5" style={{ color: config.secondaryColor }}>
               Add more items to unlock promotions.
@@ -97,7 +80,6 @@ export default function CartPromotionsSection({ appliedPromoId, onApply, onRemov
           )}
         </div>
 
-        {/* View More link */}
         {remainingCount > 0 && (
           <div style={{ borderTop: `1px solid ${config.borderColor}` }}>
             <button
@@ -125,52 +107,109 @@ export default function CartPromotionsSection({ appliedPromoId, onApply, onRemov
   );
 }
 
+// ── Shared: Card Header with optional benefits badge + validity chips ─
+
+function CartPromoCardHeader({ promo }: { promo: CartPromotion }) {
+  const config = activeBrandConfig;
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
+  const benefitCount = promo.benefits?.length ?? 0;
+
+  // Validity + scope chips only
+  const chips: string[] = [];
+  if (promo.validFrom || promo.validTo) {
+    const from = promo.validFrom ? new Date(promo.validFrom).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
+    const to = promo.validTo ? new Date(promo.validTo).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
+    if (from && to) chips.push(`Valid: ${from} – ${to}`);
+    else if (from) chips.push(`From: ${from}`);
+    else if (to) chips.push(`Until: ${to}`);
+  }
+  if (promo.scope) chips.push(`Scope: ${promo.scope}`);
+
+  return (
+    <>
+      {/* Benefits badge + promo code */}
+      {(hasBenefits || promo.promoCode) && (
+        <div className="flex items-center gap-2 mt-1" style={{ marginLeft: 22 }}>
+          {hasBenefits && (
+            <span
+              className="text-[11px] font-medium rounded-full px-2 py-0.5"
+              style={{ backgroundColor: "#E6F1FB", color: "#185FA5", border: "1px solid #85B7EB" }}
+            >
+              {benefitCount} benefit{benefitCount !== 1 ? "s" : ""}
+            </span>
+          )}
+          {promo.promoCode && (
+            <span
+              className="text-[10px] font-semibold rounded px-2 py-0.5"
+              style={{ backgroundColor: config.cardBg, color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
+            >
+              {promo.promoCode}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Validity/Scope chips */}
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-1.5" style={{ marginLeft: 22 }}>
+          {chips.map((chip) => (
+            <span
+              key={chip}
+              className="text-[11px] px-2 py-0.5 rounded"
+              style={{ backgroundColor: config.cardBg, color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 // ── Applied Card (orange) ───────────────────────────────────────────
 
 function AppliedPromoCard({ promo, onRemove }: { promo: CartPromotion; onRemove: () => void }) {
   const config = activeBrandConfig;
   const PromoIcon = promo.type === "spend-free-units" ? GiftOutlined : TagOutlined;
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
 
   return (
     <div
-      className="rounded-lg mx-3 my-3 transition-colors"
-      style={{
-        border: "1px solid #FED7AA",
-        backgroundColor: "#FFF7ED",
-        padding: "14px 16px",
-      }}
+      className="rounded-lg mx-3 my-3 overflow-hidden transition-colors"
+      style={{ border: "1px solid #FED7AA", backgroundColor: "#FFF7ED" }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            <PromoIcon style={{ fontSize: 16, color: "#EA580C" }} />
-            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-              GET {promo.label}
-            </span>
+      <div style={{ padding: "14px 16px" }}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              <PromoIcon style={{ fontSize: 16, color: "#EA580C" }} />
+              <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+                GET {promo.label}
+              </span>
+            </div>
+            <p className="text-xs mb-1.5" style={{ color: config.secondaryColor, marginLeft: 22 }}>
+              {promo.description}
+            </p>
+            <p className="text-[11px] font-semibold" style={{ color: "#16A34A", marginLeft: 22 }}>
+              <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} />
+              Eligible
+            </p>
+            <CartPromoCardHeader promo={promo} />
           </div>
-          <p className="text-xs mb-1.5" style={{ color: config.secondaryColor, marginLeft: 22 }}>
-            {promo.description}
-          </p>
-          <p className="text-[11px] font-semibold" style={{ color: "#16A34A", marginLeft: 22 }}>
-            <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} />
-            Eligible
-          </p>
-        </div>
-        <div className="shrink-0">
-          <button
-            onClick={onRemove}
-            className="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer flex items-center gap-1"
-            style={{
-              backgroundColor: "transparent",
-              color: "#EA580C",
-              border: "1px solid #EA580C",
-            }}
-          >
-            <CheckCircleFilled style={{ fontSize: 12 }} />
-            Applied
-          </button>
+          <div className="shrink-0">
+            <button
+              onClick={onRemove}
+              className="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer flex items-center gap-1"
+              style={{ backgroundColor: "transparent", color: "#EA580C", border: "1px solid #EA580C" }}
+            >
+              <CheckCircleFilled style={{ fontSize: 12 }} />
+              Applied
+            </button>
+          </div>
         </div>
       </div>
+      {hasBenefits && <BenefitsSection benefits={promo.benefits!} />}
     </div>
   );
 }
@@ -180,46 +219,43 @@ function AppliedPromoCard({ promo, onRemove }: { promo: CartPromotion; onRemove:
 function ReadyPromoCard({ promo, onApply }: { promo: CartPromotion; onApply: () => void }) {
   const config = activeBrandConfig;
   const PromoIcon = promo.type === "spend-free-units" ? GiftOutlined : TagOutlined;
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
 
   return (
     <div
-      className="rounded-lg mx-3 my-3 transition-colors"
-      style={{
-        border: "1px solid #BBF7D0",
-        backgroundColor: "#F0FDF4",
-        padding: "14px 16px",
-      }}
+      className="rounded-lg mx-3 my-3 overflow-hidden transition-colors"
+      style={{ border: "1px solid #BBF7D0", backgroundColor: "#F0FDF4" }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            <PromoIcon style={{ fontSize: 16, color: "#16A34A" }} />
-            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-              GET {promo.label}
-            </span>
+      <div style={{ padding: "14px 16px" }}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              <PromoIcon style={{ fontSize: 16, color: "#16A34A" }} />
+              <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+                GET {promo.label}
+              </span>
+            </div>
+            <p className="text-xs mb-1.5" style={{ color: config.secondaryColor, marginLeft: 22 }}>
+              {promo.description}
+            </p>
+            <p className="text-[11px] font-semibold" style={{ color: "#16A34A", marginLeft: 22 }}>
+              <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} />
+              Eligible
+            </p>
+            <CartPromoCardHeader promo={promo} />
           </div>
-          <p className="text-xs mb-1.5" style={{ color: config.secondaryColor, marginLeft: 22 }}>
-            {promo.description}
-          </p>
-          <p className="text-[11px] font-semibold" style={{ color: "#16A34A", marginLeft: 22 }}>
-            <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} />
-            Eligible
-          </p>
-        </div>
-        <div className="shrink-0">
-          <button
-            onClick={onApply}
-            className="text-xs font-semibold px-3.5 py-1 rounded-md cursor-pointer"
-            style={{
-              backgroundColor: config.primaryColor,
-              color: "#fff",
-              border: "none",
-            }}
-          >
-            Apply
-          </button>
+          <div className="shrink-0">
+            <button
+              onClick={onApply}
+              className="text-xs font-semibold px-3.5 py-1 rounded-md cursor-pointer"
+              style={{ backgroundColor: config.primaryColor, color: "#fff", border: "none" }}
+            >
+              Apply
+            </button>
+          </div>
         </div>
       </div>
+      {hasBenefits && <BenefitsSection benefits={promo.benefits!} />}
     </div>
   );
 }
@@ -231,49 +267,47 @@ function AlmostUnlockedCard({ promo, cartTotal }: { promo: CartPromotion; cartTo
   const remaining = promo.thresholdAmount - cartTotal;
   const progress = Math.min(100, (cartTotal / promo.thresholdAmount) * 100);
   const PromoIcon = promo.type === "spend-free-units" ? GiftOutlined : TagOutlined;
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
 
   return (
     <div
-      className="rounded-lg mx-3 my-3 transition-colors"
-      style={{
-        border: "1px solid #FDE68A",
-        backgroundColor: "#FFFBEB",
-        padding: "14px 16px",
-      }}
+      className="rounded-lg mx-3 my-3 overflow-hidden transition-colors"
+      style={{ border: "1px solid #FDE68A", backgroundColor: "#FFFBEB" }}
     >
-      <div className="flex items-center gap-1.5 mb-1">
-        <PromoIcon style={{ fontSize: 16, color: "#D97706" }} />
-        <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-          GET {promo.label}
-        </span>
-      </div>
-      <p className="text-xs mb-2" style={{ color: config.secondaryColor, marginLeft: 22 }}>
-        {promo.description}
-      </p>
-
-      {/* Progress section */}
-      <div style={{ marginLeft: 22 }}>
-        <p className="text-xs font-medium mb-1.5" style={{ color: "#D97706" }}>
-          Add ${remaining.toFixed(2)} more to unlock
+      <div style={{ padding: "14px 16px" }}>
+        <div className="flex items-center gap-1.5 mb-1">
+          <PromoIcon style={{ fontSize: 16, color: "#D97706" }} />
+          <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+            GET {promo.label}
+          </span>
+        </div>
+        <p className="text-xs mb-2" style={{ color: config.secondaryColor, marginLeft: 22 }}>
+          {promo.description}
         </p>
-        <div
-          className="h-1.5 rounded-full overflow-hidden"
-          style={{ backgroundColor: "#FDE68A" }}
-        >
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{ width: `${progress}%`, backgroundColor: "#F59E0B" }}
-          />
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-[11px]" style={{ color: config.secondaryColor }}>
-            ${cartTotal.toFixed(0)}
-          </span>
-          <span className="text-[11px]" style={{ color: config.secondaryColor }}>
-            ${promo.thresholdAmount.toFixed(0)}
-          </span>
+
+        <CartPromoCardHeader promo={promo} />
+
+        <div style={{ marginLeft: 22, marginTop: 8 }}>
+          <p className="text-xs font-medium mb-1.5" style={{ color: "#D97706" }}>
+            Add ${remaining.toFixed(2)} more to unlock
+          </p>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "#FDE68A" }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${progress}%`, backgroundColor: "#F59E0B" }}
+            />
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-[11px]" style={{ color: config.secondaryColor }}>
+              ${cartTotal.toFixed(0)}
+            </span>
+            <span className="text-[11px]" style={{ color: config.secondaryColor }}>
+              ${promo.thresholdAmount.toFixed(0)}
+            </span>
+          </div>
         </div>
       </div>
+      {hasBenefits && <BenefitsSection benefits={promo.benefits!} />}
     </div>
   );
 }

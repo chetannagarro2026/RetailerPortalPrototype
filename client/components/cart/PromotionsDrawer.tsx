@@ -7,6 +7,7 @@ import {
 import { Drawer } from "antd";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { CartPromotion } from "../../data/catalogData";
+import { BenefitsSection } from "../catalog/PromotionInfoDrawer";
 
 interface PromotionsDrawerProps {
   open: boolean;
@@ -149,6 +150,7 @@ function DrawerPromoCard({
   const isReady = state === "ready";
   const isAlmost = state === "almost";
   const PromoIcon = promo.type === "spend-free-units" ? GiftOutlined : TagOutlined;
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
 
   const borderColor = isApplied
     ? "#FED7AA"
@@ -170,13 +172,13 @@ function DrawerPromoCard({
 
   return (
     <div
-      className="rounded-lg transition-colors"
+      className="rounded-lg overflow-hidden transition-colors"
       style={{
         border: `1px solid ${borderColor}`,
         backgroundColor: bgColor,
-        padding: "14px 16px",
       }}
     >
+      <div style={{ padding: "14px 16px" }}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
@@ -203,6 +205,8 @@ function DrawerPromoCard({
               <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} /> Eligible
             </p>
           )}
+
+          <DrawerCardChips promo={promo} />
         </div>
 
         <div className="shrink-0">
@@ -258,6 +262,67 @@ function DrawerPromoCard({
           </div>
         </div>
       )}
+      </div>
+
+      {hasBenefits && <BenefitsSection benefits={promo.benefits!} />}
     </div>
+  );
+}
+
+// ── Shared chips for validity/scope/benefits badge ──────────────────
+
+function DrawerCardChips({ promo }: { promo: CartPromotion }) {
+  const config = activeBrandConfig;
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
+  const benefitCount = promo.benefits?.length ?? 0;
+
+  const chips: string[] = [];
+  if (promo.validFrom || promo.validTo) {
+    const from = promo.validFrom ? new Date(promo.validFrom).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
+    const to = promo.validTo ? new Date(promo.validTo).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
+    if (from && to) chips.push(`Valid: ${from} – ${to}`);
+    else if (from) chips.push(`From: ${from}`);
+    else if (to) chips.push(`Until: ${to}`);
+  }
+  if (promo.scope) chips.push(`Scope: ${promo.scope}`);
+
+  if (!hasBenefits && chips.length === 0 && !promo.promoCode) return null;
+
+  return (
+    <>
+      {(hasBenefits || promo.promoCode) && (
+        <div className="flex items-center gap-2 mt-1" style={{ marginLeft: 22 }}>
+          {hasBenefits && (
+            <span
+              className="text-[11px] font-medium rounded-full px-2 py-0.5"
+              style={{ backgroundColor: "#E6F1FB", color: "#185FA5", border: "1px solid #85B7EB" }}
+            >
+              {benefitCount} benefit{benefitCount !== 1 ? "s" : ""}
+            </span>
+          )}
+          {promo.promoCode && (
+            <span
+              className="text-[10px] font-semibold rounded px-2 py-0.5"
+              style={{ backgroundColor: config.cardBg, color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
+            >
+              {promo.promoCode}
+            </span>
+          )}
+        </div>
+      )}
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-1.5" style={{ marginLeft: 22 }}>
+          {chips.map((chip) => (
+            <span
+              key={chip}
+              className="text-[11px] px-2 py-0.5 rounded"
+              style={{ backgroundColor: config.cardBg, color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
