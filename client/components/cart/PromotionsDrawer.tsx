@@ -221,18 +221,29 @@ function DrawerPromoCard({
           {/* State badge — top right */}
           <div className="shrink-0">
             {isApplied ? (
-              <button
-                onClick={onRemove}
-                className="text-[11px] font-medium rounded-full cursor-pointer flex items-center gap-1"
+              <span
+                className="text-[11px] font-medium flex items-center gap-1"
                 style={{
                   backgroundColor: "#1a7a4a",
                   color: "#fff",
-                  border: "none",
+                  borderRadius: 6,
                   padding: "3px 10px",
                 }}
               >
                 ✓ Applied
-              </button>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={onRemove}
+                  onKeyDown={(e) => e.key === "Enter" && onRemove()}
+                  className="cursor-pointer"
+                  style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 6 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+                >
+                  ×
+                </span>
+              </span>
             ) : isReady ? (
               <button
                 onClick={onApply}
