@@ -269,12 +269,12 @@ export function BenefitRow({ benefit, isLast }: { benefit: PromotionBenefit; isL
       )}
 
       {/* Row 3: Condition */}
-      <div style={{ marginLeft: 34, marginTop: 4 }}>
-        {benefit.condition ? (
+      {benefit.condition && (
+        <div style={{ marginLeft: 34, marginTop: 4 }}>
           <span
             className="inline-flex items-center text-[11px] rounded-md"
             style={{
-              border: `0.5px solid ${config.borderColor}`,
+              border: `1px solid ${config.borderColor}`,
               backgroundColor: "#fff",
               color: config.secondaryColor,
               padding: "3px 8px",
@@ -288,15 +288,8 @@ export function BenefitRow({ benefit, isLast }: { benefit: PromotionBenefit; isL
             </span>
             {benefit.condition}
           </span>
-        ) : (
-          <span
-            className="text-[11px] italic"
-            style={{ color: config.secondaryColor, opacity: 0.5 }}
-          >
-            No additional condition
-          </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
