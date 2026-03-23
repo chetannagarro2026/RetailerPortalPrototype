@@ -1,5 +1,5 @@
 import { Button } from "antd";
-import { ShoppingOutlined, PercentageOutlined } from "@ant-design/icons";
+import { ShoppingOutlined, PercentageOutlined, GiftOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder, type OrderLineItem } from "../context/OrderContext";
@@ -208,14 +208,49 @@ function CartItemList({
         />
       ))}
 
-      {/* Cart promotion free goods row(s) */}
-      {cartPromoFreeGoods.map((fg, idx) => (
-        <CartPromoFreeGoodRow
-          key={`cart-free-${idx}`}
-          freeGood={fg}
-          isLast={idx === cartPromoFreeGoods.length - 1}
-        />
-      ))}
+      {/* Cart promotion gift divider + free goods row(s) */}
+      {hasFreeGoods && (
+        <>
+          <CartPromoGiftDivider promoName={cartPromoFreeGoods[0].promoName} />
+          {cartPromoFreeGoods.map((fg, idx) => (
+            <CartPromoFreeGoodRow
+              key={`cart-free-${idx}`}
+              freeGood={fg}
+              isLast={idx === cartPromoFreeGoods.length - 1}
+            />
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Cart Promotion Gift Divider ─────────────────────────────────────
+
+function CartPromoGiftDivider({ promoName }: { promoName: string }) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      style={{
+        backgroundColor: config.cardBg,
+        borderTop: `1.5px dashed ${config.secondaryColor}40`,
+        padding: "8px 14px",
+      }}
+    >
+      <GiftOutlined style={{ fontSize: 16, color: config.secondaryColor }} />
+      <span
+        className="uppercase"
+        style={{
+          fontSize: 11,
+          fontWeight: 500,
+          letterSpacing: "0.06em",
+          color: config.secondaryColor,
+        }}
+      >
+        Cart Promotion Gift · {promoName}
+      </span>
     </div>
   );
 }
