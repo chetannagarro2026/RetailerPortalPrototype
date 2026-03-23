@@ -41,7 +41,7 @@ const sectionLabels: Record<PromoState, string> = {
 };
 
 const sectionColors: Record<PromoState, string> = {
-  applied: "#EA580C",
+  applied: "#1a7a4a",
   ready: "#16A34A",
   almost: "#D97706",
   locked: "#6B7B99",
@@ -130,6 +130,28 @@ export default function PromotionsDrawer({
   );
 }
 
+// ── Left border color per state ─────────────────────────────────────
+
+function getLeftBorderColor(state: PromoState, config: typeof activeBrandConfig): string {
+  switch (state) {
+    case "applied": return "#1a7a4a";
+    case "ready": return "#1a7a4a";
+    case "almost": return "#f59e0b";
+    case "locked": return config.borderColor;
+  }
+}
+
+// ── Icon color per state ────────────────────────────────────────────
+
+function getIconColor(state: PromoState, config: typeof activeBrandConfig): string {
+  switch (state) {
+    case "applied": return "#1a7a4a";
+    case "ready": return "#1a7a4a";
+    case "almost": return "#D97706";
+    case "locked": return config.secondaryColor;
+  }
+}
+
 function DrawerPromoCard({
   promo,
   state,
@@ -149,119 +171,126 @@ function DrawerPromoCard({
   const isApplied = state === "applied";
   const isReady = state === "ready";
   const isAlmost = state === "almost";
+  const isLocked = state === "locked";
   const PromoIcon = promo.type === "spend-free-units" ? GiftOutlined : TagOutlined;
   const hasBenefits = promo.benefits && promo.benefits.length > 0;
-
-  const borderColor = isApplied
-    ? "#FED7AA"
-    : isReady
-    ? "#BBF7D0"
-    : isAlmost
-    ? "#FDE68A"
-    : config.borderColor;
-
-  const bgColor = isApplied
-    ? "#FFF7ED"
-    : isReady
-    ? "#F0FDF4"
-    : isAlmost
-    ? "#FFFBEB"
-    : config.cardBg;
-
-  const iconColor = isApplied ? "#EA580C" : isReady ? "#16A34A" : isAlmost ? "#D97706" : config.secondaryColor;
 
   return (
     <div
       className="rounded-lg overflow-hidden transition-colors"
       style={{
-        border: `1px solid ${borderColor}`,
-        backgroundColor: bgColor,
+        border: `0.5px solid ${config.borderColor}`,
+        borderLeft: `3px solid ${getLeftBorderColor(state, config)}`,
+        backgroundColor: "#fff",
       }}
     >
       <div style={{ padding: "14px 16px" }}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            <PromoIcon style={{ fontSize: 16, color: iconColor }} />
-            <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-              GET {promo.label}
-            </span>
-            {isApplied && (
-              <CheckCircleFilled style={{ fontSize: 12, color: "#EA580C" }} />
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              <PromoIcon style={{ fontSize: 16, color: getIconColor(state, config) }} />
+              <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+                GET {promo.label}
+              </span>
+            </div>
+
+            <p className="text-xs mb-1" style={{ color: config.secondaryColor, marginLeft: 22 }}>
+              {promo.description}
+            </p>
+
+            {/* Eligible badge — for applied + ready states, below description */}
+            {(isApplied || isReady) && (
+              <div style={{ marginLeft: 22, marginBottom: 4 }}>
+                <span
+                  className="inline-flex items-center text-[11px] font-medium rounded-full"
+                  style={{
+                    backgroundColor: "#fff",
+                    color: "#1a7a4a",
+                    border: "1px solid #63c99a",
+                    padding: "3px 10px",
+                  }}
+                >
+                  ✓ Eligible
+                </span>
+              </div>
+            )}
+
+            <DrawerCardChips promo={promo} />
+          </div>
+
+          {/* State badge — top right */}
+          <div className="shrink-0">
+            {isApplied ? (
+              <button
+                onClick={onRemove}
+                className="text-[11px] font-medium rounded-full cursor-pointer flex items-center gap-1"
+                style={{
+                  backgroundColor: "#1a7a4a",
+                  color: "#fff",
+                  border: "none",
+                  padding: "3px 10px",
+                }}
+              >
+                ✓ Applied
+              </button>
+            ) : isReady ? (
+              <button
+                onClick={onApply}
+                className="text-xs font-semibold px-3.5 py-1 rounded-md cursor-pointer"
+                style={{ backgroundColor: config.primaryColor, color: "#fff", border: "none" }}
+              >
+                Apply
+              </button>
+            ) : isAlmost ? (
+              <span
+                className="inline-flex items-center text-[11px] font-medium rounded-full whitespace-nowrap"
+                style={{
+                  backgroundColor: "#fff",
+                  color: "#b45309",
+                  border: "1px solid #f59e0b",
+                  padding: "3px 10px",
+                }}
+              >
+                Add ${remaining.toFixed(2)} to unlock
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center text-[11px] font-medium rounded-full gap-1"
+                style={{
+                  backgroundColor: "#fff",
+                  color: config.secondaryColor,
+                  border: `0.5px solid ${config.secondaryColor}40`,
+                  padding: "3px 10px",
+                }}
+              >
+                <LockOutlined style={{ fontSize: 10 }} /> Locked
+              </span>
             )}
           </div>
-
-          <p className="text-xs mb-1" style={{ color: config.secondaryColor, marginLeft: 22 }}>
-            {promo.description}
-          </p>
-
-          {isApplied && (
-            <p className="text-[11px] font-semibold" style={{ color: "#16A34A", marginLeft: 22 }}>
-              <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} /> Eligible
-            </p>
-          )}
-          {isReady && (
-            <p className="text-[11px] font-semibold" style={{ color: "#16A34A", marginLeft: 22 }}>
-              <CheckCircleFilled className="mr-1" style={{ fontSize: 11 }} /> Eligible
-            </p>
-          )}
-
-          <DrawerCardChips promo={promo} />
         </div>
 
-        <div className="shrink-0">
-          {isApplied ? (
-            <button
-              onClick={onRemove}
-              className="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer flex items-center gap-1"
-              style={{ backgroundColor: "transparent", color: "#EA580C", border: "1px solid #EA580C" }}
-            >
-              <CheckCircleFilled style={{ fontSize: 12 }} /> Applied
-            </button>
-          ) : isReady ? (
-            <button
-              onClick={onApply}
-              className="text-xs font-semibold px-3.5 py-1 rounded-md cursor-pointer"
-              style={{ backgroundColor: config.primaryColor, color: "#fff", border: "none" }}
-            >
-              Apply
-            </button>
-          ) : (
-            <span
-              className="text-[11px] font-medium px-2.5 py-1 rounded-md inline-flex items-center gap-1"
-              style={{ backgroundColor: config.cardBg, color: config.secondaryColor, border: `1px solid ${config.borderColor}` }}
-            >
-              <LockOutlined style={{ fontSize: 10 }} /> Locked
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Progress bar for almost/locked */}
-      {(isAlmost || state === "locked") && (
-        <div style={{ marginLeft: 22, marginTop: 8 }}>
-          <p className="text-xs font-medium mb-1.5" style={{ color: "#D97706" }}>
-            Add ${remaining.toFixed(2)} more to unlock
-          </p>
-          <div
-            className="h-1.5 rounded-full overflow-hidden"
-            style={{ backgroundColor: isAlmost ? "#FDE68A" : config.borderColor }}
-          >
+        {/* Progress bar for almost/locked */}
+        {(isAlmost || isLocked) && (
+          <div style={{ marginLeft: 22, marginTop: 8 }}>
             <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{ width: `${progress}%`, backgroundColor: isAlmost ? "#F59E0B" : "#D97706" }}
-            />
+              className="h-1.5 rounded-full overflow-hidden"
+              style={{ backgroundColor: isAlmost ? "#FDE68A" : config.borderColor }}
+            >
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${progress}%`, backgroundColor: isAlmost ? "#F59E0B" : "#D97706" }}
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[11px]" style={{ color: config.secondaryColor }}>
+                ${cartTotal.toFixed(0)}
+              </span>
+              <span className="text-[11px]" style={{ color: config.secondaryColor }}>
+                ${promo.thresholdAmount.toFixed(0)}
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-[11px]" style={{ color: config.secondaryColor }}>
-              ${cartTotal.toFixed(0)}
-            </span>
-            <span className="text-[11px]" style={{ color: config.secondaryColor }}>
-              ${promo.thresholdAmount.toFixed(0)}
-            </span>
-          </div>
-        </div>
-      )}
+        )}
       </div>
 
       {hasBenefits && <BenefitsSection benefits={promo.benefits!} />}
