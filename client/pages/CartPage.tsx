@@ -1,5 +1,5 @@
 import { Button } from "antd";
-import { ShoppingOutlined } from "@ant-design/icons";
+import { ShoppingOutlined, PercentageOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../config/brandConfig";
 import { useOrder, type OrderLineItem } from "../context/OrderContext";
@@ -8,8 +8,67 @@ import CreditSummaryBlock from "../components/cart/CreditSummaryBlock";
 import CartPromotionsSection from "../components/cart/CartPromotionsSection";
 import CartLineItem from "../components/cart/CartLineItem";
 import OrderSummaryCard from "../components/cart/OrderSummaryCard";
-import { cartPromotions } from "../data/catalogData";
-import { useState } from "react";
+import { cartPromotions, type CartPromotion, type PromotionBenefit } from "../data/catalogData";
+import { useState, useMemo } from "react";
+
+export interface CartPromoBenefitLine {
+  label: string;
+  amount: number;
+}
+
+export interface CartPromoFreeGood {
+  promoName: string;
+  freeQty: number;
+  benefitLabel: string;
+}
+
+function computeCartPromoBenefits(
+  promo: CartPromotion | null,
+  cartTotal: number,
+): { benefitLines: CartPromoBenefitLine[]; freeGoods: CartPromoFreeGood[]; totalDiscount: number } {
+  if (!promo || cartTotal < promo.thresholdAmount) {
+    return { benefitLines: [], freeGoods: [], totalDiscount: 0 };
+  }
+
+  const hasBenefits = promo.benefits && promo.benefits.length > 0;
+
+  if (!hasBenefits) {
+    // Legacy single-benefit promo
+    const discount = promo.discountAmount ?? 0;
+    return {
+      benefitLines: [],
+      freeGoods: [],
+      totalDiscount: discount,
+    };
+  }
+
+  const benefitLines: CartPromoBenefitLine[] = [];
+  const freeGoods: CartPromoFreeGood[] = [];
+  let totalDiscount = 0;
+
+  for (const b of promo.benefits!) {
+    if (b.type === "flat-discount" && b.discountPercent) {
+      const amt = Math.round(cartTotal * (b.discountPercent / 100) * 100) / 100;
+      benefitLines.push({ label: `${promo.label} \u00b7 ${b.discountPercent}% off`, amount: amt });
+      totalDiscount += amt;
+    } else if (b.type === "flat-amount" && b.discountAmount) {
+      benefitLines.push({ label: `${promo.label} \u00b7 $${b.discountAmount} off`, amount: b.discountAmount });
+      totalDiscount += b.discountAmount;
+    } else if (b.type === "discount" && b.discountPercent) {
+      const amt = Math.round(cartTotal * (b.discountPercent / 100) * 100) / 100;
+      benefitLines.push({ label: `${promo.label} \u00b7 ${b.discountPercent}% off`, amount: amt });
+      totalDiscount += amt;
+    } else if (b.type === "free-goods") {
+      freeGoods.push({
+        promoName: promo.label,
+        freeQty: b.freeQty ?? 1,
+        benefitLabel: b.label,
+      });
+    }
+  }
+
+  return { benefitLines, freeGoods, totalDiscount };
+}
 
 export default function CartPage() {
   const config = activeBrandConfig;
@@ -20,10 +79,11 @@ export default function CartPage() {
   const appliedPromo = appliedPromoId
     ? cartPromotions.find((p) => p.id === appliedPromoId) ?? null
     : null;
-  const cartPromoDiscount =
-    appliedPromo && totalValue >= appliedPromo.thresholdAmount
-      ? (appliedPromo.discountAmount ?? 0)
-      : 0;
+
+  const { benefitLines, freeGoods, totalDiscount: cartPromoDiscount } = useMemo(
+    () => computeCartPromoBenefits(appliedPromo, totalValue),
+    [appliedPromo, totalValue],
+  );
 
   if (items.length === 0) {
     return (
@@ -70,6 +130,8 @@ export default function CartPage() {
             items={items}
             onUpdateQuantity={updateQuantity}
             onRemove={removeItem}
+            cartPromoFreeGoods={freeGoods}
+            appliedPromoName={appliedPromo?.label}
           />
         </div>
 
@@ -87,6 +149,7 @@ export default function CartPage() {
             totalValue={totalValue}
             appliedPromo={appliedPromo}
             cartPromoDiscount={cartPromoDiscount}
+            cartPromoBenefitLines={benefitLines}
           />
 
           {isAuthenticated && <CreditSummaryBlock />}
@@ -102,12 +165,17 @@ function CartItemList({
   items,
   onUpdateQuantity,
   onRemove,
+  cartPromoFreeGoods,
+  appliedPromoName,
 }: {
   items: OrderLineItem[];
   onUpdateQuantity: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
+  cartPromoFreeGoods: CartPromoFreeGood[];
+  appliedPromoName?: string;
 }) {
   const config = activeBrandConfig;
+  const hasFreeGoods = cartPromoFreeGoods.length > 0;
 
   return (
     <div
@@ -134,11 +202,102 @@ function CartItemList({
         <CartLineItem
           key={item.id}
           item={item}
-          isLast={idx === items.length - 1}
+          isLast={idx === items.length - 1 && !hasFreeGoods}
           onUpdateQuantity={onUpdateQuantity}
           onRemove={onRemove}
         />
       ))}
+
+      {/* Cart promotion free goods row(s) */}
+      {cartPromoFreeGoods.map((fg, idx) => (
+        <CartPromoFreeGoodRow
+          key={`cart-free-${idx}`}
+          freeGood={fg}
+          isLast={idx === cartPromoFreeGoods.length - 1}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Cart Promotion Free Good Row ────────────────────────────────────
+
+function CartPromoFreeGoodRow({
+  freeGood,
+  isLast,
+}: {
+  freeGood: CartPromoFreeGood;
+  isLast: boolean;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div
+      className="grid grid-cols-[1fr_120px_100px_40px] gap-4 px-5 py-4 items-center"
+      style={{
+        borderBottom: !isLast ? `1px solid ${config.borderColor}` : "none",
+        backgroundColor: "#f6fdf9",
+        borderLeft: "3px solid #1a7a4a",
+      }}
+    >
+      {/* Product Info */}
+      <div className="flex items-center gap-3 min-w-0">
+        {/* GIFT thumbnail */}
+        <div
+          className="flex items-center justify-center shrink-0 rounded-lg"
+          style={{
+            width: 44,
+            height: 44,
+            backgroundColor: "#e0f5ea",
+            border: "1px solid #63c99a",
+          }}
+        >
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#1a7a4a" }}>GIFT</span>
+        </div>
+
+        <div className="min-w-0">
+          <span
+            className="text-[13px] font-semibold block"
+            style={{ color: "#1a7a4a" }}
+          >
+            Complimentary Product
+          </span>
+          <p className="text-xs mt-0.5" style={{ color: "#3B8B5A" }}>
+            Free product \u00b7 {freeGood.promoName}
+          </p>
+
+          {/* Benefit chip */}
+          <div className="mt-1.5">
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold rounded-full"
+              style={{
+                backgroundColor: "#e0f5ea",
+                border: "1px solid #63c99a",
+                color: "#1a7a4a",
+                padding: "2px 10px",
+              }}
+            >
+              <PercentageOutlined style={{ fontSize: 11 }} />
+              FREE GOODS \u00b7 Cart Promotion \u00b7 {freeGood.promoName}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quantity — static */}
+      <div className="flex justify-center">
+        <span className="text-xs font-medium" style={{ color: "#1a7a4a" }}>
+          {freeGood.freeQty}
+        </span>
+      </div>
+
+      {/* Total */}
+      <div className="text-right">
+        <span className="text-[13px] font-semibold" style={{ color: "#1a7a4a" }}>$0.00</span>
+      </div>
+
+      {/* Delete — empty */}
+      <div />
     </div>
   );
 }

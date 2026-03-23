@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCreditState } from "../../hooks/useCreditState";
 import type { OrderLineItem } from "../../context/OrderContext";
 import type { CartPromotion } from "../../data/catalogData";
+import type { CartPromoBenefitLine } from "../../pages/CartPage";
 
 interface OrderSummaryCardProps {
   items: OrderLineItem[];
@@ -13,6 +14,7 @@ interface OrderSummaryCardProps {
   totalValue: number;
   appliedPromo: CartPromotion | null;
   cartPromoDiscount: number;
+  cartPromoBenefitLines?: CartPromoBenefitLine[];
 }
 
 export default function OrderSummaryCard({
@@ -21,6 +23,7 @@ export default function OrderSummaryCard({
   totalValue,
   appliedPromo,
   cartPromoDiscount,
+  cartPromoBenefitLines = [],
 }: OrderSummaryCardProps) {
   const config = activeBrandConfig;
   const navigate = useNavigate();
@@ -108,21 +111,38 @@ export default function OrderSummaryCard({
         <>
           <div className="my-2.5" style={{ borderTop: `1px solid ${config.borderColor}` }} />
 
-          <div className="flex justify-between py-1.5 text-xs">
-            <span className="font-medium" style={{ color: "#16A34A" }}>Cart Promotion</span>
-            <span className="font-semibold" style={{ color: "#16A34A" }}>
-              −{fmt(cartPromoDiscount)}
-            </span>
-          </div>
+          {cartPromoBenefitLines.length > 0 ? (
+            /* Multi-benefit: one line per monetary benefit */
+            cartPromoBenefitLines.map((line, idx) => (
+              <div key={idx} className="flex justify-between py-1.5 text-[13px]">
+                <span className="font-medium" style={{ color: "#16A34A" }}>
+                  {line.label}
+                </span>
+                <span className="font-semibold" style={{ color: "#16A34A" }}>
+                  −{fmt(line.amount)}
+                </span>
+              </div>
+            ))
+          ) : (
+            /* Legacy single-benefit cart promo */
+            <>
+              <div className="flex justify-between py-1.5 text-xs">
+                <span className="font-medium" style={{ color: "#16A34A" }}>Cart Promotion</span>
+                <span className="font-semibold" style={{ color: "#16A34A" }}>
+                  −{fmt(cartPromoDiscount)}
+                </span>
+              </div>
 
-          <div className="pl-3">
-            <div className="flex justify-between text-[11px] py-0.5">
-              <span style={{ color: config.secondaryColor }}>
-                GET {appliedPromo.label} · order over ${appliedPromo.thresholdAmount.toLocaleString()}
-              </span>
-              <span style={{ color: config.secondaryColor }}>−{fmt(cartPromoDiscount)}</span>
-            </div>
-          </div>
+              <div className="pl-3">
+                <div className="flex justify-between text-[11px] py-0.5">
+                  <span style={{ color: config.secondaryColor }}>
+                    GET {appliedPromo.label} · order over ${appliedPromo.thresholdAmount.toLocaleString()}
+                  </span>
+                  <span style={{ color: config.secondaryColor }}>−{fmt(cartPromoDiscount)}</span>
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
 
