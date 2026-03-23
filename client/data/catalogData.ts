@@ -43,6 +43,18 @@ export interface VariantAttribute {
   values: string[];    // e.g. ["S", "M", "L", "XL"]
 }
 
+/** A single benefit within a promotion */
+export interface PromotionBenefit {
+  type: "discount" | "free-goods" | "bogo";
+  label: string;
+  description?: string;
+  discountPercent?: number;
+  freeQty?: number;
+  qualifyingQty?: number;
+  /** Optional cap/limit text, e.g. "Max $200" */
+  cap?: string;
+}
+
 /** Promotion metadata */
 export interface PromotionInfo {
   id: string;
@@ -60,6 +72,10 @@ export interface PromotionInfo {
   /** Which variant IDs this promotion applies to (undefined = all) */
   eligibleVariantIds?: string[];
   rules?: string[];
+  /** Multi-benefit promotions: array of individual benefits */
+  benefits?: PromotionBenefit[];
+  /** Promo code for display */
+  promoCode?: string;
 }
 
 /** Cart-level promotion definition */
@@ -704,6 +720,34 @@ const allPromotions: PromotionInfo[] = [
     type: "bogo", freeQty: 2, qualifyingQty: 1, minQty: 1,
     validFrom: "2026-04-01", validTo: "2026-08-31", scope: "sku",
     rules: ["Minimum Quantity: 1", "Limited availability"],
+  },
+  // ── Multi-benefit promotions ──────────────────────────────────────
+  {
+    id: "promo-mega-deal",
+    label: "Mega Deal",
+    description: "Get 10% off, Buy 1 Get 1 Free, plus a free accessory",
+    type: "discount", discountPercent: 10, minQty: 1,
+    validFrom: "2026-01-01", validTo: "2026-12-31", scope: "family",
+    promoCode: "MEGA2026",
+    rules: ["Minimum Quantity: 1"],
+    benefits: [
+      { type: "discount", label: "10% OFF", description: "10% discount on eligible units", discountPercent: 10, cap: "Max $200" },
+      { type: "bogo", label: "Buy 1 Get 1 Free", description: "Purchase one unit and receive one free", freeQty: 1, qualifyingQty: 1 },
+      { type: "free-goods", label: "Free Accessory", description: "Receive a complimentary accessory with purchase", freeQty: 1 },
+    ],
+  },
+  {
+    id: "promo-bundle-saver",
+    label: "Bundle Saver",
+    description: "15% off plus Buy 5 Get 1 Free on bulk orders",
+    type: "discount", discountPercent: 15, minQty: 5,
+    validFrom: "2026-02-01", validTo: "2026-09-30", scope: "sku",
+    promoCode: "BUNDLE15",
+    rules: ["Minimum Quantity: 5"],
+    benefits: [
+      { type: "discount", label: "15% OFF", description: "15% discount on all qualifying items", discountPercent: 15 },
+      { type: "free-goods", label: "Buy 5 Get 1 Free", description: "Every 5 units purchased earns 1 free unit", freeQty: 1, qualifyingQty: 5 },
+    ],
   },
 ];
 

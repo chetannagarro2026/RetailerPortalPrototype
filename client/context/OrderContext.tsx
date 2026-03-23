@@ -1,6 +1,6 @@
 import { createContext, useContext, useCallback, useState, useRef, type ReactNode } from "react";
 import { App } from "antd";
-import { getProductById } from "../data/catalogData";
+import { getProductById, type PromotionBenefit } from "../data/catalogData";
 import { evaluateBestPromotion } from "../utils/pricing";
 
 // ── Types ───────────────────────────────────────────────────────────
@@ -23,9 +23,13 @@ export interface OrderLineItem {
   promotionLabel?: string;
   /** Whether this is a free item from a BOGO promotion */
   isFreeItem?: boolean;
+  /** For free items: "bogo" or "free-goods" */
+  freeItemType?: "bogo" | "free-goods";
   imageUrl?: string;
   /** ID of the parent line item that generated this free goods row */
   parentLineId?: string;
+  /** Benefits from a multi-benefit promotion */
+  appliedBenefits?: PromotionBenefit[];
 }
 
 interface OrderContextValue {
@@ -63,10 +67,13 @@ function applyPromotions(items: OrderLineItem[]): OrderLineItem[] {
     const best = evaluateBestPromotion(promotions, item.quantity, item.listPrice ?? item.unitPrice, item.id);
 
     if (best) {
-      // Apply promo label to the line item
+      const hasBenefits = best.promotion.benefits && best.promotion.benefits.length > 0;
+
+      // Apply promo label + benefits to the line item
       const updatedItem: OrderLineItem = {
         ...item,
         promotionLabel: best.label,
+        appliedBenefits: hasBenefits ? best.promotion.benefits : undefined,
         // For discount promos, adjust unitPrice
         unitPrice:
           best.promotion.type === "discount" && best.promotion.discountPercent
@@ -75,22 +82,74 @@ function applyPromotions(items: OrderLineItem[]): OrderLineItem[] {
       };
       result.push(updatedItem);
 
-      // For BXGY: insert or update free goods row
-      if (best.freeUnits > 0 && (best.promotion.type === "free-goods" || best.promotion.type === "bogo")) {
-        result.push({
-          id: `${item.id}__free`,
-          productId: item.productId,
-          productName: item.productName,
-          sku: item.sku,
-          variantAttributes: item.variantAttributes,
-          quantity: best.freeUnits,
-          unitPrice: 0,
-          listPrice: item.listPrice ?? item.unitPrice,
-          promotionLabel: best.label,
-          isFreeItem: true,
-          imageUrl: item.imageUrl,
-          parentLineId: item.id,
-        });
+      if (hasBenefits) {
+        // Multi-benefit: generate child rows for each BOGO / free-goods benefit
+        const benefits = best.promotion.benefits!;
+        for (let bi = 0; bi < benefits.length; bi++) {
+          const b = benefits[bi];
+          if (b.type === "bogo") {
+            const qualQty = b.qualifyingQty ?? 1;
+            const freeQ = b.freeQty ?? 1;
+            const freeUnits = Math.floor(item.quantity / qualQty) * freeQ;
+            if (freeUnits > 0) {
+              result.push({
+                id: `${item.id}__free_${bi}`,
+                productId: item.productId,
+                productName: item.productName,
+                sku: item.sku,
+                variantAttributes: item.variantAttributes,
+                quantity: freeUnits,
+                unitPrice: 0,
+                listPrice: item.listPrice ?? item.unitPrice,
+                promotionLabel: b.label,
+                isFreeItem: true,
+                freeItemType: "bogo",
+                imageUrl: item.imageUrl,
+                parentLineId: item.id,
+              });
+            }
+          } else if (b.type === "free-goods") {
+            const qualQty = b.qualifyingQty ?? 1;
+            const freeQ = b.freeQty ?? 1;
+            const freeUnits = qualQty > 1 ? Math.floor(item.quantity / qualQty) * freeQ : freeQ;
+            if (freeUnits > 0) {
+              result.push({
+                id: `${item.id}__gift_${bi}`,
+                productId: item.productId,
+                productName: `${item.productName} (Gift)`,
+                sku: item.sku,
+                variantAttributes: item.variantAttributes,
+                quantity: freeUnits,
+                unitPrice: 0,
+                listPrice: item.listPrice ?? item.unitPrice,
+                promotionLabel: b.label,
+                isFreeItem: true,
+                freeItemType: "free-goods",
+                imageUrl: item.imageUrl,
+                parentLineId: item.id,
+              });
+            }
+          }
+        }
+      } else {
+        // Single-benefit: insert free goods row as before
+        if (best.freeUnits > 0 && (best.promotion.type === "free-goods" || best.promotion.type === "bogo")) {
+          result.push({
+            id: `${item.id}__free`,
+            productId: item.productId,
+            productName: item.productName,
+            sku: item.sku,
+            variantAttributes: item.variantAttributes,
+            quantity: best.freeUnits,
+            unitPrice: 0,
+            listPrice: item.listPrice ?? item.unitPrice,
+            promotionLabel: best.label,
+            isFreeItem: true,
+            freeItemType: best.promotion.type === "bogo" ? "bogo" : "free-goods",
+            imageUrl: item.imageUrl,
+            parentLineId: item.id,
+          });
+        }
       }
     } else {
       // No promo qualifies — restore original price, clear label

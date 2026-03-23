@@ -3,13 +3,19 @@ import { DeleteOutlined, CheckCircleFilled, PercentageOutlined } from "@ant-desi
 import { Link } from "react-router-dom";
 import { activeBrandConfig } from "../../config/brandConfig";
 import type { OrderLineItem } from "../../context/OrderContext";
+import type { PromotionBenefit } from "../../data/catalogData";
 
 /** Color schemes for auto-applied promo tags */
 const promoTagColors: Record<string, { bg: string; text: string }> = {
   discount: { bg: "#FFF3E8", text: "#C2660A" },   // % discount
   flat: { bg: "#EEF4FF", text: "#2563A8" },        // flat $ discount
-  bxgy: { bg: "#DCFCE7", text: "#0D7A4A" },       // Buy X Get Y
+  bxgy: { bg: "#DCFCE7", text: "#0D7A4A" },       // Buy X Get Y / Free goods
 };
+
+function getPromoTagStyleForType(type: string): { bg: string; text: string } {
+  if (type === "bogo" || type === "free-goods") return promoTagColors.bxgy;
+  return promoTagColors.discount;
+}
 
 function getPromoTagStyle(label?: string): { bg: string; text: string } {
   if (!label) return promoTagColors.discount;
@@ -35,6 +41,7 @@ export default function CartLineItem({ item, isLast, onUpdateQuantity, onRemove 
     ? (item.listPrice - item.unitPrice) * item.quantity
     : 0;
 
+  const hasBenefits = !isFree && item.appliedBenefits && item.appliedBenefits.length > 0;
   const tagStyle = getPromoTagStyle(item.promotionLabel);
 
   return (
@@ -43,7 +50,7 @@ export default function CartLineItem({ item, isLast, onUpdateQuantity, onRemove 
       style={{
         borderBottom: !isLast ? `1px solid ${config.borderColor}` : "none",
         backgroundColor: isFree ? "#F0FDF4" : "transparent",
-        borderLeft: isFree ? "3px solid #22C55E" : "none",
+        borderLeft: isFree ? "3px solid #1a7a4a" : "none",
       }}
     >
       {/* Product Info */}
@@ -68,44 +75,19 @@ export default function CartLineItem({ item, isLast, onUpdateQuantity, onRemove 
           </p>
 
           {isFree ? (
-            /* Type D: Free goods label */
-            <div className="mt-1.5">
-              <span
-                className="inline-flex items-center gap-1 text-[10px] font-semibold rounded"
-                style={{ backgroundColor: "#DCFCE7", color: "#0D7A4A", padding: "2px 8px" }}
-              >
-                <PercentageOutlined style={{ fontSize: 12 }} />
-                FREE GOODS · {item.promotionLabel || "Buy X Get Y"}
-              </span>
-            </div>
+            <FreeItemBadge item={item} />
+          ) : hasBenefits ? (
+            <MultiBenefitTags
+              item={item}
+              benefits={item.appliedBenefits!}
+              lineSavings={lineSavings}
+            />
           ) : (
-            /* Type A/B/C: Price + auto-applied promo tag */
-            <div className="mt-1">
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
-                  ${item.unitPrice.toFixed(2)}
-                </span>
-                {item.listPrice && item.listPrice > item.unitPrice && (
-                  <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
-                    ${item.listPrice.toFixed(2)}
-                  </span>
-                )}
-              </div>
-
-              {/* Auto-applied promotion tag */}
-              {item.promotionLabel && (
-                <div className="mt-1.5">
-                  <span
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold rounded"
-                    style={{ backgroundColor: tagStyle.bg, color: tagStyle.text, padding: "2px 8px" }}
-                  >
-                    <CheckCircleFilled style={{ fontSize: 12 }} />
-                    {item.promotionLabel} auto-applied
-                    {lineSavings > 0 && ` · Saved $${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-                  </span>
-                </div>
-              )}
-            </div>
+            <SinglePromoTag
+              item={item}
+              tagStyle={tagStyle}
+              lineSavings={lineSavings}
+            />
           )}
         </div>
       </div>
@@ -154,6 +136,139 @@ export default function CartLineItem({ item, isLast, onUpdateQuantity, onRemove 
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Single Promo Tag (existing behavior) ────────────────────────────
+
+function SinglePromoTag({
+  item,
+  tagStyle,
+  lineSavings,
+}: {
+  item: OrderLineItem;
+  tagStyle: { bg: string; text: string };
+  lineSavings: number;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div className="mt-1">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+          ${item.unitPrice.toFixed(2)}
+        </span>
+        {item.listPrice && item.listPrice > item.unitPrice && (
+          <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
+            ${item.listPrice.toFixed(2)}
+          </span>
+        )}
+      </div>
+
+      {item.promotionLabel && (
+        <div className="mt-1.5">
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-semibold rounded"
+            style={{ backgroundColor: tagStyle.bg, color: tagStyle.text, padding: "2px 8px" }}
+          >
+            <CheckCircleFilled style={{ fontSize: 12 }} />
+            {item.promotionLabel} auto-applied
+            {lineSavings > 0 && ` · Saved $${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Multi-Benefit Stacked Tags ──────────────────────────────────────
+
+function MultiBenefitTags({
+  item,
+  benefits,
+  lineSavings,
+}: {
+  item: OrderLineItem;
+  benefits: PromotionBenefit[];
+  lineSavings: number;
+}) {
+  const config = activeBrandConfig;
+
+  return (
+    <div className="mt-1">
+      {/* Price line */}
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <span className="text-sm font-semibold" style={{ color: config.primaryColor }}>
+          ${item.unitPrice.toFixed(2)}
+        </span>
+        {item.listPrice && item.listPrice > item.unitPrice && (
+          <span className="text-[11px] line-through" style={{ color: config.secondaryColor }}>
+            ${item.listPrice.toFixed(2)}
+          </span>
+        )}
+      </div>
+
+      {/* Stacked benefit tags — one per benefit, 4px gap */}
+      <div className="flex flex-col gap-1 mt-1.5">
+        {benefits.map((benefit, idx) => {
+          const style = getPromoTagStyleForType(benefit.type);
+          let tagLabel = "";
+
+          switch (benefit.type) {
+            case "discount":
+              tagLabel = `${benefit.label} auto-applied`;
+              if (lineSavings > 0) tagLabel += ` · Saved $${lineSavings.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+              tagLabel += ` · ${item.promotionLabel}`;
+              break;
+            case "bogo":
+              tagLabel = `${benefit.label} auto-applied · ${item.promotionLabel}`;
+              break;
+            case "free-goods":
+              tagLabel = `Free goods included · ${item.promotionLabel}`;
+              break;
+          }
+
+          return (
+            <span
+              key={idx}
+              className="inline-flex items-center gap-1 text-[10px] font-semibold rounded self-start"
+              style={{ backgroundColor: style.bg, color: style.text, padding: "2px 8px" }}
+            >
+              <CheckCircleFilled style={{ fontSize: 12 }} />
+              {tagLabel}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Free Item Badge (child row) ─────────────────────────────────────
+
+function FreeItemBadge({ item }: { item: OrderLineItem }) {
+  const isBogo = item.freeItemType === "bogo";
+  const badgeLabel = isBogo ? "FREE" : "GIFT";
+
+  return (
+    <div className="mt-1.5 flex items-center gap-2">
+      <span
+        className="text-[9px] font-bold rounded px-1.5 py-0.5"
+        style={{
+          backgroundColor: "#0D7A4A",
+          color: "#fff",
+        }}
+      >
+        {badgeLabel}
+      </span>
+      <span
+        className="inline-flex items-center gap-1 text-[10px] font-semibold rounded"
+        style={{ backgroundColor: "#DCFCE7", color: "#0D7A4A", padding: "2px 8px" }}
+      >
+        <PercentageOutlined style={{ fontSize: 12 }} />
+        FREE GOODS · {item.promotionLabel || "Buy X Get Y"}
+      </span>
     </div>
   );
 }
